@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Jay's Sandbox | Experiments & Maps</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Jay’s Sandbox is where Jason experiments with maps, visualizations, and small tools using dummy or public data." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="site-wrapper">
+    <header>
+      <nav class="navbar">
+        <div class="brand">JASON CONOVER</div>
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="work.html">Work &amp; Methods</a>
+          <a href="sandbox.html">Jay's Sandbox</a>
+          <a href="contact.html">Contact</a>
+        </div>
+      </nav>
+    </header>
+
+    <main class="section">
+      <h1 class="section-heading">Jay’s Sandbox</h1>
+      <p class="section-subtext">
+        Jay’s Sandbox is where I park experiments and half-finished ideas—usually maps, small tools, or visualizations
+        that help me think through wind, land, and data. Nothing here is tied to a specific real-world project or
+        employer. It’s all demos, dummy data, and explorations I’m comfortable sharing publicly.
+      </p>
+
+      <section class="section">
+        <div class="highlight-badge">Current highlight · Webmap experiment</div>
+        <h2 class="section-heading">Terrain + Access: Playing with Road Concepts</h2>
+        <p class="card-body" style="margin-top:0.5rem;">
+          This demo map uses public elevation and landcover data to explore how basic slope and access assumptions
+          start to shape a conceptual wind project footprint. It’s not a real site—just a sandbox—but the idea is the
+          same: roads want to thread along friendlier ground while still reaching logical turbine pads.
+        </p>
+        <p class="card-body" style="margin-top:0.75rem;">
+          <span class="muted">
+            Why I built it:
+          </span>
+          I wanted a shareable way to explain why “drive straight there” almost never works once you look at terrain
+          and drainage.
+        </p>
+        <p class="card-body" style="margin-top:0.4rem;">
+          <span class="muted">
+            What I’m testing:
+          </span>
+          Simple slope thresholds, a rough “avoid this” layer, and a few options for tying into existing roads.
+        </p>
+        <!-- Later you can embed a real webmap iframe or a screenshot here -->
+      </section>
+
+      <section class="section">
+        <h2 class="section-heading">Earlier sandbox entries</h2>
+        <div class="card-grid">
+          <article class="card">
+            <h3 class="card-title">Wind roses with dummy data</h3>
+            <p class="card-tagline">Visualization · Concept only</p>
+            <p class="card-body">
+              A small set of wind roses using synthetic wind data to show how direction distributions might influence
+              layout thinking—without referencing any real project.
+            </p>
+          </article>
+          <article class="card">
+            <h3 class="card-title">Collection routing sketches</h3>
+            <p class="card-tagline">Linework · Routing logic</p>
+            <p class="card-body">
+              Quick linework exploring “shortest path” versus “buildable path” under simple constraints. It’s less
+              about exact engineering and more about communication with stakeholders.
+            </p>
+          </article>
+          <article class="card">
+            <h3 class="card-title">Style grid for the same map</h3>
+            <p class="card-tagline">Cartography · Visual exploration</p>
+            <p class="card-body">
+              A small gallery comparing different cartographic styles for the same dummy site to see what feels clearest
+              for non-GIS audiences.
+            </p>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer>
+    &copy; <span id="year"></span> Jason Conover
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

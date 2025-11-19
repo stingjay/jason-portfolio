@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Jason Conover | Wind Development & Tools</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Jason Conover works in utility-scale wind development and builds maps, tools, and experiments around geospatial data and automation." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="site-wrapper">
+    <header>
+      <nav class="navbar">
+        <div class="brand">JASON CONOVER</div>
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="work.html">Work &amp; Methods</a>
+          <a href="sandbox.html">Jay's Sandbox</a>
+          <a href="contact.html">Contact</a>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+<section class="hero">
+  <div>
+    <h1 class="hero-title">Hi, I’m Jason Conover.</h1>
+    <p class="hero-subtitle">
+      I work in utility-scale wind development and I like building things—maps, tools, visualizations, and small experiments that help me think through how projects work.
+    </p>
+    <p class="hero-muted">
+      This site is a home for the projects I tinker with and the ideas I’m exploring.
+    </p>
+    <div class="hero-actions">
+      <a class="button button-primary" href="work.html">Explore Work &amp; Methods</a>
+      <a class="button button-secondary" href="sandbox.html">Visit Jay's Sandbox</a>
+    </div>
+  </div>
+
+  <div class="hero-visual">
+    <img src="images/hero.jpg" alt="Landscape with energy infrastructure and terrain" />
+  </div>
+</section>
+
+
+      <section class="section">
+        <h2 class="section-heading">What you’ll find here</h2>
+        <p class="section-subtext">
+          I wanted a place that’s less formal than a resume and more interesting than a LinkedIn page.
+          You’ll find a mix of side projects, geospatial demos, automation ideas, and whatever else I’m currently curious about.
+        </p>
+        <div class="card-grid">
+          <article class="card">
+            <h3 class="card-title">Work &amp; Methods</h3>
+            <p class="card-body">
+              A concise look at how I approach wind development, GIS, automation, and the quieter pieces of project work like data structure and diligence prep.
+            </p>
+          </article>
+          <article class="card">
+            <h3 class="card-title">Jay’s Sandbox</h3>
+            <p class="card-body">
+              An informal corner for experiments—maps, visualizations, and tools built with dummy data or public sources, just to explore ideas.
+            </p>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer>
+    &copy; <span id="year"></span> Jason Conover
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

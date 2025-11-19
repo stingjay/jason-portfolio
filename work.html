@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Work & Methods | Jason Conover</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="How Jason Conover thinks about wind project development, GIS, automation, and data organization." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="site-wrapper">
+    <header>
+      <nav class="navbar">
+        <div class="brand">JASON CONOVER</div>
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="work.html">Work &amp; Methods</a>
+          <a href="sandbox.html">Jay's Sandbox</a>
+          <a href="contact.html">Contact</a>
+        </div>
+      </nav>
+    </header>
+
+    <main class="section">
+      <h1 class="section-heading">Work &amp; Methods</h1>
+      <p class="section-subtext">
+        This page is a look at how I think about technical work—wind development, GIS, layout strategy,
+        automation, and the ways I organize information so projects move cleanly from concept to construction.
+        It’s not a collection of finished projects; it’s a simple overview of the methods, tools, and principles
+        that shape the work I do.
+      </p>
+
+      <section class="section two-col">
+        <div>
+          <h2 class="section-heading">About Jason</h2>
+          <p class="card-body">
+            I’m a Development Manager focused on utility-scale wind projects. Most of my work sits at the
+            intersection of GIS, layout design, permitting readiness, and data organization. I use ArcGIS Pro to
+            build turbine, road, collection, substation, and T-line layout concepts, and I support the technical side
+            of development with workflow automation in SQL Server and PowerShell.
+          </p>
+          <p class="card-body" style="margin-top:0.75rem;">
+            I also enjoy the quieter parts of the job: preparing documentation for diligence, keeping geospatial
+            data organized, refining VDR structures, and helping engineers and land teams stay aligned with clean,
+            consistent information.
+          </p>
+          <p class="card-body" style="margin-top:0.75rem;">
+            This section highlights the skills, tools, and methods I use regularly—and the things I enjoy working on most.
+          </p>
+
+          <a class="button button-secondary" style="margin-top:1rem;" href="#" target="_blank" rel="noopener">
+            Download My Resume
+          </a>
+          <!-- Replace href with your real resume link when ready -->
+        </div>
+
+        <aside>
+          <h3 class="section-heading">What I work with</h3>
+          <div class="list-chips">
+            <span class="chip">Wind Project Development</span>
+            <span class="chip">GIS / ArcGIS Pro</span>
+            <span class="chip">SQL Server</span>
+            <span class="chip">PowerShell</span>
+            <span class="chip">Layout Strategy</span>
+            <span class="chip">Permitting Prep</span>
+            <span class="chip">VDR / Diligence</span>
+            <span class="chip">O365 / SharePoint / AD</span>
+          </div>
+        </aside>
+      </section>
+
+      <section class="section">
+        <h2 class="section-heading">Methods</h2>
+        <p class="section-subtext">
+          A few small snapshots of how I tend to approach common pieces of development work.
+        </p>
+        <div class="card-grid">
+          <article class="card">
+            <h3 class="card-title">Early-stage layout thinking</h3>
+            <p class="card-body">
+              When designing early wind layouts, I start by understanding exclusion zones, topography, landowner
+              constraints, and access logic. I sketch around constraints first, then refine the geometry with
+              engineering feedback and permitting considerations. The goal isn’t perfection—it’s clarity and buildability.
+            </p>
+          </article>
+          <article class="card">
+            <h3 class="card-title">Clean data → clean decisions</h3>
+            <p class="card-body">
+              I rely heavily on SQL Server and PowerShell to automate data handling. Consistent inputs and automated
+              checks reduce noise, cut down manual work, and ensure the team always has clean information for engineering
+              and agency reviews.
+            </p>
+          </article>
+          <article class="card">
+            <h3 class="card-title">Aligning with permitting pathways</h3>
+            <p class="card-body">
+              A layout only works if permitting works. I integrate FAA/DOT/USFWS considerations into early design so we
+              avoid late-stage redesigns. It’s a balance: optimize the layout, stay within the regulatory lane, and make
+              sure decisions are documented clearly.
+            </p>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer>
+    &copy; <span id="year"></span> Jason Conover
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
