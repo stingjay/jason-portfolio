@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Jay's Sandbox | Experiments & Maps</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Jay’s Sandbox is where Jason experiments with maps, visualizations, and small tools using dummy or public data." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="site-wrapper">
+    <header>
+      <nav class="navbar">
+        <div class="brand">JASON CONOVER</div>
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="work.html">Work &amp; Methods</a>
+          <a href="sandbox.html">Jay's Sandbox</a>
+          <a href="contact.html">Contact</a>
+        </div>
+      </nav>
+    </header>
+
+    <main class="section">
+      <h1 class="section-heading">Jay’s Sandbox</h1>
+      <p class="section-subtext">
+        Jay’s Sandbox is where I park experiments and half-finished ideas—usually maps, small tools, or visualizations
+        that help me think through wind, land, and data. Nothing here is tied to a specific real-world project or
+        employer. It’s all demos, dummy data, and explorations I’m comfortable sharing publicly.
+      </p>
+<section class="section">
+  <div class="highlight-badge">Current highlight · Interactive webmap</div>
+  <h2 class="section-heading">Explore 40 Years of U.S. Wind Turbine Growth</h2>
+
+  <p class="card-body" style="margin-top:0.5rem;">
+    This map shows every wind turbine in the United States and how the fleet has changed over time.
+    Drag the year slider to watch turbines appear across the country as the wind industry grows.
+    Each turbine is colored by its total height, so you can also see how turbine designs have
+    evolved—starting with smaller machines in the 1980s and moving toward the taller, modern
+    turbines built today.
+  </p>
+
+  <p class="card-body" style="margin-top:0.75rem;">
+    It’s an easy way to explore when wind energy arrived in different regions, how the technology
+    has scaled up, and where the largest projects have been built.
+  </p>
+
+  <div class="map-embed">
+<iframe width="100%" height="488" frameborder="0" title="Felt Map" src="https://felt.com/embed/map/Wind-Turbine-Evolution-Ph9AeIJXYSQSSlEOHU4q0JB?loc=39.64%2C-95.1%2C3.38z&legend=1&cooperativeGestures=1&link=1&geolocation=0&zoomControls=1&scaleBar=1" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+  </div>
+</section>
+
+      
+
+
+    </main>
+  </div>
+
+  <footer>
+    &copy; <span id="year"></span> Jason Conover
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
