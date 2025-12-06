@@ -6,6 +6,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="Jay’s Sandbox is where Jason experiments with maps, visualizations, and small tools using dummy or public data." />
   <link rel="stylesheet" href="styles.css" />
+
+  <!-- Leaflet core CSS & JS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-sA+e2atXQWw2CkGZtPFl1kYyMI0CkH5vYXZbQ1r1PXA="
+    crossorigin=""
+  />
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-o9N1j7kGStb0rjv8NEn0pZKX32PVdC2yYZIuP89u0kM="
+    crossorigin=""
+  ></script>
+
+  <!-- Leaflet.TimeDimension CSS & JS -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/leaflet-timedimension-new@1.1.0/src/leaflet.timedimension.control.css"
+  />
+  <script src="https://cdn.jsdelivr.net/npm/leaflet-timedimension-new@1.1.0/src/leaflet.timedimension.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/leaflet-timedimension-new@1.1.0/src/leaflet.timedimension.util.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/leaflet-timedimension-new@1.1.0/src/leaflet.timedimension.layer.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/leaflet-timedimension-new@1.1.0/src/leaflet.timedimension.layer.geojson.js"></script>
 </head>
 <body>
   <div class="site-wrapper">
@@ -28,27 +51,25 @@
         that help me think through wind, land, and data. Nothing here is tied to a specific real-world project or
         employer. It’s all demos, dummy data, and explorations I’m comfortable sharing publicly.
       </p>
-<section class="section">
-  <div class="highlight-badge">Current highlight · Interactive webmap</div>
-  <h2 class="section-heading">Explore 40 Years of U.S. Wind Turbine Growth</h2>
 
-  <p class="card-body" style="margin-top:0.5rem;">
-    This map shows every wind turbine in the United States and how the fleet has changed over time.
-    Drag the year slider to watch turbines appear across the country as the wind industry grows.
-    Each turbine is colored by its total height, so you can also see how turbine designs have
-    evolved—starting with smaller machines in the 1980s and moving toward the taller, modern
-    turbines built today.
-  </p>
+      <section class="section">
+        <div class="highlight-badge">Current highlight · Interactive webmap</div>
+        <h2 class="section-heading">Explore 40 Years of U.S. Wind Turbine Growth</h2>
 
-  <p class="card-body" style="margin-top:0.75rem;">
-    It’s an easy way to explore when wind energy arrived in different regions, how the technology
-    has scaled up, and where the largest projects have been built.
-  </p>
+        <p class="card-body" style="margin-top:0.5rem;">
+          This map shows every wind turbine in the United States and how the fleet has changed over time.
+          Drag the time slider to watch turbines appear across the country as the wind industry grows.
+          Each turbine is styled by its characteristics so you can see how designs have evolved over the last four decades.
+        </p>
 
-  <div class="map-embed">
-<iframe width="100%" height="488" frameborder="0" title="Felt Map" src="https://felt.com/embed/map/Wind-Turbine-Evolution-Ph9AeIJXYSQSSlEOHU4q0JB?loc=39.64%2C-95.1%2C3.38z&legend=1&cooperativeGestures=1&link=1&geolocation=0&zoomControls=1&scaleBar=1" referrerpolicy="strict-origin-when-cross-origin"></iframe>
-  </div>
-</section>
+        <p class="card-body" style="margin-top:0.75rem;">
+          It’s an easy way to explore when wind energy arrived in different regions, how the technology has scaled,
+          and where the largest projects have been built.
+        </p>
+
+        <!-- REPLACEMENT FOR THE IFRAME -->
+        <div id="map" style="height: 600px; margin-top: 1.5rem;"></div>
+      </section>
     </main>
   </div>
 
@@ -59,5 +80,8 @@
   <script>
     document.getElementById("year").textContent = new Date().getFullYear();
   </script>
+
+  <!-- Your custom Leaflet map logic -->
+  <script src="js/map.js"></script>
 </body>
 </html>
