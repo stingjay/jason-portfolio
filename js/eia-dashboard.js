@@ -147,7 +147,7 @@ function processData(rows) {
 
 // ─── GeoJSON loader ────────────────────────────────────────────────────────
 async function loadGeoJSON() {
-  const res = await fetch('data/rto-regions.geojson');
+  const res = await fetch('data/rto-regions.geojson?v=3');
   if (!res.ok) throw new Error(`Could not load rto-regions.geojson (HTTP ${res.status})`);
   const fc = await res.json();
   for (const feature of fc.features) {
@@ -369,8 +369,9 @@ async function loadData() {
   document.getElementById('loading-msg').style.display = 'block';
 
   try {
-    // Load GeoJSON boundaries once — skipped on subsequent refreshes
-    if (Object.keys(geoFeatures).length === 0) {
+    // Load GeoJSON boundaries once per page load — re-load if incomplete
+    const expectedRegions = Object.keys(REGIONS).length;
+    if (Object.keys(geoFeatures).length < expectedRegions) {
       await loadGeoJSON();
     }
 
