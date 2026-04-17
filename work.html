@@ -5,6 +5,17 @@
   <title>Work & Methods | Jason Conover</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="How Jason Conover thinks about wind project development, GIS, automation, and data organization." />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <!-- Open Graph — replace YOURDOMAIN.com with your actual deployed domain -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Work & Methods | Jason Conover" />
+  <meta property="og:description" content="How Jason Conover thinks about wind project development, GIS, automation, and data organization." />
+  <meta property="og:image" content="https://YOURDOMAIN.com/images/hero.jpg" />
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Work & Methods | Jason Conover" />
+  <meta name="twitter:description" content="How Jason Conover thinks about wind project development, GIS, automation, and data organization." />
+  <meta name="twitter:image" content="https://YOURDOMAIN.com/images/hero.jpg" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -12,6 +23,7 @@
     <header>
       <nav class="navbar">
         <div class="brand">JASON CONOVER</div>
+        <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">&#9776;</button>
         <div class="nav-links">
           <a href="index.html">Home</a>
           <a href="work.html">Work &amp; Methods</a>
@@ -21,12 +33,12 @@
       </nav>
     </header>
 
-    <main class="section">
+    <main class="page-content">
       <h1 class="section-heading">Work &amp; Methods</h1>
       <p class="section-subtext">
         This page is a look at how I think about technical work—wind development, GIS, layout strategy,
         automation, and the ways I organize information so projects move cleanly from concept to construction.
-        It’s not a collection of finished projects; it’s a simple overview of the methods, tools, and principles
+        It's not a collection of finished projects; it's a simple overview of the methods, tools, and principles
         that shape the work I do.
       </p>
 
@@ -34,7 +46,7 @@
         <div>
           <h2 class="section-heading">About Jason</h2>
           <p class="card-body">
-            I’m a Development Manager focused on utility-scale wind projects. Most of my work sits at the
+            I'm a Development Manager focused on utility-scale wind projects. Most of my work sits at the
             intersection of GIS, layout design, permitting readiness, and data organization. I use ArcGIS Pro to
             build turbine, road, collection, substation, and T-line layout concepts, and I support the technical side
             of development with workflow automation in SQL Server and PowerShell.
@@ -48,15 +60,15 @@
             This section highlights the skills, tools, and methods I use regularly—and the things I enjoy working on most.
           </p>
 
-<a
-  class="button button-secondary"
-  style="margin-top:1rem;"
-  href="https://www.linkedin.com/in/jason-conover-97079b95"
-  target="_blank"
-  rel="noopener"
->
-  View My LinkedIn
-</a>
+          <a
+            class="button button-secondary"
+            style="margin-top:1rem;"
+            href="https://www.linkedin.com/in/jason-conover-97079b95"
+            target="_blank"
+            rel="noopener"
+          >
+            View My LinkedIn
+          </a>
         </div>
 
         <aside>
@@ -85,7 +97,7 @@
             <p class="card-body">
               When designing early wind layouts, I start by understanding exclusion zones, topography, landowner
               constraints, and access logic. I sketch around constraints first, then refine the geometry with
-              engineering feedback and permitting considerations. The goal isn’t perfection—it’s clarity and buildability.
+              engineering feedback and permitting considerations. The goal isn't perfection—it's clarity and buildability.
             </p>
           </article>
           <article class="card">
@@ -100,7 +112,7 @@
             <h3 class="card-title">Aligning with permitting pathways</h3>
             <p class="card-body">
               A layout only works if permitting works. I integrate FAA/DOT/USFWS considerations into early design so we
-              avoid late-stage redesigns. It’s a balance: optimize the layout, stay within the regulatory lane, and make
+              avoid late-stage redesigns. It's a balance: optimize the layout, stay within the regulatory lane, and make
               sure decisions are documented clearly.
             </p>
           </article>
@@ -115,6 +127,12 @@
 
   <script>
     document.getElementById("year").textContent = new Date().getFullYear();
+    const toggle = document.querySelector('.nav-toggle');
+    const navLinks = document.querySelector('.nav-links');
+    if (toggle) toggle.addEventListener('click', () => {
+      navLinks.classList.toggle('nav-open');
+      toggle.setAttribute('aria-expanded', navLinks.classList.contains('nav-open'));
+    });
   </script>
 </body>
 </html>

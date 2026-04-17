@@ -4,32 +4,36 @@
   <meta charset="UTF-8" />
   <title>Jay's Sandbox | Experiments & Maps</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="An informal corner for experiments — maps, visualizations, and tools built with public data to explore ideas in wind energy and GIS." />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <!-- Open Graph — replace YOURDOMAIN.com with your actual deployed domain -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Jay's Sandbox | Experiments & Maps" />
+  <meta property="og:description" content="An informal corner for experiments — maps, visualizations, and tools built with public data to explore ideas in wind energy and GIS." />
+  <meta property="og:image" content="https://YOURDOMAIN.com/images/hero.jpg" />
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Jay's Sandbox | Experiments & Maps" />
+  <meta name="twitter:description" content="An informal corner for experiments — maps, visualizations, and tools built with public data to explore ideas in wind energy and GIS." />
+  <meta name="twitter:image" content="https://YOURDOMAIN.com/images/hero.jpg" />
   <link rel="stylesheet" href="styles.css" />
 
-  <!-- Leaflet core CSS & JS ONLY -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  />
-  <script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
-  </script>
-    <!-- Leaflet.TimeDimension -->
-<link
-  rel="stylesheet"
-  href="https://cdn.jsdelivr.net/npm/leaflet-timedimension@1.1.0/dist/leaflet.timedimension.control.css"
-/>
-<script src="https://cdn.jsdelivr.net/npm/leaflet-timedimension@1.1.0/dist/leaflet.timedimension.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/leaflet-timedimension@1.1.0/dist/leaflet.timedimension.util.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/leaflet-timedimension@1.1.0/dist/leaflet.timedimension.layer.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/leaflet-timedimension@1.1.0/dist/leaflet.timedimension.layer.geojson.js"></script>
-
+  <!-- Leaflet core CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Leaflet.TimeDimension -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-timedimension@1.1.0/dist/leaflet.timedimension.control.css" />
+  <script src="https://cdn.jsdelivr.net/npm/leaflet-timedimension@1.1.0/dist/leaflet.timedimension.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/leaflet-timedimension@1.1.0/dist/leaflet.timedimension.util.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/leaflet-timedimension@1.1.0/dist/leaflet.timedimension.layer.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/leaflet-timedimension@1.1.0/dist/leaflet.timedimension.layer.geojson.js"></script>
 </head>
 <body>
   <div class="site-wrapper">
     <header>
       <nav class="navbar">
         <div class="brand">JASON CONOVER</div>
+        <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">&#9776;</button>
         <div class="nav-links">
           <a href="index.html">Home</a>
           <a href="work.html">Work &amp; Methods</a>
@@ -39,18 +43,53 @@
       </nav>
     </header>
 
-    <main class="section">
-      <h1 class="section-heading">Jay’s Sandbox</h1>
+    <main class="page-content">
+      <h1 class="section-heading">Jay's Sandbox</h1>
       <p class="section-subtext">
-          This interactive map shows the growth of wind energy across the United States over time.
-  Each point represents an individual wind turbine, and the timeline below allows you to watch
-  turbines appear as they reach their commercial operation date (COD). Explore how wind projects
-  expanded region by region, how technology evolved, and where the largest concentrations of
-  development occurred.
+        An informal corner for experiments—maps, visualizations, and tools built with public data to explore
+        ideas in wind energy and GIS. More experiments coming as I build them out.
       </p>
 
-      <!-- MAP CONTAINER -->
-      <div id="map" style="height: 600px; margin-top: 1.5rem;"></div>
+      <section class="section">
+        <h2 class="section-heading">Experiments</h2>
+        <div class="card-grid experiment-index">
+          <article class="card">
+            <span class="highlight-badge badge-live">Experiment #1 &middot; Live</span>
+            <h3 class="card-title">U.S. Wind Turbine Timeline</h3>
+            <p class="card-body">
+              Watch the growth of wind energy across the United States over time. Each point is an individual turbine
+              appearing at its commercial operation date—explore how projects expanded region by region.
+            </p>
+          </article>
+          <article class="card card--muted">
+            <span class="highlight-badge badge-soon">Coming Soon</span>
+            <h3 class="card-title">Live Grid Mix Dashboard</h3>
+            <p class="card-body">
+              Real-time U.S. electricity generation by source—wind, solar, gas, nuclear—across NERC regions,
+              pulled from the EIA open API.
+            </p>
+          </article>
+          <article class="card card--muted">
+            <span class="highlight-badge badge-soon">Coming Soon</span>
+            <h3 class="card-title">More experiments in progress&hellip;</h3>
+            <p class="card-body">
+              Ideas in the queue: wind resource overlays, siting constraint visualizations, and automation tools
+              for development workflows.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2 class="section-heading" style="margin-bottom:0.5rem;">
+          Experiment #1 &mdash; U.S. Wind Turbine Timeline
+        </h2>
+        <p class="section-subtext" style="margin-bottom:1rem;">
+          Each point represents an individual wind turbine. Use the timeline below the map to play through
+          commercial operation dates and watch the build-out unfold region by region.
+        </p>
+        <div id="map" style="height: 600px;"></div>
+      </section>
     </main>
   </div>
 
@@ -60,9 +99,14 @@
 
   <script>
     document.getElementById("year").textContent = new Date().getFullYear();
+    const toggle = document.querySelector('.nav-toggle');
+    const navLinks = document.querySelector('.nav-links');
+    if (toggle) toggle.addEventListener('click', () => {
+      navLinks.classList.toggle('nav-open');
+      toggle.setAttribute('aria-expanded', navLinks.classList.contains('nav-open'));
+    });
   </script>
 
-  <!-- Your custom Leaflet map logic -->
   <script src="js/map.js"></script>
 </body>
 </html>

@@ -5,6 +5,17 @@
   <title>Contact | Jason Conover</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="Get in touch with Jason Conover about wind development, GIS, automation, or related work." />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <!-- Open Graph — replace YOURDOMAIN.com with your actual deployed domain -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Contact | Jason Conover" />
+  <meta property="og:description" content="Get in touch with Jason Conover about wind development, GIS, automation, or related work." />
+  <meta property="og:image" content="https://YOURDOMAIN.com/images/hero.jpg" />
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Contact | Jason Conover" />
+  <meta name="twitter:description" content="Get in touch with Jason Conover about wind development, GIS, automation, or related work." />
+  <meta name="twitter:image" content="https://YOURDOMAIN.com/images/hero.jpg" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -12,6 +23,7 @@
     <header>
       <nav class="navbar">
         <div class="brand">JASON CONOVER</div>
+        <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">&#9776;</button>
         <div class="nav-links">
           <a href="index.html">Home</a>
           <a href="work.html">Work &amp; Methods</a>
@@ -21,15 +33,16 @@
       </nav>
     </header>
 
-    <main class="section">
+    <main class="page-content">
       <h1 class="section-heading">Contact</h1>
       <p class="section-subtext">
-        If you’d like to connect about wind development, GIS, automation, or anything on this site,
-        you can reach me through the form below. I’ll get back to you as soon as I can.
+        If you'd like to connect about wind development, GIS, automation, or anything on this site,
+        you can reach me through the form below. I'll get back to you as soon as I can.
       </p>
 
-      <form class="contact-form" style="margin-top:1.5rem;" netlify>
-	<input type="hidden" name="form-name" value="contact-form">
+      <form class="contact-form" style="margin-top:1.5rem;" action="/success.html" netlify>
+        <input type="hidden" name="form-name" value="contact-form">
+
         <label for="name">Your Name</label>
         <input id="name" name="name" type="text" required>
 
@@ -40,9 +53,8 @@
         <textarea id="message" name="message" rows="5" required></textarea>
 
         <button type="submit" class="button button-primary">
-	  Send Message
-	</button>
-
+          Send Message
+        </button>
       </form>
 
       <p class="section-subtext" style="margin-top:1.5rem;">
@@ -62,6 +74,12 @@
 
   <script>
     document.getElementById("year").textContent = new Date().getFullYear();
+    const toggle = document.querySelector('.nav-toggle');
+    const navLinks = document.querySelector('.nav-links');
+    if (toggle) toggle.addEventListener('click', () => {
+      navLinks.classList.toggle('nav-open');
+      toggle.setAttribute('aria-expanded', navLinks.classList.contains('nav-open'));
+    });
   </script>
 </body>
 </html>
