@@ -16,8 +16,8 @@ const REGIONS = {
   NYIS: { name: 'New York ISO',           short: 'NYIS', center: [-75.8, 43.0], geoId: 'NYIS' },
   PJM:  { name: 'PJM Interconnection',    short: 'PJM',  center: [-79.5, 39.0], geoId: 'PJM'  },
   MISO: { name: 'MISO',                   short: 'MISO', center: [-90.0, 40.5], geoId: 'MISO' },
-  SPP:  { name: 'Southwest Power Pool',   short: 'SPP',  center: [-99.5, 38.5], geoId: 'SWPP' },
-  ERCO: { name: 'ERCOT (Texas)',          short: 'ERCO', center: [-99.0, 31.0], geoId: 'ERCO' },
+  SWPP: { name: 'Southwest Power Pool',   short: 'SPP',  center: [-99.5, 38.5], geoId: 'SWPP' },
+  ERCO: { name: 'ERCOT (Texas)',          short: 'ERCOT', center: [-99.0, 31.0], geoId: 'ERCO' },
   CISO: { name: 'California ISO',         short: 'CISO', center: [-120.0, 37.0], geoId: 'CAL' },
 };
 
@@ -33,9 +33,12 @@ const FUELS = {
   OTH: { label: 'Other',       color: '#94a3b8' },
 };
 
-// Fuel order determines stacking / donut slice order
+// Fuel order determines stacking / donut slice order.
+// Any EIA fuel type NOT in this list (e.g. GEO, BIO, STR) gets folded into OTH
+// during processing so the donut and headline always share the same denominator.
 const FUEL_ORDER = ['WND', 'SUN', 'WAT', 'NUC', 'NG', 'COL', 'OIL', 'OTH'];
 const RENEWABLE_FUELS = ['WND', 'SUN', 'WAT'];
+const CLEAN_FUELS     = ['WND', 'SUN', 'WAT', 'NUC'];
 
 // ─── State ─────────────────────────────────────────────────────────────────
 let leafletMap = null;
@@ -47,10 +50,11 @@ let activeRegion = null;
 let geoFeatures = {}; // geoId → GeoJSON feature, loaded once from rto-regions.geojson
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
-function renewableColor(pct) {
-  if (pct >= 50) return '#22c55e';
-  if (pct >= 30) return '#86efac';
-  if (pct >= 15) return '#fde68a';
+// Map color is based on % clean (renewable + nuclear) for better regional variation
+function cleanColor(pct) {
+  if (pct >= 60) return '#22c55e';
+  if (pct >= 40) return '#86efac';
+  if (pct >= 20) return '#fde68a';
   return '#f87171';
 }
 
@@ -108,17 +112,31 @@ function processData(rows) {
   for (const [region, periods] of Object.entries(tree)) {
     // Most recent period for this region
     const latestPeriod = Object.keys(periods).sort().reverse()[0];
-    const fuels = periods[latestPeriod] ?? {};
+    const rawFuels = periods[latestPeriod] ?? {};
 
-    const total = Object.values(fuels).reduce((s, v) => s + v, 0);
+    // Fold any unknown fuel types into OTH so the donut and headline
+    // always use the same denominator (sum of FUEL_ORDER keys only).
+    const fuels = {};
+    for (const [f, v] of Object.entries(rawFuels)) {
+      if (FUEL_ORDER.includes(f)) {
+        fuels[f] = v;
+      } else {
+        fuels['OTH'] = (fuels['OTH'] ?? 0) + v;
+      }
+    }
+
+    const total     = FUEL_ORDER.reduce((s, f) => s + (fuels[f] ?? 0), 0);
     const renewable = RENEWABLE_FUELS.reduce((s, f) => s + (fuels[f] ?? 0), 0);
+    const clean     = CLEAN_FUELS.reduce((s, f) => s + (fuels[f] ?? 0), 0);
 
     result[region] = {
       period: latestPeriod,
       fuels,
       total,
       renewable,
+      clean,
       renewablePct: total > 0 ? (renewable / total) * 100 : 0,
+      cleanPct:     total > 0 ? (clean     / total) * 100 : 0,
     };
   }
   return result;
@@ -157,8 +175,8 @@ function updateMap(data) {
     if (!feature) continue;
 
     const rd = data[key];
-    const pct = rd?.renewablePct ?? 0;
-    const color = renewableColor(pct);
+    const pct = rd?.cleanPct ?? 0;
+    const color = cleanColor(pct);
     const isActive = key === activeRegion;
 
     const layer = L.geoJSON(feature, {
@@ -172,7 +190,7 @@ function updateMap(data) {
     });
 
     const tip = rd
-      ? `<strong>${region.name}</strong><br>${pct.toFixed(1)}% renewable<br>${fmtGWh(rd.total)} total`
+      ? `<strong>${region.name}</strong><br>${pct.toFixed(1)}% clean · ${rd.renewablePct.toFixed(1)}% renewable<br>${fmtGWh(rd.total)} total`
       : `<strong>${region.name}</strong><br>No data`;
     layer.bindTooltip(tip, { sticky: true, className: 'eia-tip' });
 
@@ -190,8 +208,8 @@ function selectRegion(key) {
 
   // Re-style all layers
   for (const [k, layer] of Object.entries(regionLayers)) {
-    const pct = processedData[k]?.renewablePct ?? 0;
-    const color = renewableColor(pct);
+    const pct = processedData[k]?.cleanPct ?? 0;
+    const color = cleanColor(pct);
     layer.setStyle({
       fillColor: color,
       fillOpacity: k === key ? 0.65 : 0.35,
@@ -212,14 +230,14 @@ function selectRegion(key) {
     return;
   }
 
-  const pct = rd.renewablePct;
-  const color = renewableColor(pct);
+  const pct = rd.cleanPct;
+  const color = cleanColor(pct);
   const pctEl = document.getElementById('panel-pct');
   pctEl.textContent = `${pct.toFixed(1)}%`;
   pctEl.style.color = color;
 
   document.getElementById('panel-pct-sub').textContent =
-    `renewable — ${fmtGWh(rd.renewable)} of ${fmtGWh(rd.total)}`;
+    `clean (incl. nuclear) · ${rd.renewablePct.toFixed(1)}% renewable · ${fmtGWh(rd.total)} total`;
 
   const fill = document.getElementById('panel-pct-fill');
   fill.style.width = `${Math.min(pct, 100)}%`;
