@@ -12,13 +12,16 @@ const EIA_API_KEY = 'RKQFhW6AWE23RK3UIYcqENb85wB8xJDs7lNg1hUx';
 // geoId maps each API respondent code to the EIA_ID used in rto-regions.geojson.
 // Two differ: CAL (not CISO) and SWPP (not SPP).
 const REGIONS = {
-  ISNE: { name: 'ISO New England',       short: 'ISNE', center: [-71.0, 44.5], geoId: 'ISNE' },
-  NYIS: { name: 'New York ISO',           short: 'NYIS', center: [-75.8, 43.0], geoId: 'NYIS' },
-  PJM:  { name: 'PJM Interconnection',    short: 'PJM',  center: [-79.5, 39.0], geoId: 'PJM'  },
-  MISO: { name: 'MISO',                   short: 'MISO', center: [-90.0, 40.5], geoId: 'MISO' },
-  SWPP: { name: 'Southwest Power Pool',   short: 'SPP',  center: [-99.5, 38.5], geoId: 'SWPP' },
-  ERCO: { name: 'ERCOT (Texas)',          short: 'ERCOT', center: [-99.0, 31.0], geoId: 'ERCO' },
-  CISO: { name: 'California ISO',         short: 'CISO', center: [-120.0, 37.0], geoId: 'CAL' },
+  ISNE: { name: 'ISO New England',       short: 'ISNE', center: [-71.0, 44.5],  geoId: 'ISNE' },
+  NYIS: { name: 'New York ISO',          short: 'NYIS', center: [-75.8, 43.0],  geoId: 'NYIS' },
+  PJM:  { name: 'PJM Interconnection',   short: 'PJM',  center: [-79.5, 39.0],  geoId: 'PJM'  },
+  MISO: { name: 'MISO',                  short: 'MISO', center: [-90.0, 40.5],  geoId: 'MISO' },
+  SWPP: { name: 'Southwest Power Pool',  short: 'SPP',  center: [-99.5, 38.5],  geoId: 'SWPP' },
+  ERCO: { name: 'ERCOT (Texas)',         short: 'ERCOT', center: [-99.0, 31.0], geoId: 'ERCO' },
+  CISO: { name: 'California ISO',        short: 'CISO', center: [-120.0, 37.0], geoId: 'CAL'  },
+  TVA:  { name: 'Tennessee Valley Authority', short: 'TVA',  center: [-86.5, 35.8], geoId: 'TVA'  },
+  BPAT: { name: 'Bonneville Power Admin.', short: 'BPAT', center: [-119.0, 46.5], geoId: 'BPAT' },
+  SOCO: { name: 'Southern Company',      short: 'SOCO', center: [-85.5, 32.5],  geoId: 'SOCO' },
 };
 
 // ─── Fuel config ───────────────────────────────────────────────────────────
