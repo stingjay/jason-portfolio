@@ -150,10 +150,12 @@ async function loadGeoJSON() {
   const res = await fetch('data/rto-regions.geojson?v=3');
   if (!res.ok) throw new Error(`Could not load rto-regions.geojson (HTTP ${res.status})`);
   const fc = await res.json();
+  console.log('[EIA] GeoJSON loaded, features:', fc.features.map(f => f.properties.EIA_ID));
   for (const feature of fc.features) {
     const id = feature.properties.EIA_ID;
     if (id) geoFeatures[id] = feature;
   }
+  console.log('[EIA] geoFeatures keys:', Object.keys(geoFeatures));
 }
 
 // ─── Map ───────────────────────────────────────────────────────────────────
@@ -175,7 +177,7 @@ function updateMap(data) {
 
   for (const [key, region] of Object.entries(REGIONS)) {
     const feature = geoFeatures[region.geoId];
-    if (!feature) continue;
+    if (!feature) { console.warn('[EIA] No GeoJSON feature for', key, '(geoId:', region.geoId + ')'); continue; }
 
     const rd = data[key];
     const pct = rd?.cleanPct ?? 0;
@@ -200,6 +202,7 @@ function updateMap(data) {
     layer.on('click', () => selectRegion(key));
     layer.addTo(leafletMap);
     regionLayers[key] = layer;
+    console.log('[EIA] Drew layer for', key, '— cleanPct:', pct.toFixed(1) + '%', 'color:', color);
   }
 }
 
