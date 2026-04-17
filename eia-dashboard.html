@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Grid Mix Dashboard | Jay's Sandbox</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Live U.S. electricity generation by source — wind, solar, gas, nuclear — across major grid regions, powered by EIA open data." />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Grid Mix Dashboard | Jay's Sandbox" />
+  <meta property="og:description" content="Live U.S. electricity generation by source across major grid regions — EIA open data." />
+  <meta property="og:image" content="https://YOURDOMAIN.com/images/hero.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Grid Mix Dashboard | Jay's Sandbox" />
+  <meta name="twitter:description" content="Live U.S. electricity generation by source across major grid regions — EIA open data." />
+  <meta name="twitter:image" content="https://YOURDOMAIN.com/images/hero.jpg" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    /* ── Dashboard layout ── */
+    .dash-header {
+      display: flex;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+    .dash-header-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-left: auto;
+      flex-shrink: 0;
+      padding-top: 0.25rem;
+    }
+    .last-updated {
+      font-size: 0.8rem;
+      color: #4b5563;
+    }
+    .refresh-btn {
+      background: none;
+      border: 1px solid rgba(148,163,184,0.3);
+      color: #9ca3af;
+      border-radius: 999px;
+      padding: 0.28rem 0.75rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+    .refresh-btn:hover  { border-color: #22c55e; color: #22c55e; }
+    .refresh-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .dash-grid {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 780px) {
+      .dash-grid { grid-template-columns: 1.65fr 1fr; }
+    }
+
+    #eia-map {
+      height: 430px;
+      border-radius: 0.75rem;
+      overflow: hidden;
+      border: 1px solid rgba(148,163,184,0.18);
+    }
+
+    /* dark tile tooltip */
+    .eia-tip {
+      background: #0f172a !important;
+      border: 1px solid rgba(148,163,184,0.22) !important;
+      color: #e5e7eb !important;
+      border-radius: 0.5rem !important;
+      font-family: system-ui, sans-serif !important;
+      font-size: 0.8rem !important;
+      padding: 0.4rem 0.65rem !important;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.45) !important;
+    }
+    .leaflet-tooltip.eia-tip::before { display: none !important; }
+
+    .map-legend {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.4rem 0.85rem;
+      margin-top: 0.5rem;
+      font-size: 0.77rem;
+      color: #6b7280;
+    }
+    .map-legend-item { display: flex; align-items: center; gap: 0.28rem; }
+    .map-swatch { width: 13px; height: 13px; border-radius: 3px; flex-shrink: 0; }
+
+    /* ── Right panel ── */
+    .panel {
+      background: radial-gradient(circle at top left, #0b1120, #020617 80%);
+      border: 1px solid rgba(30,64,175,0.4);
+      border-radius: 1rem;
+      padding: 1.1rem 1.15rem;
+      display: flex;
+      flex-direction: column;
+    }
+    .panel-eyebrow {
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #4b5563;
+      margin-bottom: 0.2rem;
+    }
+    .panel-region { font-size: 1.05rem; font-weight: 600; color: #f9fafb; }
+    .panel-period { font-size: 0.76rem; color: #4b5563; margin-bottom: 0.6rem; }
+    .big-pct {
+      font-size: 2.4rem;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 0.15rem;
+    }
+    .pct-sub { font-size: 0.8rem; color: #6b7280; margin-bottom: 0.45rem; }
+
+    .pct-bar {
+      height: 5px;
+      border-radius: 3px;
+      background: rgba(148,163,184,0.12);
+      overflow: hidden;
+      margin-bottom: 0.9rem;
+    }
+    .pct-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.55s ease;
+    }
+
+    .donut-wrap {
+      position: relative;
+      width: 180px;
+      margin: 0 auto 0.75rem;
+    }
+    .fuel-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem 0.65rem;
+      font-size: 0.77rem;
+      color: #d1d5db;
+    }
+    .fuel-item { display: flex; align-items: center; gap: 0.28rem; }
+    .fuel-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    /* ── Bar chart section ── */
+    .bar-section { margin-top: 1.5rem; }
+    .bar-wrap { position: relative; height: 230px; }
+
+    /* ── State messages ── */
+    .state-box {
+      border-radius: 0.75rem;
+      padding: 1.1rem 1.3rem;
+      font-size: 0.9rem;
+      line-height: 1.7;
+      margin-bottom: 1rem;
+    }
+    .state-box.setup {
+      background: rgba(245,158,11,0.08);
+      border: 1px solid rgba(245,158,11,0.28);
+      color: #fde68a;
+    }
+    .state-box.setup a { color: #fbbf24; }
+    .state-box.setup code {
+      background: rgba(245,158,11,0.14);
+      padding: 0.1em 0.35em;
+      border-radius: 4px;
+      font-size: 0.87em;
+    }
+    .state-box.error {
+      background: rgba(220,38,38,0.08);
+      border: 1px solid rgba(220,38,38,0.28);
+      color: #fca5a5;
+    }
+    .loading-msg {
+      text-align: center;
+      color: #4b5563;
+      font-size: 0.9rem;
+      padding: 2.5rem 0;
+    }
+    .placeholder-text {
+      color: #374151;
+      font-size: 0.88rem;
+      text-align: center;
+      padding: 2rem 0 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="site-wrapper">
+    <header>
+      <nav class="navbar">
+        <div class="brand">JASON CONOVER</div>
+        <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">&#9776;</button>
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="work.html">Work &amp; Methods</a>
+          <a href="sandbox.html">Jay's Sandbox</a>
+          <a href="contact.html">Contact</a>
+        </div>
+      </nav>
+    </header>
+
+    <main class="page-content">
+
+      <div class="dash-header">
+        <div>
+          <span class="highlight-badge badge-live">Experiment #2 &middot; Live</span>
+          <h1 class="section-heading" style="margin-top:0.4rem; margin-bottom:0.2rem;">
+            U.S. Grid Mix Dashboard
+          </h1>
+          <p class="muted" style="font-size:0.87rem;">
+            Hourly generation by fuel type across major U.S. grid operators &mdash; EIA open data
+          </p>
+        </div>
+        <div class="dash-header-meta">
+          <span class="last-updated" id="last-updated">—</span>
+          <button class="refresh-btn" id="refresh-btn" onclick="loadData()">&#8635; Refresh</button>
+        </div>
+      </div>
+
+      <!-- State messages -->
+      <div class="state-box setup" id="setup-msg" style="display:none;">
+        <strong>One-time setup:</strong> open <code>js/eia-dashboard.js</code> and replace
+        <code>YOUR_EIA_API_KEY_HERE</code> with your free key.<br>
+        Get one instantly (no billing) at
+        <a href="https://www.eia.gov/opendata/register.php" target="_blank" rel="noopener">
+          eia.gov/opendata/register.php
+        </a>.
+      </div>
+      <div class="state-box error" id="error-msg" style="display:none;"></div>
+      <div class="loading-msg" id="loading-msg">Loading grid data&hellip;</div>
+
+      <!-- Dashboard (hidden until data arrives) -->
+      <div id="dash-content" style="display:none;">
+
+        <div class="dash-grid">
+          <!-- Map -->
+          <div>
+            <div id="eia-map"></div>
+            <div class="map-legend">
+              <span>% Renewable (wind + solar + hydro):</span>
+              <span class="map-legend-item"><span class="map-swatch" style="background:#22c55e;"></span>&ge;50%</span>
+              <span class="map-legend-item"><span class="map-swatch" style="background:#86efac;"></span>30–50%</span>
+              <span class="map-legend-item"><span class="map-swatch" style="background:#fde68a;"></span>15–30%</span>
+              <span class="map-legend-item"><span class="map-swatch" style="background:#f87171;"></span>&lt;15%</span>
+            </div>
+          </div>
+
+          <!-- Region detail panel -->
+          <div class="panel">
+            <p class="panel-eyebrow">Selected region</p>
+            <p class="panel-region" id="panel-region">Click a region on the map</p>
+            <p class="panel-period" id="panel-period">&nbsp;</p>
+
+            <p class="big-pct" id="panel-pct" style="color:#374151;">—</p>
+            <p class="pct-sub" id="panel-pct-sub">% renewable generation</p>
+            <div class="pct-bar">
+              <div class="pct-fill" id="panel-pct-fill" style="width:0%;"></div>
+            </div>
+
+            <div class="donut-wrap">
+              <canvas id="donut-chart" width="180" height="180"></canvas>
+            </div>
+            <p class="placeholder-text" id="panel-placeholder">← click any highlighted region</p>
+            <div class="fuel-legend" id="fuel-legend"></div>
+          </div>
+        </div>
+
+        <!-- Stacked bar: all regions -->
+        <div class="bar-section">
+          <h2 class="section-heading" style="font-size:1rem; margin-bottom:0.75rem;">
+            Generation Mix by Region
+          </h2>
+          <div class="bar-wrap">
+            <canvas id="bar-chart"></canvas>
+          </div>
+        </div>
+
+      </div><!-- /dash-content -->
+
+    </main>
+  </div>
+
+  <footer>
+    &copy; <span id="year"></span> Jason Conover &mdash;
+    <span style="font-size:0.77rem; color:#374151;">
+      Data:
+      <a href="https://www.eia.gov/opendata/" target="_blank" rel="noopener"
+         style="color:#4b5563; text-decoration:none;">
+        U.S. Energy Information Administration
+      </a>
+    </span>
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+    const toggle = document.querySelector('.nav-toggle');
+    const navLinks = document.querySelector('.nav-links');
+    if (toggle) toggle.addEventListener('click', () => {
+      navLinks.classList.toggle('nav-open');
+      toggle.setAttribute('aria-expanded', navLinks.classList.contains('nav-open'));
+    });
+  </script>
+  <script src="js/eia-dashboard.js"></script>
+</body>
+</html>
