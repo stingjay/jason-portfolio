@@ -1,0 +1,1962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sandlot Smarts — Baseball Strategy & Drills</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Special+Elite&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#f4ecd8;
+    --cream-dark:#e8dcc0;
+    --paper:#faf4e3;
+    --navy:#0f2545;
+    --navy-light:#1d3a6b;
+    --red:#b3271e;
+    --red-dark:#8a1a14;
+    --grass:#3d6b3a;
+    --grass-light:#5a8a4d;
+    --dirt:#c8a878;
+    --dirt-dark:#a0825a;
+    --ink:#1a1a1a;
+    --gold:#d4a548;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+
+  html{scroll-behavior:smooth}
+
+  body{
+    font-family:'Libre Caslon Text', Georgia, serif;
+    background:var(--cream);
+    color:var(--ink);
+    line-height:1.55;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(139,90,43,0.04) 0%, transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(139,90,43,0.04) 0%, transparent 40%),
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='0.9' numOctaves='2' seed='5'/><feColorMatrix values='0 0 0 0 0.4  0 0 0 0 0.3  0 0 0 0 0.2  0 0 0 0.04 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    min-height:100vh;
+  }
+
+  /* ============= HEADER ============= */
+  header{
+    background:var(--navy);
+    color:var(--cream);
+    padding:2rem 1.5rem 2.5rem;
+    text-align:center;
+    border-bottom:6px solid var(--red);
+    position:relative;
+    overflow:hidden;
+  }
+  header::before{
+    content:"";
+    position:absolute;inset:0;
+    background:
+      repeating-linear-gradient(45deg,transparent 0 20px,rgba(255,255,255,0.02) 20px 21px);
+    pointer-events:none;
+  }
+  .pennant{
+    display:inline-block;
+    background:var(--red);
+    color:var(--cream);
+    padding:.3rem 1.2rem;
+    font-family:'Bungee',sans-serif;
+    font-size:.75rem;
+    letter-spacing:.2em;
+    margin-bottom:.8rem;
+    transform:rotate(-2deg);
+    box-shadow:3px 3px 0 var(--red-dark);
+  }
+  h1{
+    font-family:'Bungee',sans-serif;
+    font-size:clamp(2.2rem,6vw,4.5rem);
+    line-height:.95;
+    letter-spacing:.02em;
+    text-shadow:4px 4px 0 var(--red),8px 8px 0 rgba(0,0,0,.3);
+    margin-bottom:.6rem;
+  }
+  header p{
+    font-family:'Special Elite',monospace;
+    font-size:1rem;
+    opacity:.85;
+    max-width:600px;
+    margin:0 auto;
+  }
+
+  /* ============= TAB NAV ============= */
+  .tabs{
+    display:flex;
+    justify-content:center;
+    gap:0;
+    padding:0 1rem;
+    margin-top:-1.5rem;
+    position:relative;
+    z-index:2;
+    flex-wrap:wrap;
+  }
+  .tab{
+    background:var(--cream);
+    border:3px solid var(--navy);
+    border-bottom:none;
+    color:var(--navy);
+    font-family:'Bungee',sans-serif;
+    font-size:.85rem;
+    letter-spacing:.1em;
+    padding:1rem 1.8rem;
+    cursor:pointer;
+    transition:transform .15s, background .15s;
+    border-radius:8px 8px 0 0;
+    margin:0 -2px;
+  }
+  .tab:hover{transform:translateY(-3px);background:var(--paper)}
+  .tab.active{
+    background:var(--red);
+    color:var(--cream);
+    border-color:var(--red);
+    transform:translateY(-6px);
+    box-shadow:0 -4px 0 rgba(0,0,0,.15);
+  }
+
+  /* ============= MAIN ============= */
+  main{
+    max-width:1100px;
+    margin:0 auto;
+    padding:2rem 1.5rem 4rem;
+  }
+  .panel{display:none}
+  .panel.active{display:block;animation:fadeIn .35s ease}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  /* ============= STRATEGY GAME ============= */
+  .game-card{
+    background:var(--paper);
+    border:2px solid var(--navy);
+    border-radius:6px;
+    padding:1.5rem;
+    box-shadow:6px 6px 0 var(--navy);
+    margin-bottom:1.5rem;
+  }
+
+  .difficulty-row{
+    display:flex;
+    gap:.6rem;
+    flex-wrap:wrap;
+    align-items:center;
+    margin-bottom:1rem;
+  }
+  .difficulty-label{
+    font-family:'Bungee',sans-serif;
+    font-size:.75rem;
+    letter-spacing:.15em;
+    color:var(--navy);
+    margin-right:.4rem;
+  }
+  .diff-btn{
+    font-family:'Special Elite',monospace;
+    background:var(--cream);
+    border:2px solid var(--navy);
+    color:var(--navy);
+    padding:.4rem 1rem;
+    cursor:pointer;
+    font-size:.85rem;
+    border-radius:4px;
+    transition:all .15s;
+    position:relative;
+  }
+  .diff-btn:hover{background:var(--cream-dark)}
+  .diff-btn.active{
+    background:var(--navy);
+    color:var(--cream);
+    box-shadow:inset 0 0 0 2px var(--gold);
+  }
+  .diff-btn[data-locked="true"]{
+    opacity:.55;
+    cursor:not-allowed;
+    background:repeating-linear-gradient(
+      45deg,
+      var(--cream) 0 6px,
+      var(--cream-dark) 6px 12px
+    );
+  }
+  .diff-btn[data-locked="true"]:hover{background:repeating-linear-gradient(
+      45deg,
+      var(--cream) 0 6px,
+      var(--cream-dark) 6px 12px
+    );}
+  .diff-btn .lock{font-size:.85em;margin-left:.2em}
+  .diff-btn.just-unlocked{
+    animation:unlock-flash 1.2s ease-in-out;
+  }
+  @keyframes unlock-flash{
+    0%,100%{box-shadow:inset 0 0 0 2px transparent}
+    50%{box-shadow:inset 0 0 0 3px var(--gold), 0 0 12px var(--gold)}
+  }
+
+  .progress-wrap{margin-bottom:1rem}
+  .progress-label{
+    display:flex;
+    justify-content:space-between;
+    font-family:'Bungee',sans-serif;
+    font-size:.65rem;
+    letter-spacing:.12em;
+    color:var(--navy);
+    margin-bottom:.3rem;
+  }
+  .progress-label span:last-child{color:var(--red-dark)}
+  .progress-bar{
+    height:10px;
+    background:var(--cream-dark);
+    border:1.5px solid var(--navy);
+    border-radius:6px;
+    overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;
+    background:linear-gradient(90deg,var(--red) 0%,var(--gold) 100%);
+    width:0%;
+    transition:width .5s cubic-bezier(.4,.05,.3,1);
+  }
+
+  /* Promotion banner */
+  .promo-banner{
+    position:fixed;
+    top:50%;left:50%;
+    transform:translate(-50%,-50%) scale(.5);
+    background:var(--navy);
+    color:var(--gold);
+    padding:2rem 2.5rem;
+    border:4px solid var(--gold);
+    border-radius:10px;
+    box-shadow:0 0 0 8px var(--red), 12px 12px 0 rgba(0,0,0,.4);
+    z-index:9999;
+    text-align:center;
+    font-family:'Bungee',sans-serif;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .3s, transform .4s cubic-bezier(.3,1.6,.5,1);
+    max-width:90vw;
+  }
+  .promo-banner.show{
+    opacity:1;
+    transform:translate(-50%,-50%) scale(1);
+  }
+  .promo-banner .promo-pennant{
+    font-size:.7rem;letter-spacing:.3em;color:var(--cream);
+    background:var(--red);padding:.3rem .8rem;display:inline-block;
+    transform:rotate(-2deg);margin-bottom:.8rem;
+  }
+  .promo-banner h2{
+    font-size:2rem;margin-bottom:.3rem;line-height:1;
+    text-shadow:3px 3px 0 var(--red);
+  }
+  .promo-banner p{
+    font-family:'Special Elite',monospace;color:var(--cream);
+    font-size:1rem;margin-bottom:1.2rem;
+  }
+  .promo-banner button{
+    background:var(--gold);color:var(--navy);
+    font-family:'Bungee',sans-serif;font-size:.85rem;
+    padding:.7rem 1.4rem;border:none;border-radius:4px;
+    cursor:pointer;letter-spacing:.1em;
+    box-shadow:3px 3px 0 var(--red-dark);
+    transition:transform .12s;
+  }
+  .promo-banner button:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--red-dark)}
+
+  .scoreboard{
+    display:flex;
+    gap:1rem;
+    flex-wrap:wrap;
+    justify-content:space-between;
+    background:var(--navy);
+    color:var(--cream);
+    padding:.8rem 1.2rem;
+    border-radius:4px;
+    font-family:'Bungee',sans-serif;
+    font-size:.85rem;
+    letter-spacing:.1em;
+    margin-bottom:1.5rem;
+  }
+  .score-item{display:flex;gap:.5rem;align-items:center}
+  .score-item span:last-child{color:var(--gold);font-size:1.1rem}
+
+  .scenario-text{
+    font-family:'Special Elite',monospace;
+    font-size:1.1rem;
+    line-height:1.6;
+    background:var(--cream);
+    border-left:5px solid var(--red);
+    padding:1rem 1.2rem;
+    margin-bottom:1.2rem;
+    border-radius:0 4px 4px 0;
+  }
+  .scenario-text strong{color:var(--red-dark)}
+
+  /* Diamond */
+  .field-wrap{
+    display:flex;
+    justify-content:center;
+    margin:1rem 0 1.5rem;
+  }
+  .diamond{
+    width:100%;
+    max-width:480px;
+    height:auto;
+    cursor:default;
+  }
+  .base{
+    cursor:pointer;
+    transition:transform .15s, filter .15s;
+    transform-origin:center;
+                          transform-box:fill-box;
+  }
+  .base:hover{transform:scale(1.15);filter:brightness(1.1)}
+  .base.selectable{
+    animation:pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{filter:drop-shadow(0 0 0 var(--gold))}
+    50%{filter:drop-shadow(0 0 8px var(--gold)) brightness(1.15)}
+  }
+  .base-label{
+    font-family:'Bungee',sans-serif;
+    font-size:14px;
+    fill:var(--ink);
+    pointer-events:none;
+    user-select:none;
+  }
+  .runner-dot{
+    fill:var(--red);
+    stroke:var(--ink);
+    stroke-width:2;
+    transition:cx .6s cubic-bezier(.4,.05,.3,1), cy .6s cubic-bezier(.4,.05,.3,1);
+  }
+  .runner-dot.running{
+    animation:runner-bob .35s ease-in-out infinite;
+  }
+  @keyframes runner-bob{
+    0%,100%{transform:translateY(0)}
+    50%{transform:translateY(-2px)}
+  }
+  .runner-dot.safe{
+    fill:var(--grass);
+    transition:fill .3s, cx .6s, cy .6s;
+  }
+  .runner-dot.out{
+    fill:#888;
+    opacity:.5;
+  }
+  .ball-mark{
+    fill:#fff;
+    stroke:var(--red);
+    stroke-width:2;
+    filter:drop-shadow(0 2px 3px rgba(0,0,0,.35));
+  }
+  .ball-spin{
+    animation:ball-spin 1.2s linear infinite;
+    transform-origin:center;
+    transform-box:fill-box;
+  }
+  @keyframes ball-spin{
+    from{transform:rotate(0)}
+    to{transform:rotate(360deg)}
+  }
+  .ball-trail{
+    fill:none;
+    stroke:var(--red);
+    stroke-width:1.5;
+    stroke-dasharray:3,4;
+    opacity:0;
+    animation:trail-fade 1.4s ease-out forwards;
+  }
+  @keyframes trail-fade{
+    0%{opacity:0;stroke-dashoffset:60}
+    20%{opacity:.6}
+    100%{opacity:0;stroke-dashoffset:0}
+  }
+  .fielder-hilite{
+    animation:fielder-pop 1s ease-out;
+    transform-origin:center;
+    transform-box:fill-box;
+  }
+  @keyframes fielder-pop{
+    0%{transform:scale(1);filter:drop-shadow(0 0 0 var(--gold))}
+    30%{transform:scale(1.6);filter:drop-shadow(0 0 10px var(--gold))}
+    100%{transform:scale(1);filter:drop-shadow(0 0 0 var(--gold))}
+  }
+  .out-burst{
+    fill:none;
+    stroke:#fff;
+    stroke-width:3;
+    opacity:0;
+    animation:burst .6s ease-out forwards;
+    transform-origin:center;
+    transform-box:fill-box;
+  }
+  @keyframes burst{
+    0%{opacity:1;r:4}
+    100%{opacity:0;r:22}
+  }
+
+  .feedback{
+    padding:1rem 1.2rem;
+    border-radius:4px;
+    font-family:'Special Elite',monospace;
+    font-size:1rem;
+    margin-bottom:1rem;
+    border:2px dashed transparent;
+  }
+  .feedback.correct{
+    background:#e3f0d8;
+    border-color:var(--grass);
+    color:#234c1f;
+  }
+  .feedback.wrong{
+    background:#f5d8d6;
+    border-color:var(--red);
+    color:var(--red-dark);
+  }
+  .feedback strong{display:block;font-family:'Bungee',sans-serif;font-size:1.1rem;margin-bottom:.3rem;letter-spacing:.05em}
+
+  .btn-row{display:flex;gap:.8rem;flex-wrap:wrap}
+  .btn{
+    font-family:'Bungee',sans-serif;
+    font-size:.85rem;
+    letter-spacing:.1em;
+    padding:.8rem 1.5rem;
+    border:none;
+    cursor:pointer;
+    border-radius:4px;
+    transition:transform .12s;
+  }
+  .btn:hover{transform:translateY(-2px)}
+  .btn-primary{background:var(--red);color:var(--cream);box-shadow:3px 3px 0 var(--red-dark)}
+  .btn-primary:hover{box-shadow:5px 5px 0 var(--red-dark)}
+  .btn-secondary{background:var(--cream);color:var(--navy);border:2px solid var(--navy);box-shadow:3px 3px 0 var(--navy)}
+  .btn-secondary:hover{box-shadow:5px 5px 0 var(--navy)}
+
+  .hint-box{
+    background:rgba(212,165,72,0.15);
+    border:2px dashed var(--gold);
+    padding:.8rem 1rem;
+    margin-top:1rem;
+    border-radius:4px;
+    font-family:'Special Elite',monospace;
+    font-size:.95rem;
+  }
+  .hint-box strong{color:var(--red-dark)}
+
+  /* ============= DRILLS ============= */
+  .drill-filters{
+    display:flex;
+    gap:.5rem;
+    flex-wrap:wrap;
+    margin-bottom:1.5rem;
+    align-items:center;
+  }
+  .filter-label{
+    font-family:'Bungee',sans-serif;
+    font-size:.7rem;
+    letter-spacing:.15em;
+    color:var(--navy);
+  }
+  .filter-btn{
+    font-family:'Special Elite',monospace;
+    background:var(--paper);
+    border:2px solid var(--navy);
+    color:var(--navy);
+    padding:.35rem .9rem;
+    cursor:pointer;
+    font-size:.8rem;
+    border-radius:20px;
+    transition:all .15s;
+  }
+  .filter-btn:hover{background:var(--cream-dark)}
+  .filter-btn.active{background:var(--navy);color:var(--cream)}
+
+  .drill-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+    gap:1.2rem;
+  }
+  .drill-card{
+    background:var(--paper);
+    border:2px solid var(--navy);
+    border-radius:6px;
+    padding:1.2rem;
+    box-shadow:5px 5px 0 var(--navy);
+    transition:transform .2s, box-shadow .2s;
+    position:relative;
+    display:flex;
+    flex-direction:column;
+  }
+  .drill-card:hover{
+    transform:translate(-2px,-2px);
+    box-shadow:7px 7px 0 var(--navy);
+  }
+  .drill-card::before{
+    content:"";
+    position:absolute;
+    top:.6rem;right:.6rem;
+    width:14px;height:14px;
+    border-radius:50%;
+    background:radial-gradient(circle at 30% 30%,#fff,#eee 60%,#ddd);
+    border:1.5px solid var(--red);
+  }
+  .drill-card::after{
+    content:"";
+    position:absolute;
+    top:.85rem;right:.55rem;
+    width:18px;height:6px;
+    border:1.5px solid var(--red);
+    border-top:none;border-left:none;border-right:none;
+    border-radius:0 0 50% 50%;
+    transform:rotate(-30deg);
+  }
+  .drill-meta{
+    display:flex;
+    gap:.4rem;
+    flex-wrap:wrap;
+    margin-bottom:.6rem;
+  }
+  .tag{
+    font-family:'Bungee',sans-serif;
+    font-size:.6rem;
+    letter-spacing:.12em;
+    padding:.2rem .55rem;
+    border-radius:3px;
+  }
+  .tag-age{background:var(--navy);color:var(--cream)}
+  .tag-cat{background:var(--red);color:var(--cream)}
+  .tag-solo{background:var(--grass);color:var(--cream)}
+
+  .drill-card h3{
+    font-family:'Bungee',sans-serif;
+    font-size:1.1rem;
+    color:var(--navy);
+    margin-bottom:.5rem;
+    line-height:1.15;
+    padding-right:1.5rem;
+  }
+  .drill-equip{
+    font-family:'Special Elite',monospace;
+    font-size:.78rem;
+    color:var(--red-dark);
+    margin-bottom:.6rem;
+    font-style:italic;
+  }
+  .drill-desc{font-size:.92rem;line-height:1.5;flex-grow:1}
+  .drill-steps{
+    font-family:'Special Elite',monospace;
+    font-size:.85rem;
+    margin-top:.7rem;
+    padding-top:.7rem;
+    border-top:1px dashed var(--dirt-dark);
+    display:none;
+  }
+  .drill-steps.open{display:block}
+  .drill-steps ol{margin-left:1.2rem}
+  .drill-steps li{margin-bottom:.35rem}
+  .toggle-steps{
+    margin-top:.7rem;
+    background:none;
+    border:none;
+    color:var(--red);
+    font-family:'Bungee',sans-serif;
+    font-size:.7rem;
+    letter-spacing:.12em;
+    cursor:pointer;
+    text-align:left;
+    padding:0;
+  }
+  .toggle-steps:hover{color:var(--red-dark);text-decoration:underline}
+
+  .drill-anim{
+    width:100%;
+    height:90px;
+    background:
+      linear-gradient(to bottom,#cfe2c2 0%,#a6c898 70%,#8fa87f 100%);
+    border-radius:4px;
+    margin-bottom:.7rem;
+    position:relative;
+    overflow:hidden;
+    border:1.5px solid var(--navy);
+  }
+  .drill-anim svg{width:100%;height:100%}
+  /* Generic loop element animations */
+  .anim-bat{
+    transform-origin:50px 70px;
+    transform-box:fill-box;
+    animation:swing-bat 2s ease-in-out infinite;
+  }
+  @keyframes swing-bat{
+    0%,15%{transform:rotate(-50deg)}
+    35%{transform:rotate(45deg)}
+    55%{transform:rotate(60deg)}
+    75%,100%{transform:rotate(-50deg)}
+  }
+  .anim-ball-toss{
+    animation:ball-toss 2s ease-in-out infinite;
+  }
+  @keyframes ball-toss{
+    0%,15%{transform:translate(0,0)}
+    35%{transform:translate(50px,-30px)}
+    55%{transform:translate(70px,-15px)}
+    75%,100%{transform:translate(140px,40px);opacity:0}
+  }
+  .anim-grounder{
+    animation:grounder 2.4s linear infinite;
+  }
+  @keyframes grounder{
+    0%{transform:translate(0,0);opacity:0}
+    10%{opacity:1}
+    50%{transform:translate(110px,0);opacity:1}
+    100%{transform:translate(220px,0);opacity:0}
+  }
+  .anim-throw{
+    animation:throw-arc 2s ease-out infinite;
+  }
+  @keyframes throw-arc{
+    0%{transform:translate(0,0) scale(1);opacity:0}
+    10%{opacity:1}
+    50%{transform:translate(90px,-25px) scale(.9)}
+    90%{transform:translate(180px,5px) scale(.7);opacity:1}
+    100%{transform:translate(195px,8px) scale(.6);opacity:0}
+  }
+  .anim-runner{
+    animation:run-back-forth 2s ease-in-out infinite;
+  }
+  @keyframes run-back-forth{
+    0%,100%{transform:translateX(0)}
+    50%{transform:translateX(140px)}
+  }
+  .anim-bob{
+    animation:bob 0.4s ease-in-out infinite;
+  }
+  @keyframes bob{
+    0%,100%{transform:translateY(0)}
+    50%{transform:translateY(-3px)}
+  }
+  .anim-think{
+    animation:think 2.5s ease-in-out infinite;
+    transform-origin:center;
+    transform-box:fill-box;
+  }
+  @keyframes think{
+    0%,100%{transform:scale(1)}
+    50%{transform:scale(1.15)}
+  }
+  .drill-actions{
+    display:flex;
+    gap:.5rem;
+    margin-top:.7rem;
+    flex-wrap:wrap;
+  }
+  .yt-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:.4rem;
+    background:#cc0000;
+    color:#fff;
+    font-family:'Bungee',sans-serif;
+    font-size:.65rem;
+    letter-spacing:.1em;
+    padding:.4rem .7rem;
+    border-radius:4px;
+    text-decoration:none;
+    transition:background .15s, transform .15s;
+    border:none;
+    cursor:pointer;
+  }
+  .yt-btn:hover{background:#a00000;transform:translateY(-1px)}
+  .yt-btn svg{width:14px;height:14px;fill:#fff}
+
+  .yt-embed{
+    margin-top:.8rem;
+    width:100%;
+    aspect-ratio:16/9;
+    background:#000;
+    border:2px solid var(--navy);
+    border-radius:4px;
+    overflow:hidden;
+    display:none;
+    box-shadow:3px 3px 0 var(--navy);
+  }
+  .yt-embed.open{display:block;animation:fadeIn .3s ease}
+  .yt-embed iframe{width:100%;height:100%;border:0}
+  .yt-fallback{
+    margin-top:.5rem;
+    font-family:'Special Elite',monospace;
+    font-size:.78rem;
+    color:var(--navy);
+    display:none;
+  }
+  .yt-fallback.open{display:block}
+  .yt-fallback a{color:var(--red);font-weight:bold}
+
+  /* ============= FOOTER ============= */
+  footer{
+    text-align:center;
+    padding:2rem 1rem;
+    font-family:'Special Elite',monospace;
+    font-size:.85rem;
+    color:var(--navy);
+    border-top:3px double var(--navy);
+    background:var(--cream-dark);
+  }
+  footer .stitches{
+    display:inline-block;
+    margin:0 .5rem;
+    color:var(--red);
+    letter-spacing:.3em;
+  }
+
+  @media (max-width:600px){
+    h1{font-size:2.4rem}
+    .tab{padding:.8rem 1rem;font-size:.7rem}
+    .scoreboard{font-size:.7rem;gap:.5rem;padding:.6rem .8rem}
+    .game-card{padding:1rem;box-shadow:4px 4px 0 var(--navy)}
+  }
+</style>
+</head>
+<body>
+<a href="playground.html" style="display:inline-block;font-family:'Special Elite',monospace;color:#0f2545;text-decoration:none;padding:0.9rem 1.2rem;font-size:0.85rem;letter-spacing:0.05em;background:#f4ecd8;">← Back to Playground</a>
+
+<header>
+  <span class="pennant">★ EST. SUMMER ★</span>
+  <h1>Sandlot Smarts</h1>
+  <p>Baseball strategy &amp; backyard drills, built for ballplayers ages 6–12</p>
+</header>
+
+<nav class="tabs">
+  <button class="tab active" data-tab="game">⚾ Strategy Game</button>
+  <button class="tab" data-tab="drills">🥎 Backyard Drills</button>
+</nav>
+
+<main>
+
+<!-- ============= STRATEGY GAME PANEL ============= -->
+<section class="panel active" id="game">
+
+  <div class="game-card">
+    <div class="difficulty-row">
+      <span class="difficulty-label">LEVEL:</span>
+      <button class="diff-btn active" data-level="rookie">Rookie (6U–7U)</button>
+      <button class="diff-btn" data-level="easy">8U</button>
+      <button class="diff-btn" data-level="medium">9U–10U</button>
+      <button class="diff-btn" data-level="hard">11U–12U</button>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span>STREAK TO PROMOTE</span>
+        <span><span id="streak-progress">0</span> / <span id="streak-target">5</span></span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    </div>
+
+    <div class="scoreboard">
+      <div class="score-item"><span>STREAK:</span><span id="streak">0</span></div>
+      <div class="score-item"><span>CORRECT:</span><span id="correct">0</span></div>
+      <div class="score-item"><span>PLAYS:</span><span id="total">0</span></div>
+    </div>
+
+    <div class="scenario-text" id="scenario">
+      Pick a level above and a play will load. Tap the base where you'd throw the ball.
+    </div>
+
+    <div class="field-wrap">
+      <svg class="diamond" viewBox="0 0 400 460" id="field">
+        <!-- Outfield grass — dark green base -->
+        <path d="M 200 440 Q 10 320 10 90 Q 10 -10 200 -10 Q 390 -10 390 90 Q 390 320 200 440 Z"
+              fill="#5a8a4d" opacity="0.35"/>
+        <!-- Outfield depth indicator (lighter band where outfielders play) -->
+        <path d="M 30 60 Q 200 -25 370 60 L 370 95 Q 200 15 30 95 Z" fill="#7aa86a" opacity="0.35"/>
+        <!-- Infield dirt (diamond geometry unchanged) -->
+        <path d="M 200 340 L 60 200 L 200 60 L 340 200 Z" fill="#c8a878" opacity="0.7"/>
+        <!-- Grass infield circle around mound -->
+        <circle cx="200" cy="200" r="55" fill="#5a8a4d" opacity="0.55"/>
+        <!-- Warning track / wall arc -->
+        <path d="M 25 65 Q 200 -25 375 65" fill="none" stroke="#fff" stroke-width="1.2" stroke-dasharray="2,4" opacity="0.5"/>
+
+        <!-- Foul lines extend from home through bases to outfield wall -->
+        <line x1="200" y1="340" x2="50" y2="190" stroke="#fff" stroke-width="2"/>
+        <line x1="200" y1="340" x2="350" y2="190" stroke="#fff" stroke-width="2"/>
+        <line x1="50" y1="190" x2="20" y2="60" stroke="#fff" stroke-width="1.5" opacity="0.6"/>
+        <line x1="350" y1="190" x2="380" y2="60" stroke="#fff" stroke-width="1.5" opacity="0.6"/>
+        <!-- Base path between bases (dashed, light) -->
+        <line x1="60" y1="200" x2="200" y2="60" stroke="#fff" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.5"/>
+        <line x1="340" y1="200" x2="200" y2="60" stroke="#fff" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.5"/>
+
+        <!-- Pitcher's mound -->
+        <circle cx="200" cy="200" r="18" fill="#a0825a"/>
+        <text x="200" y="204" text-anchor="middle" font-family="Bungee" font-size="9" fill="#fff">P</text>
+
+        <!-- Fielder positions (small markers).
+             Diamond: home bottom, 1st right, 2nd top, 3rd left.
+             Infielders: SS between 2nd-3rd, 2B between 1st-2nd. 1B/3B just inside
+             foul line, slightly toward 2nd from their bags.
+             Outfielders play DEEP — well past the bases, in the lighter green band. -->
+        <g id="fielders" opacity="0.6">
+          <!-- Outfielders (deep) -->
+          <circle id="pos-cf" cx="200" cy="25" r="7" fill="#0f2545"/>
+          <text x="200" y="13" text-anchor="middle" font-family="Bungee" font-size="9" fill="#0f2545">CF</text>
+          <circle id="pos-lf" cx="80" cy="55" r="7" fill="#0f2545"/>
+          <text x="80" y="43" text-anchor="middle" font-family="Bungee" font-size="9" fill="#0f2545">LF</text>
+          <circle id="pos-rf" cx="320" cy="55" r="7" fill="#0f2545"/>
+          <text x="320" y="43" text-anchor="middle" font-family="Bungee" font-size="9" fill="#0f2545">RF</text>
+          <!-- Middle infielders -->
+          <circle id="pos-ss" cx="135" cy="150" r="7" fill="#0f2545"/>
+          <text x="135" y="138" text-anchor="middle" font-family="Bungee" font-size="9" fill="#0f2545">SS</text>
+          <circle id="pos-2b" cx="265" cy="150" r="7" fill="#0f2545"/>
+          <text x="265" y="138" text-anchor="middle" font-family="Bungee" font-size="9" fill="#0f2545">2B</text>
+          <!-- Corner infielders (shifted toward 2nd from their bags, just inside the foul line) -->
+          <circle id="pos-3b" cx="115" cy="180" r="7" fill="#0f2545"/>
+          <text x="115" y="200" text-anchor="middle" font-family="Bungee" font-size="9" fill="#0f2545">3B</text>
+          <circle id="pos-1b" cx="285" cy="180" r="7" fill="#0f2545"/>
+          <text x="285" y="200" text-anchor="middle" font-family="Bungee" font-size="9" fill="#0f2545">1B</text>
+          <!-- Catcher -->
+          <circle id="pos-c" cx="200" cy="370" r="6" fill="#0f2545"/>
+          <text x="200" y="390" text-anchor="middle" font-family="Bungee" font-size="9" fill="#0f2545">C</text>
+        </g>
+
+        <!-- BASES (geometry unchanged — animations depend on these positions) -->
+        <!-- Home -->
+        <g class="base" data-base="home">
+          <polygon points="200,355 188,343 200,330 212,343" fill="#fff" stroke="#0f2545" stroke-width="2.5"/>
+          <text class="base-label" x="200" y="378" text-anchor="middle">HOME</text>
+        </g>
+        <!-- 1st -->
+        <g class="base" data-base="first">
+          <rect x="328" y="188" width="24" height="24" fill="#fff" stroke="#0f2545" stroke-width="2.5" transform="rotate(45 340 200)"/>
+          <text class="base-label" x="365" y="204" text-anchor="start">1ST</text>
+        </g>
+        <!-- 2nd -->
+        <g class="base" data-base="second">
+          <rect x="188" y="48" width="24" height="24" fill="#fff" stroke="#0f2545" stroke-width="2.5" transform="rotate(45 200 60)"/>
+          <text class="base-label" x="240" y="64" text-anchor="start">2ND</text>
+        </g>
+        <!-- 3rd -->
+        <g class="base" data-base="third">
+          <rect x="48" y="188" width="24" height="24" fill="#fff" stroke="#0f2545" stroke-width="2.5" transform="rotate(45 60 200)"/>
+          <text class="base-label" x="35" y="204" text-anchor="end">3RD</text>
+        </g>
+        <!-- Cutoff option (pitcher) -->
+        <g class="base" data-base="cutoff" style="display:none">
+          <circle cx="200" cy="200" r="14" fill="#d4a548" stroke="#0f2545" stroke-width="2.5"/>
+          <text class="base-label" x="200" y="204" text-anchor="middle" font-size="8">CUT</text>
+        </g>
+
+        <!-- BACKUP / POSITIONING ZONES (hidden by default, shown per scenario) -->
+        <!-- Behind 1st base (RF backs up throws to 1st) -->
+        <g class="base zone" data-base="behind-first" style="display:none">
+          <circle cx="372" cy="172" r="13" fill="#5a8a4d" stroke="#0f2545" stroke-width="2" stroke-dasharray="3,2"/>
+          <text class="base-label" x="372" y="176" text-anchor="middle" font-size="7" fill="#fff">BACK</text>
+        </g>
+        <!-- Behind 3rd base (LF backs up throws to 3rd) -->
+        <g class="base zone" data-base="behind-third" style="display:none">
+          <circle cx="28" cy="172" r="13" fill="#5a8a4d" stroke="#0f2545" stroke-width="2" stroke-dasharray="3,2"/>
+          <text class="base-label" x="28" y="176" text-anchor="middle" font-size="7" fill="#fff">BACK</text>
+        </g>
+        <!-- Behind 2nd base (CF backs up throws to 2nd) -->
+        <g class="base zone" data-base="behind-second" style="display:none">
+          <circle cx="200" cy="105" r="13" fill="#5a8a4d" stroke="#0f2545" stroke-width="2" stroke-dasharray="3,2"/>
+          <text class="base-label" x="200" y="109" text-anchor="middle" font-size="7" fill="#fff">BACK</text>
+        </g>
+        <!-- Behind home (catcher backup) -->
+        <g class="base zone" data-base="behind-home" style="display:none">
+          <circle cx="200" cy="420" r="13" fill="#5a8a4d" stroke="#0f2545" stroke-width="2" stroke-dasharray="3,2"/>
+          <text class="base-label" x="200" y="424" text-anchor="middle" font-size="7" fill="#fff">BACK</text>
+        </g>
+        <!-- "Hold" / stay-in-position indicator (centered on user's role) -->
+        <g class="base zone" data-base="hold" style="display:none">
+          <circle id="hold-marker" cx="200" cy="200" r="15" fill="none" stroke="#d4a548" stroke-width="3" stroke-dasharray="4,3"/>
+          <text class="base-label" x="200" y="204" text-anchor="middle" font-size="7" fill="#d4a548">HOLD</text>
+        </g>
+
+        <!-- "You are here" marker for off-ball role scenarios -->
+        <g id="user-marker" style="display:none">
+          <circle cx="200" cy="200" r="11" fill="none" stroke="#d4a548" stroke-width="3"/>
+          <text x="200" y="204" text-anchor="middle" font-family="Bungee" font-size="9" fill="#d4a548">YOU</text>
+        </g>
+
+        <!-- Runners (drawn dynamically) -->
+        <g id="runners"></g>
+        <!-- Ball location -->
+        <g id="ball"></g>
+      </svg>
+    </div>
+
+    <div class="feedback" id="feedback" style="display:none"></div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="next-btn" style="display:none">NEXT PLAY ➤</button>
+      <button class="btn btn-secondary" id="hint-btn">SHOW HINT</button>
+      <button class="btn btn-secondary" id="reset-btn">NEW GAME</button>
+    </div>
+
+    <div class="hint-box" id="hint" style="display:none"></div>
+  </div>
+
+  <div class="game-card" style="font-size:.95rem">
+    <h3 style="font-family:'Bungee',sans-serif;color:var(--navy);margin-bottom:.6rem;letter-spacing:.05em">HOW TO PLAY</h3>
+    <p style="margin-bottom:.5rem">Read the play. If a <strong>YOU</strong> marker appears, you're playing that position — tap where you should run, throw, or back up. Otherwise, you're the fielder with the ball — tap the base where you'd throw it.</p>
+    <p style="margin-bottom:.5rem"><strong>Get promoted!</strong> Build a streak of correct plays to unlock the next age level. The hint button always works — there's no penalty for using it.</p>
+    <p><strong>Position cheat sheet:</strong> P = pitcher, C = catcher, 1B/2B/3B = first/second/third basemen, SS = shortstop, LF/CF/RF = left, center, right field. <strong>BACK</strong> circles mean "back up that base."</p>
+  </div>
+</section>
+
+<!-- ============= DRILLS PANEL ============= -->
+<section class="panel" id="drills">
+  <div class="drill-filters">
+    <span class="filter-label">CATEGORY:</span>
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="hitting">Hitting</button>
+    <button class="filter-btn" data-filter="fielding">Fielding</button>
+    <button class="filter-btn" data-filter="throwing">Throwing</button>
+    <button class="filter-btn" data-filter="footwork">Footwork</button>
+    <button class="filter-btn" data-filter="mental">Mental Game</button>
+  </div>
+  <div class="drill-filters">
+    <span class="filter-label">AGE:</span>
+    <button class="filter-btn active" data-age="all">All</button>
+    <button class="filter-btn" data-age="6U">6U–7U</button>
+    <button class="filter-btn" data-age="8U">8U</button>
+    <button class="filter-btn" data-age="10U">9U–10U</button>
+    <button class="filter-btn" data-age="12U">11U–12U</button>
+  </div>
+
+  <div class="drill-grid" id="drill-grid"></div>
+</section>
+
+</main>
+
+<footer>
+  <span class="stitches">⎯⎯⎯</span>
+  Built for the love of the game
+  <span class="stitches">⎯⎯⎯</span>
+</footer>
+
+<!-- Promotion banner (shown when level is unlocked) -->
+<div class="promo-banner" id="promo-banner">
+  <span class="promo-pennant">★ PROMOTION ★</span>
+  <h2 id="promo-title">YOU LEVELED UP!</h2>
+  <p id="promo-text">You've earned your way to the next age level.</p>
+  <button id="promo-continue">PLAY NEXT LEVEL ➤</button>
+</div>
+
+<script>
+/* ===========================================================
+   TAB SWITCHING
+   =========================================================== */
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById(t.dataset.tab).classList.add('active');
+  });
+});
+
+/* ===========================================================
+   STRATEGY GAME (rebuilt for v3)
+   ===========================================================
+   Scenario data model:
+   {
+     fielder: "ss",           // who fields the ball (drives ball animation)
+     role:   "ss",            // who the user is playing AS
+                              //   default = the fielder; if different, "YOU" marker shows on role's position
+                              //   special role "back-1b","back-3b","back-2b" = backup positioning question
+     runners: ['first', ...], // starting runners
+     text: "...",             // scenario prompt (HTML allowed)
+     correct: ['second'],     // ARRAY of fully-correct targets (any one is "right")
+     acceptable: ['first'],   // ARRAY of acceptable but not optimal (counts as correct, with "good call")
+     targets: [...],          // OPTIONAL override of which clickable zones are shown
+                              //   default = ['first','second','third','home'] (+ cutoff on med/hard)
+                              //   include 'behind-first', 'behind-third', 'behind-second', 'behind-home', 'hold'
+     hint: "...",
+     why: "..."
+   }
+*/
+
+/* -------- Animation timings -------- */
+const PITCH_MS = 500;
+const HIT_MS = 700;
+const THROW_MS = 700;
+const RUNNER_MS = 900;
+
+/* -------- Position lookups -------- */
+const basePos = {
+  home:           {x:200, y:343},
+  first:          {x:340, y:200},
+  second:         {x:200, y:60},
+  third:          {x:60,  y:200},
+  cutoff:         {x:200, y:200},
+  'behind-first': {x:372, y:172},
+  'behind-third': {x:28,  y:172},
+  'behind-second':{x:200, y:105},
+  'behind-home':  {x:200, y:420},
+  hold:           {x:200, y:200} // overridden per-scenario to user's role position
+};
+
+const fielderPos = {
+  p:  {x:200, y:200},
+  c:  {x:200, y:370},
+  '1b':{x:285, y:180},
+  '2b':{x:265, y:150},
+  '3b':{x:115, y:180},
+  ss: {x:135, y:150},
+  lf: {x:80,  y:55},
+  cf: {x:200, y:25},
+  rf: {x:320, y:55}
+};
+
+/* ===========================================================
+   SCENARIO LIBRARY
+   ===========================================================
+   Each level has ~25 scenarios mixed across:
+     - basic where-to-throw
+     - off-ball positioning ("you are RF, ball goes to SS — where do you go?")
+     - backup throws (RF backs up 1B, LF backs up 3B, etc.)
+     - cutoff/relay decisions (medium/hard)
+*/
+const scenarios = {
+
+  /* ---------------------- ROOKIE (6U–7U) ----------------------
+     - Simple "where's the easiest out?"
+     - No tag-up logic, no force chains beyond batter-runner
+     - One or two off-ball intro scenarios
+  */
+  rookie: [
+    {fielder:"ss",runners:[],text:"<strong>NOBODY ON.</strong> Slow ground ball to the shortstop. Where do you throw?",correct:["first"],hint:"Get the batter out at the closest base.",why:"With nobody on, the only out you can get is the batter going to first. Always throw to first!"},
+    {fielder:"p",runners:[],text:"<strong>NOBODY ON.</strong> Easy ground ball back to the pitcher. Where's the throw?",correct:["first"],hint:"Get the batter at first.",why:"No runners means just one runner to worry about — the batter heading to first. Throw to first!"},
+    {fielder:"3b",runners:[],text:"<strong>NOBODY ON.</strong> Ground ball right at the third baseman. Where's the throw?",correct:["first"],hint:"Long throw, but it's the only play.",why:"Nobody else is running. Throw across the diamond to first to get the batter!"},
+    {fielder:"1b",runners:[],text:"<strong>NOBODY ON.</strong> Ground ball right at the first baseman. He fields it. What now?",correct:["first"],hint:"He's right next to the bag!",why:"He just steps on first base himself! Easiest out in baseball."},
+    {fielder:"2b",runners:['first'],text:"<strong>RUNNER ON 1ST.</strong> Hard ground ball to the second baseman. What's the FIRST throw?",correct:["second"],acceptable:["first"],hint:"Get the lead runner first.",why:"The runner on first is heading to second. Throw to second to get him first, then we can try for first too. (Throwing straight to first is OK if it's a sure out.)"},
+    {fielder:"ss",runners:['first'],text:"<strong>RUNNER ON 1ST.</strong> Ground ball to the shortstop. Where's the throw?",correct:["second"],acceptable:["first"],hint:"Lead runner is going to second.",why:"Throw to second base to get the runner who's running there. That's the lead runner — get him first!"},
+    {fielder:"3b",runners:['third'],text:"<strong>RUNNER ON 3RD, 2 OUTS.</strong> Slow grounder to the third baseman. Where do you throw?",correct:["first"],hint:"With 2 outs, just get the easy out.",why:"With 2 outs, you only need ONE more out. Throw to first — the runner can't score before you record the third out!"},
+    {fielder:"ss",runners:[],text:"<strong>NOBODY ON.</strong> Pop fly to the shortstop — he catches it! Now what?",correct:["hold"],acceptable:["first","second","third","home"],hint:"The play is OVER!",why:"When you catch a fly ball with no one on, the batter is already out. Just hold the ball — the play is done!",targets:["first","second","third","home","hold"]},
+    {fielder:"cf",runners:[],text:"<strong>NOBODY ON.</strong> Easy fly ball to center field. CF catches it. Now what?",correct:["hold"],acceptable:["second"],hint:"Inning's over (or the batter's out).",why:"You caught the ball — that's the out! Toss it back to the infield, no big throw needed.",targets:["first","second","third","home","hold"]},
+    {fielder:"2b",runners:['first','second'],text:"<strong>RUNNERS ON 1ST AND 2ND.</strong> Ground ball to the second baseman. Where's the easiest out?",correct:["first"],acceptable:["second"],hint:"He's right by first base — quickest play.",why:"The 2B is closest to first base. The simplest out is at first. Going to second is also OK if the runner from first is closer."},
+    {fielder:"ss",runners:['second'],text:"<strong>RUNNER ON 2ND.</strong> Ground ball to the shortstop. Where do you throw?",correct:["first"],hint:"The runner on 2nd does NOT have to run.",why:"With only a runner on 2nd, he doesn't HAVE to run anywhere. Throw to first to get the batter."},
+    {fielder:"1b",runners:['first'],text:"<strong>RUNNER ON 1ST.</strong> Ground ball to the first baseman. He fields it. What now?",correct:["first"],acceptable:["second"],hint:"He's right by the bag.",why:"Easiest play: step on first himself! That gets the batter out. Going to second works too if the runner is far behind."},
+    {fielder:"3b",runners:['second'],text:"<strong>RUNNER ON 2ND.</strong> Ground ball to the third baseman. Where's the throw?",correct:["first"],hint:"Runner on 2nd doesn't have to run.",why:"The runner on 2nd isn't forced anywhere. Throw to first for the batter out!"},
+    {fielder:"rf",runners:[],text:"<strong>NOBODY ON.</strong> Pop fly caught by the right fielder. Now what?",correct:["hold"],acceptable:["second"],hint:"The play is over.",why:"You caught it — that's the out! Just toss it back in. No need for a big throw.",targets:["first","second","third","home","hold"]},
+    // Off-ball positioning — intro to the concept
+    {fielder:"ss",role:"rf",runners:[],text:"You are the <strong>RIGHT FIELDER</strong>. Ground ball goes to the SHORTSTOP. The throw is going to first base. Where should you go?",correct:["behind-first"],hint:"Your job: back up first base in case the throw is wild!",why:"Right fielders always back up throws to first. If the SS throws wide, YOU stop it from going into the outfield. Hustle behind first!",targets:["first","second","behind-first","hold"]},
+    {fielder:"3b",role:"lf",runners:[],text:"You are the <strong>LEFT FIELDER</strong>. Ground ball goes to the THIRD BASEMAN, who throws to first. Where should you go?",correct:["hold"],acceptable:["behind-third"],hint:"The throw isn't coming your way.",why:"On a throw across the diamond to first, the LF doesn't have a backup job. Stay alert in case the ball gets through, but you don't need to run anywhere specific.",targets:["first","third","behind-third","hold"]},
+    {fielder:"ss",runners:['third'],text:"<strong>RUNNER ON 3RD, 0 OUTS.</strong> Ground ball to the shortstop. The runner is RUNNING HOME! Where's the throw?",correct:["home"],hint:"Don't let the run score!",why:"The runner is going home — throw home to stop the run! You can't let an easy run score early in the inning."},
+    {fielder:"p",runners:['second'],text:"<strong>RUNNER ON 2ND.</strong> Ground ball back to the pitcher. Where's the throw?",correct:["first"],hint:"The runner on 2nd doesn't have to run.",why:"Just get the batter at first. The runner on 2nd isn't forced — he might advance, but the easy out is the batter."},
+    {fielder:"2b",runners:[],text:"<strong>NOBODY ON.</strong> Ground ball to the second baseman. Where's the throw?",correct:["first"],hint:"He's pretty close to first.",why:"Quick throw across to first — the 2B has the shortest throw of any infielder. Easy out!"},
+    {fielder:"cf",runners:['first'],text:"<strong>RUNNER ON 1ST.</strong> Single hit to center field. The runner stops at second. Where's the throw?",correct:["second"],acceptable:["cutoff"],hint:"Try to keep the runner from going to third.",why:"Throw to second base (or hit the cutoff) to keep the runner from going further. Don't let him keep going to third!"},
+    {fielder:"lf",runners:[],text:"<strong>NOBODY ON.</strong> Single to left field. The batter is heading hard for second. Where's the throw?",correct:["second"],hint:"He's trying to stretch it into a double.",why:"Throw to second to try to get him out trying to stretch the hit. Don't let him take the extra base!"},
+    {fielder:"3b",runners:['first','third'],text:"<strong>RUNNERS ON 1ST AND 3RD, 2 OUTS.</strong> Slow grounder to the third baseman. Where do you throw?",correct:["first"],hint:"With 2 outs, just get the easy out.",why:"2 outs means just get one more out anywhere! Throw to first for the easiest play. Game-winning runs don't matter if you record the third out."},
+    {fielder:"ss",role:"cf",runners:[],text:"You are the <strong>CENTER FIELDER</strong>. Ground ball to the SHORTSTOP, throw is going to first. Where should you go?",correct:["hold"],acceptable:["behind-second","behind-first"],hint:"You don't have a specific backup job here.",why:"On a routine grounder to SS, the CF stays alert in case the ball gets through. No specific backup spot for this play.",targets:["first","second","behind-first","behind-second","hold"]},
+    {fielder:"1b",runners:['second'],text:"<strong>RUNNER ON 2ND.</strong> Ground ball to the first baseman. He fields it. What now?",correct:["first"],hint:"Easiest play.",why:"He's right at first — step on the bag for the out! The runner on 2nd may try to advance, but get the sure out first."},
+    {fielder:"2b",runners:['third'],text:"<strong>RUNNER ON 3RD, 1 OUT.</strong> Hard grounder to the second baseman. The runner on 3rd is running home! Where's the throw?",correct:["home"],acceptable:["first"],hint:"Stop the run!",why:"With 1 out and a runner heading home, throw home to keep the run off the board. (If the runner held, throwing to first for the out is fine too.)"}
+  ],
+
+  /* ---------------------- 8U (Easy) ----------------------
+     - Force-out logic
+     - Tag-ups
+     - Backup positioning starts to matter
+     - First cutoff appearances
+  */
+  easy: [
+    {fielder:"ss",runners:['first'],text:"<strong>RUNNER ON 1ST.</strong> Ground ball to the shortstop. Where's the throw for the BEST play?",correct:["second"],acceptable:["first"],hint:"Get the lead runner first.",why:"The runner on 1st is FORCED to run to 2nd. Get the lead runner — throw to second base. (First base also works for a sure out, but second is better.)"},
+    {fielder:"2b",runners:['second'],text:"<strong>RUNNER ON 2ND.</strong> Grounder to the second baseman. Where do you throw?",correct:["first"],hint:"Runner on 2nd is NOT forced.",why:"With only a runner on 2nd, he's NOT forced to advance — nobody is running to 2nd behind him. Throw to first for the sure out. Hold the runner at 2nd."},
+    {fielder:"3b",runners:['first','second'],text:"<strong>RUNNERS ON 1ST AND 2ND.</strong> Ground ball to the third baseman. Where's the easiest force out?",correct:["third"],hint:"What base is right next to you?",why:"Both runners are forced to advance. The 3B is standing AT third base — just step on the bag for the easy force out on the lead runner!"},
+    {fielder:"ss",runners:['third'],text:"<strong>RUNNER ON 3RD, 1 OUT.</strong> Ground ball to the shortstop, runner on 3rd is breaking for home. Where's the throw?",correct:["home"],hint:"Don't let the run score!",why:"The runner is trying to score. Throw home to get him at the plate and keep the run off the board!"},
+    {fielder:"rf",runners:['first'],text:"<strong>RUNNER ON 1ST.</strong> Fly ball caught by the right fielder. The runner tags up and goes for second. Where's the throw?",correct:["second"],hint:"The runner is heading to second.",why:"After a tag-up, throw to the base the runner is going to. He's heading to second, so the throw goes there!"},
+    {fielder:"rf",runners:[],text:"<strong>NOBODY ON.</strong> Single to right field. The batter rounds first hard. Where's the throw?",correct:["second"],acceptable:["cutoff"],hint:"He's trying to stretch it.",why:"If the batter is going for second, throw there to try to get him. Hitting the cutoff man is also a smart play to control where the ball goes."},
+    // Off-ball: backups and positioning
+    {fielder:"ss",role:"rf",runners:['first'],text:"You are the <strong>RIGHT FIELDER</strong>. Ground ball to SS — he's throwing to first. Where do you go?",correct:["behind-first"],hint:"Back up first base!",why:"On any throw to first, the right fielder ALWAYS sprints to back it up. If the throw goes wild, you stop it from rolling away.",targets:["first","second","behind-first","hold"]},
+    {fielder:"3b",role:"lf",runners:['second'],text:"You are the <strong>LEFT FIELDER</strong>. Grounder to 3B, throw will go across to first. Where do you go?",correct:["behind-third"],acceptable:["hold"],hint:"What if the runner on 2nd tries to take 3rd?",why:"LF should drift toward 3rd base in case the runner from 2nd tries to advance. Backing up 3rd is your job!",targets:["first","third","behind-third","hold"]},
+    {fielder:"cf",role:"cf",runners:['first'],text:"You are the <strong>CENTER FIELDER</strong>. The shortstop just caught a line drive. Where do you go?",correct:["second"],acceptable:["behind-second","hold"],hint:"The runner on 1st left early!",why:"Get to second base or back up the SS — the runner on 1st may have left early and you might need to throw him out at second!",targets:["second","behind-second","hold"]},
+    {fielder:"ss",runners:['first','second'],text:"<strong>RUNNERS ON 1ST AND 2ND.</strong> Ground ball to the shortstop. What's the BEST throw?",correct:["third"],acceptable:["second","first"],hint:"Both runners are forced.",why:"With both runners forced, you can get the lead runner at third! That's the toughest force, but the biggest out. Second or first also work for sure outs."},
+    {fielder:"p",runners:['third'],text:"<strong>RUNNER ON 3RD, 0 OUTS.</strong> Ground ball back to the pitcher. The runner is going home! Where's the throw?",correct:["home"],hint:"Don't let the run score early.",why:"With 0 outs, you really don't want to give up an easy run. Throw home to get him at the plate!"},
+    {fielder:"lf",runners:['second'],text:"<strong>RUNNER ON 2ND.</strong> Single to left field. The runner is rounding 3rd, heading home. Where's the throw?",correct:["home"],acceptable:["cutoff"],hint:"Try to throw him out at the plate!",why:"Throw home to try to get the runner. (Hitting the cutoff is OK if it's a long throw — let the cutoff decide whether to relay home.)"},
+    {fielder:"2b",runners:['first'],text:"<strong>RUNNER ON 1ST, 0 OUTS.</strong> Ground ball to 2B — perfect double-play ball! What's the FIRST throw?",correct:["second"],hint:"Lead runner first, then double up at first.",why:"Throw to second base to get the lead runner forced. Then second base relays to first for the double play!"},
+    {fielder:"ss",runners:['third'],text:"<strong>RUNNER ON 3RD, 1 OUT, INFIELD IN.</strong> Ground ball to SS. Runner breaks home. Where's the throw?",correct:["home"],hint:"Infield is in to stop the run.",why:"When the infield is in, they're saying 'we're going to stop the run.' Throw home to get him out!"},
+    {fielder:"rf",role:"1b",runners:[],text:"You are the <strong>FIRST BASEMAN</strong>. Single to right field. The runner rounded first too hard. RF is going to throw behind him. Where do you cover?",correct:["first"],hint:"Get back to your bag!",why:"Sprint back to first base. RF is going to try to pick him off — you need to be at the bag to catch the ball and apply the tag!",targets:["first","second","behind-first","hold"]},
+    {fielder:"cf",runners:['first','second'],text:"<strong>RUNNERS ON 1ST AND 2ND.</strong> Single to center field. Runner from 2nd is heading home, runner from 1st is going to 3rd. Where's the throw?",correct:["home"],acceptable:["cutoff","third"],hint:"Stop the run scoring first.",why:"Throw home (or hit the cutoff) to stop the run. Cutoff can relay home or to 3rd if the lead runner is already across."},
+    {fielder:"3b",runners:['third','first'],text:"<strong>RUNNERS ON 1ST AND 3RD, 1 OUT.</strong> Hard grounder to 3B. The runner on 3rd holds. What's the best throw?",correct:["second"],acceptable:["first"],hint:"Try for the double play.",why:"Throw to second to start the double play! With the runner holding at 3rd, you can get the inning-ending double play."},
+    {fielder:"ss",runners:[],text:"<strong>NOBODY ON.</strong> Pop fly to shallow left, SS catches it. What now?",correct:["hold"],acceptable:["first"],hint:"Inning continues, but no runners.",why:"Catch = batter is out. Just hold the ball or toss to the pitcher. No throws needed.",targets:["first","second","third","home","hold"]},
+    {fielder:"2b",runners:['first','second'],text:"<strong>RUNNERS ON 1ST AND 2ND, 0 OUTS.</strong> Ground ball to 2B. What's the BEST first throw?",correct:["third"],acceptable:["second","first"],hint:"All three runners are forced.",why:"With all forced, the BEST play is to third — get the lead runner! If you can't, second or first is fine. Just get an out."},
+    {fielder:"cf",role:"rf",runners:['second'],text:"You are the <strong>RIGHT FIELDER</strong>. Single to CENTER field. Where should you go?",correct:["behind-first"],acceptable:["hold"],hint:"Outfielders back each other up!",why:"When CF fields a ball, RF drifts toward right-center to back up. If the throw is going to first or second, you back up first. Keep moving!",targets:["first","second","behind-first","hold"]},
+    {fielder:"lf",runners:['first'],text:"<strong>RUNNER ON 1ST.</strong> Fly ball caught by left fielder. Runner tags up and goes for 2nd. Where's the throw?",correct:["second"],hint:"He's heading to second.",why:"On a tag-up, throw to the base the runner is going to. Throw to second!"},
+    {fielder:"3b",runners:['first'],text:"<strong>RUNNER ON 1ST.</strong> Bunt rolls toward the third baseman. Both runners hustling. Where's the throw?",correct:["first"],acceptable:["second"],hint:"Slow ball — the lead runner has a head start.",why:"On a slow bunt, the runner usually beats the throw to second. Take the sure out at first."},
+    {fielder:"ss",role:"2b",runners:['first'],text:"You are the <strong>SECOND BASEMAN</strong>. Ground ball to SS, runner on 1st is going to 2nd. Where do you go?",correct:["second"],hint:"Cover the bag!",why:"You cover second base on a grounder to SS. The SS will throw to YOU for the force out. Get to the bag!",targets:["first","second","behind-second","hold"]},
+    {fielder:"rf",runners:['first','second'],text:"<strong>RUNNERS ON 1ST AND 2ND.</strong> Single to right field. Runner from 2nd scores. Runner from 1st heads to 3rd. Where's the throw?",correct:["third"],acceptable:["cutoff"],hint:"You can't get the run that already scored.",why:"The runner from 2nd is scoring no matter what. Try to throw out the runner from 1st at 3rd. (Cutoff is also smart on a long throw.)"},
+    {fielder:"p",runners:['first','second','third'],text:"<strong>BASES LOADED, 1 OUT.</strong> Ground ball back to the pitcher. Where's the throw?",correct:["home"],acceptable:["second"],hint:"Catcher can step on home for an easy out.",why:"Throw home for the force at the plate! The catcher steps on home for one out, and can throw to first for the double play. No run scores!"}
+  ],
+
+  /* ---------------------- 9U–10U (Medium) ----------------------
+     - Cutoff men appear regularly
+     - Backup positioning becomes critical
+     - Multiple correct answers more often
+  */
+  medium: [
+    {fielder:"ss",runners:['first','second'],text:"<strong>RUNNERS ON 1ST AND 2ND, 1 OUT.</strong> Sharp grounder to SS — perfect double play ball! What's the FIRST throw?",correct:["second"],hint:"Step on second, throw to first.",why:"Quickest double play: SS steps on second for one out, then throws to first for the second. Going to third is harder — that runner has a head start."},
+    {fielder:"3b",runners:['second','third'],text:"<strong>RUNNERS ON 2ND AND 3RD, 1 OUT.</strong> Grounder to 3B. Runner on 3rd is going! Where's the throw?",correct:["home"],hint:"You can't let that run score with only 1 out!",why:"With a runner breaking from 3rd, you MUST throw home. Letting the run score with 1 out hurts way more than the chance of getting an out at first."},
+    {fielder:"2b",runners:['first','third'],text:"<strong>RUNNERS ON 1ST AND 3RD, 2 OUTS.</strong> Ground ball to 2B. Where's the throw?",correct:["first"],acceptable:["second"],hint:"With 2 outs, get the sure out.",why:"With 2 outs, the runner on 3rd doesn't matter — he can't score before the third out. Throw to first for the inning-ending out."},
+    {fielder:"rf",runners:['second'],text:"<strong>RUNNER ON 2ND.</strong> Single to right field. Runner is rounding 3rd, heading home. Where's the throw?",correct:["cutoff"],acceptable:["home"],hint:"Use the relay!",why:"On a long throw home, hit the CUTOFF MAN. He decides whether to relay home or hold the batter at first. Don't air-mail it!"},
+    {fielder:"3b",runners:['first'],text:"<strong>RUNNER ON 1ST.</strong> Bunt rolls slowly toward 3B. Both runners hustling. Where's the throw?",correct:["first"],acceptable:["second"],hint:"Slow bunt — runner has a head start.",why:"On a slow bunt, the runner usually beats the throw to 2nd. Take the sure out at 1st — don't risk a wild throw that lets everyone advance."},
+    {fielder:"ss",runners:['first','second'],text:"<strong>RUNNERS ON 1ST AND 2ND, 0 OUTS.</strong> Hard line drive caught by SS. Runner on 2nd was running on the pitch! Where's the throw?",correct:["second"],hint:"Double him off!",why:"The runner on 2nd was already running — he can't get back. Throw to second to double him off. HUGE momentum swing!"},
+    // Outfield backup scenarios
+    {fielder:"3b",role:"lf",runners:['first','second'],text:"You are the <strong>LEFT FIELDER</strong>. Ground ball to 3B. He's throwing to 3rd for the force. Where do you go?",correct:["behind-third"],hint:"Back up the throw!",why:"On a throw to 3rd, the left fielder backs up the bag. If the ball gets past the 3B, you stop it from going to the wall.",targets:["first","second","third","behind-third","hold"]},
+    {fielder:"ss",role:"cf",runners:['first'],text:"You are the <strong>CENTER FIELDER</strong>. Ground ball to SS. Throw is going to second for the force. Where do you go?",correct:["behind-second"],hint:"Outfielders back up infield throws!",why:"The CF backs up the bag at second on any throw there. If the SS throw is wild, you save runners from advancing.",targets:["first","second","behind-second","hold"]},
+    {fielder:"lf",role:"cf",runners:['second'],text:"You are the <strong>CENTER FIELDER</strong>. Single to LEFT field. Where do you go?",correct:["behind-second"],acceptable:["hold"],hint:"Help your left fielder!",why:"CF reads the ball and runs to back up the LF. If the LF bobbles it, you grab the ball and stop the runner from advancing.",targets:["second","behind-second","hold"]},
+    {fielder:"cf",role:"rf",runners:[],text:"You are the <strong>RIGHT FIELDER</strong>. Single up the middle, CF is fielding it. Where do you go?",correct:["behind-second"],acceptable:["hold"],hint:"Back up your CF.",why:"On a ball to CF, the RF runs to back him up — usually drifting toward right-center or backing up the throw to 2nd.",targets:["first","second","behind-second","hold"]},
+    {fielder:"ss",role:"3b",runners:['first'],text:"You are the <strong>THIRD BASEMAN</strong>. Ground ball to SS, going to be a force at 2nd. Where do you go?",correct:["third"],hint:"What if there's a wild throw?",why:"Stay alert at 3rd! If something goes wrong on the double play, the runner from 1st might try to take 3rd. Cover your bag.",targets:["second","third","behind-third","hold"]},
+    {fielder:"rf",runners:['first'],text:"<strong>RUNNER ON 1ST.</strong> Double down the right field line. Runner from 1st rounding 3rd. Batter heading to 2nd. Where's the relay?",correct:["home"],acceptable:["cutoff"],hint:"Lead runner matters most!",why:"Hit the cutoff, who relays HOME to throw out the runner scoring from 1st. Stop the run first — worry about the batter later."},
+    {fielder:"cf",runners:['first','second'],text:"<strong>RUNNERS ON 1ST AND 2ND, 2 OUTS.</strong> Single to center. Runner from 2nd is heading home. Where's the throw?",correct:["cutoff"],acceptable:["home"],hint:"Hit the cutoff. He decides.",why:"Always hit the cutoff on long throws. He keeps the throw accurate AND can stop the trail runner. Cutoff decides: relay home or hold the batter."},
+    {fielder:"ss",runners:['second'],text:"<strong>RUNNER ON 2ND.</strong> Slow grounder to SS. Runner on 2nd is going to 3rd! Where's the throw?",correct:["third"],acceptable:["first"],hint:"Lead runner is going.",why:"If the runner on 2nd tries to advance, throw to 3rd to cut him down. (If he's already there safely, take the sure out at 1st.)"},
+    {fielder:"p",runners:['first','third'],text:"<strong>RUNNERS ON 1ST AND 3RD, 1 OUT.</strong> Comebacker to the pitcher. Where's the throw?",correct:["second"],acceptable:["home","first"],hint:"Try for the double play.",why:"Throw to second to start the double play. The runner on 3rd usually won't try to score against a clean DP. (Home or first also works depending on what you see.)"},
+    {fielder:"3b",runners:['first','second','third'],text:"<strong>BASES LOADED, 0 OUTS.</strong> Ground ball to 3B. Where's the easiest force out?",correct:["third"],acceptable:["home"],hint:"Step on your bag!",why:"3B is standing right at third — easy force! (Or step on home for the force at home — depends on whether you're closer to home plate or third.)"},
+    {fielder:"2b",runners:['first','second'],text:"<strong>RUNNERS ON 1ST AND 2ND, 1 OUT.</strong> Ground ball to 2B. What's the BEST play?",correct:["second"],acceptable:["first"],hint:"Try for the double play.",why:"Throw to second for the force, then relay to first for the double play. Get out of the inning! Going just to first is OK if the DP isn't possible."},
+    {fielder:"lf",runners:['third'],text:"<strong>RUNNER ON 3RD, 0 OUTS.</strong> Fly ball to LF. Runner tags up. Where's the throw?",correct:["home"],acceptable:["cutoff"],hint:"Try to throw him out at the plate!",why:"Tag-up at 3rd means he's coming home. Throw home (or hit the cutoff if it's a long throw)."},
+    {fielder:"3b",role:"1b",runners:[],text:"You are the <strong>FIRST BASEMAN</strong>. Bunt to the third baseman. Where do you go?",correct:["first"],hint:"Cover your bag!",why:"The 3B charged the bunt — you HAVE to cover first base. He's throwing to your bag.",targets:["first","second","behind-first","hold"]},
+    {fielder:"ss",role:"p",runners:['first'],text:"You are the <strong>PITCHER</strong>. Ground ball to SS. Where do you go?",correct:["behind-first"],acceptable:["hold"],hint:"Pitchers back up bases!",why:"On any throw to first, the pitcher runs over to back up first base. Hustle behind the bag!",targets:["first","second","behind-first","hold"]},
+    {fielder:"rf",role:"p",runners:['second'],text:"You are the <strong>PITCHER</strong>. Single to right. Throw is going home. Where do you go?",correct:["behind-home"],hint:"Back up the catcher!",why:"On any throw home from the outfield, the pitcher backs up the catcher. If the throw is wild, you stop the runner from going to the next base!",targets:["home","cutoff","behind-home","hold"]},
+    {fielder:"cf",runners:['third'],text:"<strong>RUNNER ON 3RD, 0 OUTS.</strong> Deep fly to CF. Runner tags up. Where's the throw?",correct:["home"],acceptable:["cutoff"],hint:"Throw the runner out at home!",why:"On a tag-up from 3rd, throw home to keep the run off the board. Cutoff is fine on a long throw — let him decide."},
+    {fielder:"2b",runners:['second'],text:"<strong>RUNNER ON 2ND, 1 OUT.</strong> Ground ball to 2B. Runner stops at 2nd. Where's the throw?",correct:["first"],hint:"Get the sure out.",why:"Runner on 2nd isn't forced. Just get the batter at first. Hold the runner at 2nd."},
+    {fielder:"3b",runners:['second','third'],text:"<strong>RUNNERS ON 2ND AND 3RD, 2 OUTS.</strong> Slow grounder to 3B. Where's the throw?",correct:["first"],hint:"With 2 outs, just get the third out!",why:"With 2 outs, take the inning-ending out at first. The runs that score don't count if you get the third out before they cross."},
+    {fielder:"ss",role:"lf",runners:[],text:"You are the <strong>LEFT FIELDER</strong>. Pop fly to shallow left. SS is calling for it. Where do you go?",correct:["hold"],acceptable:["behind-third"],hint:"Yield to your infielder, but stay close.",why:"On a shallow pop, the SS has a better angle going back. Yield to him and stay close to back up if he drops it.",targets:["second","third","behind-third","hold"]},
+    {fielder:"lf",role:"3b",runners:['first'],text:"You are the <strong>THIRD BASEMAN</strong>. Single to LEFT field. Runner from 1st is heading to 3rd. Where do you go?",correct:["third"],hint:"Cover your bag!",why:"The runner is coming to YOUR base. Get there to take the throw and apply the tag!",targets:["second","third","behind-third","hold"]}
+  ],
+
+  /* ---------------------- 11U–12U (Hard) ----------------------
+     - Layered decisions, multi-base relays
+     - Reading runner intent
+     - Subtle backup chains
+  */
+  hard: [
+    {fielder:"ss",runners:['second'],text:"<strong>RUNNER ON 2ND, 0 OUTS.</strong> Sharp grounder to SS. Runner stops between 2nd and 3rd. What's the BEST play?",correct:["first"],acceptable:["third"],hint:"Don't get baited into a rundown.",why:"Take the sure out at first — chasing the runner can lead to errors. Once the batter is out at first, deal with the runner. At least you've got one out."},
+    {fielder:"ss",runners:['first','third'],text:"<strong>RUNNERS ON 1ST AND 3RD, 1 OUT.</strong> Ground ball to SS. Runner on 3rd holds. What's the best play?",correct:["second"],acceptable:["first"],hint:"Try for the double play — but watch 3rd!",why:"Turn the double play! Throw to 2nd, then 1st. The runner on 3rd usually won't try to score against a clean DP. If you bobble it, just take the out at 1st."},
+    {fielder:"rf",runners:['first'],text:"<strong>RUNNER ON 1ST.</strong> Double down the right field line. Runner from 1st rounding 3rd, batter between 1st and 2nd. Where does the relay go?",correct:["home"],acceptable:["cutoff"],hint:"Stop the lead runner from scoring!",why:"Hit the cutoff, who relays HOME to throw out the runner from 1st. Stop the run first — worry about the batter at 2nd later."},
+    {fielder:"ss",runners:['second','third'],text:"<strong>RUNNERS ON 2ND AND 3RD, 2 OUTS.</strong> Ground ball deep in the hole to SS. Where's the throw?",correct:["first"],hint:"With 2 outs, just get one more.",why:"Long throw, but you only need one out. SS to 1st gets the inning-ending out. Going home would be even further AND tougher."},
+    {fielder:"p",runners:['first','second','third'],text:"<strong>BASES LOADED, 1 OUT.</strong> Sharp grounder back to the pitcher. Where's the throw?",correct:["home"],acceptable:["second"],hint:"Catcher can double up at home and 1st.",why:"Throw HOME for the force at the plate. The catcher steps on home (one out) and can throw to 1st for the double play. Run is off the board AND two outs!"},
+    {fielder:"cf",runners:['first','second'],text:"<strong>RUNNERS ON 1ST AND 2ND, 2 OUTS.</strong> Single to CF. Runner from 2nd rounding 3rd, heading home. Where does the CF throw?",correct:["cutoff"],acceptable:["home"],hint:"Hit the cutoff. He can decide.",why:"Always hit the cutoff on long throws. He keeps it accurate AND can stop the trail runner. The cutoff decides: relay home or hold the batter at 1st."},
+    {fielder:"ss",runners:['third'],text:"<strong>RUNNER ON 3RD, 0 OUTS, INFIELD BACK.</strong> Ground ball to SS. Runner on 3rd HOLDS. Where's the throw?",correct:["first"],hint:"Infield back = conceding the run.",why:"When the infield plays back, they're saying 'we'll trade an out for a run.' Get the sure out at 1st. If the runner holds, even better — you've got an out and the runner is still at 3rd!"},
+    // Backup chains and combined positioning
+    {fielder:"rf",role:"cf",runners:['second'],text:"You are the <strong>CENTER FIELDER</strong>. Double down the right field line. Where do you go?",correct:["behind-second"],acceptable:["hold","behind-first"],hint:"Where will the relay come?",why:"Drift toward right-center to back up the relay. The throw will likely come back through the cutoff to 2nd or 3rd — be there to stop a wild relay.",targets:["second","third","behind-second","behind-first","hold"]},
+    {fielder:"lf",role:"3b",runners:['first'],text:"You are the <strong>THIRD BASEMAN</strong>. Double down the left field line. Runner from 1st is heading home. The throw is coming to YOU as the cutoff. Where do you position?",correct:["cutoff"],hint:"Be the cutoff man!",why:"On a ball down the LF line, the THIRD baseman is the cutoff for throws home. Get out into shallow LF to take the relay and decide where to throw next!",targets:["home","third","cutoff","behind-third","hold"]},
+    {fielder:"rf",role:"1b",runners:['third'],text:"You are the <strong>FIRST BASEMAN</strong>. Single to right field. Runner on 3rd is scoring. Where do you go?",correct:["cutoff"],hint:"You're the cutoff for throws home from RF.",why:"On throws home from right field, the FIRST baseman is the cutoff man. Get into shallow RF to take the relay!",targets:["first","home","cutoff","behind-first","hold"]},
+    {fielder:"cf",role:"2b",runners:[],text:"You are the <strong>SECOND BASEMAN</strong>. Single to center field. Where do you go?",correct:["second"],acceptable:["cutoff"],hint:"Cover your bag — or be the cutoff.",why:"On a single to center, you cover 2nd base in case there's a play there. (Or be the cutoff for a longer throw — the SS often takes 2nd in that case.)",targets:["first","second","cutoff","hold"]},
+    {fielder:"3b",role:"ss",runners:['second'],text:"You are the <strong>SHORTSTOP</strong>. Ground ball to 3B, throw is going across to first. The runner on 2nd is rounding 3rd. Where do you go?",correct:["second"],acceptable:["third"],hint:"Cover your bag — or back up.",why:"With the 3B making the play, you cover SECOND in case the batter rounds too far. Or shift toward 3rd if the runner on 2nd looks like he might come back.",targets:["second","third","behind-third","hold"]},
+    {fielder:"ss",runners:['first'],text:"<strong>RUNNER ON 1ST, 0 OUTS.</strong> Hard liner caught by SS. The runner is way off the bag! Where's the throw?",correct:["first"],hint:"Double him off!",why:"The runner on 1st was leading off. Throw to first to double him up — easy double play!"},
+    {fielder:"3b",runners:['first','second'],text:"<strong>RUNNERS ON 1ST AND 2ND, 1 OUT.</strong> Ground ball to 3B. What's the BEST play?",correct:["third"],acceptable:["second","first"],hint:"Step on your bag — easy force.",why:"3B steps on 3rd for the easy force on the lead runner, then can throw across for the double play! Going to 2nd or 1st also works."},
+    {fielder:"cf",runners:['second','third'],text:"<strong>RUNNERS ON 2ND AND 3RD, 1 OUT.</strong> Sac fly to deep CF. Runner on 3rd tags up and scores. Runner on 2nd tags up and goes to 3rd. Where's the throw?",correct:["third"],acceptable:["cutoff"],hint:"You can't get the run from 3rd.",why:"The runner from 3rd scores on a deep fly — accept that. Throw to 3rd to try to keep the runner from 2nd from advancing. Or hit the cutoff."},
+    {fielder:"2b",role:"rf",runners:['second'],text:"You are the <strong>RIGHT FIELDER</strong>. Ground ball to 2B. Runner on 2nd rounds 3rd. Throw goes home. Where do you go?",correct:["behind-first"],acceptable:["hold"],hint:"Backup duties.",why:"On a throw home, the RF backs up first base — in case there's a follow-up throw there. Stay alert!",targets:["first","home","behind-first","hold"]},
+    {fielder:"ss",runners:['second','third'],text:"<strong>RUNNERS ON 2ND AND 3RD, 0 OUTS, INFIELD IN.</strong> Hard grounder to SS. Runner from 3rd breaks home. Where's the throw?",correct:["home"],hint:"Infield in = stop the run!",why:"Infield in = no run scores. Throw home to cut down the runner. The other runners will advance, but you can't give up a free run."},
+    {fielder:"p",runners:[],text:"<strong>NOBODY ON.</strong> Slow chopper to the pitcher. He fields it. Where's the throw?",correct:["first"],hint:"Easy out at first.",why:"Get the batter at first. Pitchers handle their own grounders all the time."},
+    {fielder:"3b",runners:['first','third'],text:"<strong>RUNNERS ON 1ST AND 3RD, 1 OUT.</strong> Hard grounder to 3B. Runner on 3rd holds. What's the best play?",correct:["second"],acceptable:["home","first"],hint:"Get the inning-ending double play.",why:"Throw to 2nd to start the double play! Runner on 3rd usually won't try to score against a clean DP. If they break, the relay can go home."},
+    {fielder:"lf",runners:['first','second'],text:"<strong>RUNNERS ON 1ST AND 2ND.</strong> Single to left field. Runner from 2nd is rounding 3rd. Where's the throw?",correct:["home"],acceptable:["cutoff","third"],hint:"Stop the run!",why:"Throw home to stop the run from scoring. (Cutoff is fine if it's a long throw — let him decide whether to relay or to throw out the runner advancing.)"},
+    {fielder:"rf",role:"ss",runners:['second'],text:"You are the <strong>SHORTSTOP</strong>. Single to right field. Runner from 2nd is heading home. Where do you go?",correct:["cutoff"],acceptable:["second"],hint:"You can be the cutoff.",why:"On a throw home from RF, the SS often takes the cutoff position. (The 1B usually has the actual cutoff role though — if so, you cover 2nd instead.)",targets:["second","home","cutoff","hold"]},
+    {fielder:"2b",runners:['third'],text:"<strong>RUNNER ON 3RD, 1 OUT, INFIELD IN.</strong> Hard grounder to 2B. Runner is going home! Where's the throw?",correct:["home"],hint:"Infield in = stop the run.",why:"Throw home to cut down the runner. Infield in means we're sacrificing the easy out at first to stop the run from scoring."},
+    {fielder:"ss",role:"cf",runners:['first'],text:"You are the <strong>CENTER FIELDER</strong>. Hard grounder to SS — looks like a possible double play. Where do you go?",correct:["behind-second"],hint:"Back up the play at 2nd!",why:"On a possible double play at second base, the CF sprints to back up the bag. If the throw to 2nd is wild, you save the play.",targets:["second","behind-second","hold"]},
+    {fielder:"3b",role:"p",runners:['first','second'],text:"You are the <strong>PITCHER</strong>. Bunt to the 3B. Throw is going to 1st. Where do you go?",correct:["behind-first"],hint:"Backup duty after a bunt.",why:"After a bunt to 3B, the pitcher backs up FIRST in case the throw is wild. Hustle!",targets:["first","second","behind-first","hold"]},
+    {fielder:"cf",runners:['first'],text:"<strong>RUNNER ON 1ST, 0 OUTS.</strong> Deep fly to CF — caught! Runner tags up and goes for 2nd. Where's the throw?",correct:["second"],acceptable:["cutoff"],hint:"Throw him out at 2nd!",why:"Runner tagged up and is heading to 2nd. Throw to 2nd to gun him down! (Cutoff is also fine on a long throw.)"},
+    {fielder:"lf",runners:['second','third'],text:"<strong>RUNNERS ON 2ND AND 3RD, 1 OUT.</strong> Single to LEFT field. Both runners score. The batter rounds 1st aggressively. Where's the throw?",correct:["cutoff"],acceptable:["second","first"],hint:"Don't let the batter take 2nd.",why:"The runs are already in. Hit the cutoff to set up a play on the batter — don't let him reach 2nd. Cutoff decides where the throw goes."},
+    {fielder:"rf",role:"lf",runners:['first'],text:"You are the <strong>LEFT FIELDER</strong>. Single to RIGHT field. Where do you go?",correct:["behind-second"],acceptable:["hold"],hint:"Back up across the field.",why:"On a ball to the opposite-side outfielder, you drift toward 2nd base or 3rd to back up any throws coming back to the infield.",targets:["second","third","behind-second","behind-third","hold"]}
+  ]
+};
+
+/* ===========================================================
+   PROGRESSION CONFIG
+   =========================================================== */
+const LEVELS = ['rookie','easy','medium','hard'];
+const LEVEL_NAMES = {
+  rookie:'Rookie (6U–7U)',
+  easy:'8U',
+  medium:'9U–10U',
+  hard:'11U–12U'
+};
+const STREAK_TO_PROMOTE = {rookie:5, easy:6, medium:7, hard:8};
+
+/* ===========================================================
+   STATE
+   =========================================================== */
+let currentLevel = 'rookie';
+let currentScenario = null;
+let streak = 0, correct = 0, total = 0;
+let answered = false;
+let unlocked = new Set(['rookie','easy','medium','hard']);
+
+/* ===========================================================
+   DOM HELPERS
+   =========================================================== */
+const $ = id => document.getElementById(id);
+const field = document.getElementById('field');
+const runnersGrp = $('runners');
+const ballGrp = $('ball');
+const cutoffBase = field.querySelector('[data-base="cutoff"]');
+const userMarker = $('user-marker');
+const holdMarker = $('hold-marker');
+
+/* ===========================================================
+   ANIMATION HELPERS
+   =========================================================== */
+let activeBall = null;
+let runnerEls = {};
+let animTimers = [];
+
+function clearTimers(){animTimers.forEach(clearTimeout);animTimers=[];}
+function later(fn,ms){const t=setTimeout(fn,ms);animTimers.push(t);return t;}
+
+function makeBall(x,y,withSpin=true){
+  const ball = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  ball.setAttribute('cx',x); ball.setAttribute('cy',y); ball.setAttribute('r',7);
+  ball.setAttribute('class','ball-mark'+(withSpin?' ball-spin':''));
+  ball.style.transition = `cx ${THROW_MS}ms cubic-bezier(.3,.05,.3,1), cy ${THROW_MS}ms cubic-bezier(.3,.05,.3,1)`;
+  return ball;
+}
+function moveBall(x,y,ms=THROW_MS){
+  if(!activeBall) return;
+  activeBall.style.transition = `cx ${ms}ms cubic-bezier(.3,.05,.3,1), cy ${ms}ms cubic-bezier(.3,.05,.3,1)`;
+  activeBall.getBoundingClientRect();
+  activeBall.setAttribute('cx',x); activeBall.setAttribute('cy',y);
+}
+function makeTrail(x1,y1,x2,y2){
+  const path = document.createElementNS('http://www.w3.org/2000/svg','line');
+  path.setAttribute('x1',x1); path.setAttribute('y1',y1);
+  path.setAttribute('x2',x2); path.setAttribute('y2',y2);
+  path.setAttribute('class','ball-trail');
+  ballGrp.appendChild(path);
+  later(()=>path.parentNode&&path.remove(),1500);
+}
+function highlightFielder(key){
+  const el = $('pos-'+key);
+  if(!el) return;
+  el.classList.remove('fielder-hilite'); void el.offsetWidth;
+  el.classList.add('fielder-hilite');
+  later(()=>el.classList.remove('fielder-hilite'),1100);
+}
+function makeRunner(b){
+  const p = basePos[b];
+  const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  c.setAttribute('cx',p.x); c.setAttribute('cy',p.y-18); c.setAttribute('r',7);
+  c.setAttribute('class','runner-dot');
+  runnersGrp.appendChild(c);
+  return c;
+}
+function moveRunner(el,toBase){
+  if(!el) return;
+  const p = basePos[toBase];
+  el.classList.add('running');
+  el.setAttribute('cx',p.x); el.setAttribute('cy',p.y-18);
+  later(()=>el.classList.remove('running'),RUNNER_MS);
+}
+function showOutBurst(x,y){
+  const b = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  b.setAttribute('cx',x); b.setAttribute('cy',y); b.setAttribute('r',4);
+  b.setAttribute('class','out-burst');
+  ballGrp.appendChild(b);
+  later(()=>b.parentNode&&b.remove(),700);
+}
+
+/* ===========================================================
+   ZONE MANAGEMENT (which clickable targets are visible)
+   =========================================================== */
+function defaultTargets(){
+  const t = ['first','second','third','home'];
+  if(currentLevel==='medium'||currentLevel==='hard') t.push('cutoff');
+  return t;
+}
+function setVisibleTargets(targets){
+  // hide all zones first
+  field.querySelectorAll('.base').forEach(b=>{
+    b.style.display = 'none';
+  });
+  // always re-show the 4 main bases unless explicitly excluded
+  const showSet = new Set(targets);
+  ['home','first','second','third'].forEach(k=>{
+    if(showSet.has(k)){
+      const el = field.querySelector(`[data-base="${k}"]`);
+      if(el) el.style.display = '';
+    }
+  });
+  // optional ones
+  ['cutoff','behind-first','behind-third','behind-second','behind-home','hold'].forEach(k=>{
+    const el = field.querySelector(`[data-base="${k}"]`);
+    if(!el) return;
+    el.style.display = showSet.has(k) ? '' : 'none';
+  });
+}
+
+/* ===========================================================
+   USER ROLE MARKER (for off-ball scenarios)
+   =========================================================== */
+function showUserMarker(roleKey){
+  const p = fielderPos[roleKey];
+  if(!p) {userMarker.style.display='none';return;}
+  userMarker.querySelector('circle').setAttribute('cx',p.x);
+  userMarker.querySelector('circle').setAttribute('cy',p.y);
+  const t = userMarker.querySelector('text');
+  t.setAttribute('x',p.x); t.setAttribute('y',p.y+4);
+  userMarker.style.display = '';
+}
+function hideUserMarker(){userMarker.style.display='none';}
+
+/* ===========================================================
+   SCENARIO LOAD + ANIMATE
+   =========================================================== */
+function loadScenario(){
+  clearTimers();
+  answered = false;
+  const list = scenarios[currentLevel];
+  let next;
+  do { next = list[Math.floor(Math.random()*list.length)]; }
+  while(list.length>1 && next===currentScenario);
+  currentScenario = next;
+
+  $('scenario').innerHTML = next.text;
+  $('feedback').style.display='none';
+  $('hint').style.display='none';
+  $('next-btn').style.display='none';
+
+  runnersGrp.innerHTML='';
+  ballGrp.innerHTML='';
+  runnerEls={}; activeBall=null;
+
+  // Set visible target zones
+  const targets = next.targets || defaultTargets();
+  setVisibleTargets(targets);
+
+  // If scenario has an off-ball role, show YOU marker on that role's spot.
+  // Hide the role's own fielder marker so YOU stands alone.
+  // Place the HOLD zone offset to the side so it doesn't overlap the YOU marker.
+  // Restore any previously-hidden fielder markers first
+  document.querySelectorAll('#fielders > circle, #fielders > text').forEach(el=>{
+    el.style.opacity = '';
+  });
+  if(next.role && next.role !== next.fielder){
+    showUserMarker(next.role);
+    // Hide the fielder dot for the role the user is playing as
+    const roleDot = $('pos-'+next.role);
+    if(roleDot){
+      roleDot.style.opacity = '0';
+      // Hide its label too — the label is the next sibling text element
+      const next_el = roleDot.nextElementSibling;
+      if(next_el && next_el.tagName.toLowerCase()==='text') next_el.style.opacity = '0';
+    }
+    const rolePos = fielderPos[next.role];
+    if(rolePos){
+      let dy = 30;
+      if(['lf','cf','rf'].includes(next.role)) dy = 30;
+      else if(['1b','3b','ss','2b'].includes(next.role)) dy = -25;
+      else if(next.role==='c') dy = -25;
+      const hx = rolePos.x;
+      const hy = rolePos.y + dy;
+      holdMarker.setAttribute('cx',hx);
+      holdMarker.setAttribute('cy',hy);
+      const txt = field.querySelector('[data-base="hold"] text');
+      if(txt){ txt.setAttribute('x',hx); txt.setAttribute('y',hy+3); }
+      basePos.hold = {x:hx, y:hy};
+    }
+  } else {
+    hideUserMarker();
+    const fp = fielderPos[next.fielder] || {x:200,y:200};
+    const dy = ['lf','cf','rf'].includes(next.fielder) ? 30 : -25;
+    const hx = fp.x;
+    const hy = fp.y + dy;
+    holdMarker.setAttribute('cx',hx);
+    holdMarker.setAttribute('cy',hy);
+    const txt = field.querySelector('[data-base="hold"] text');
+    if(txt){ txt.setAttribute('x',hx); txt.setAttribute('y',hy+3); }
+    basePos.hold = {x:hx, y:hy};
+  }
+
+  // Place runners on bases
+  next.runners.forEach(b=>{
+    runnerEls[b] = makeRunner(b);
+  });
+
+  // Disable bases during animation
+  field.querySelectorAll('.base').forEach(b=>{
+    b.classList.remove('selectable');
+    b.style.pointerEvents='none';
+  });
+
+  // PITCH animation: ball from pitcher to home
+  const pPos = fielderPos.p;
+  const hPos = fielderPos.c;
+  activeBall = makeBall(pPos.x,pPos.y);
+  ballGrp.appendChild(activeBall);
+  later(()=>moveBall(hPos.x,hPos.y,PITCH_MS),50);
+
+  // HIT animation: ball flies to the fielder (or stays at home for "drop your bat" off-ball setups)
+  later(()=>{
+    const fPos = fielderPos[next.fielder] || fielderPos.ss;
+    makeTrail(hPos.x,hPos.y,fPos.x,fPos.y);
+    moveBall(fPos.x,fPos.y,HIT_MS);
+  }, PITCH_MS+100);
+
+  // ENABLE answer when ball arrives
+  later(()=>{
+    highlightFielder(next.fielder);
+    if(activeBall) activeBall.classList.remove('ball-spin');
+    field.querySelectorAll('.base').forEach(b=>{
+      if(b.style.display!=='none'){
+        b.classList.add('selectable');
+        b.style.pointerEvents='auto';
+      }
+    });
+  }, PITCH_MS+HIT_MS+100);
+}
+
+/* ===========================================================
+   ANSWER HANDLING
+   =========================================================== */
+field.querySelectorAll('.base').forEach(base=>{
+  base.addEventListener('click',()=>{
+    if(answered || !currentScenario) return;
+    handleAnswer(base.dataset.base);
+  });
+});
+
+function getRunnerAdvances(sc){
+  // Simple force-based advancement model
+  const occ = new Set(sc.runners);
+  const moves = {};
+  const isOutfield = ['lf','cf','rf'].includes(sc.fielder);
+  const force1 = true;
+  const force2 = occ.has('first') && force1;
+  const force3 = occ.has('second') && force2;
+  const forceH = occ.has('third') && force3;
+  if(force3) moves['second']='third';
+  if(force2) moves['first']='second';
+  if(forceH) moves['third']='home';
+  if(isOutfield){
+    if(occ.has('third') && !forceH) moves['third']='home';
+    if(occ.has('second') && !force3) moves['second']='third';
+    if(occ.has('first') && !force2) moves['first']='second';
+  }
+  return moves;
+}
+
+function handleAnswer(choice){
+  answered = true;
+  total++;
+  clearTimers();
+  const sc = currentScenario;
+
+  // Determine correctness — multi-correct support
+  const isFullyCorrect = (sc.correct||[]).includes(choice);
+  const isAcceptable = (sc.acceptable||[]).includes(choice);
+  const isRight = isFullyCorrect || isAcceptable;
+
+  // Disable bases
+  field.querySelectorAll('.base').forEach(b=>{
+    b.classList.remove('selectable');
+    b.style.pointerEvents='none';
+  });
+
+  const targetPos = basePos[choice];
+  const fielderStart = fielderPos[sc.fielder] || fielderPos.ss;
+
+  // For "off-ball" scenarios where the user is moving themselves (not throwing the ball),
+  // animate the YOU marker to the target instead of the ball.
+  const isOffBall = sc.role && sc.role !== sc.fielder &&
+    ['behind-first','behind-third','behind-second','behind-home','hold','cutoff','first','second','third','home'].includes(choice);
+
+  if(isOffBall){
+    // animate user marker toward target
+    const c = userMarker.querySelector('circle');
+    const t = userMarker.querySelector('text');
+    c.style.transition = 'cx .8s cubic-bezier(.3,.05,.3,1), cy .8s cubic-bezier(.3,.05,.3,1)';
+    t.style.transition = 'x .8s cubic-bezier(.3,.05,.3,1), y .8s cubic-bezier(.3,.05,.3,1)';
+    c.setAttribute('cx',targetPos.x);
+    c.setAttribute('cy',targetPos.y);
+    t.setAttribute('x',targetPos.x);
+    t.setAttribute('y',targetPos.y+4);
+    // also animate the ball going wherever the play is (to the actual base if ball-handler throwing first)
+    if(activeBall){
+      activeBall.classList.add('ball-spin');
+      // ball goes to first base by default in these positioning scenarios (just symbolic)
+      const symbolicTarget = basePos.first;
+      moveBall(symbolicTarget.x, symbolicTarget.y, THROW_MS);
+    }
+  } else {
+    // Standard: throw the ball to the chosen target
+    if(activeBall){
+      activeBall.classList.add('ball-spin');
+      makeTrail(fielderStart.x,fielderStart.y,targetPos.x,targetPos.y);
+      moveBall(targetPos.x,targetPos.y,THROW_MS);
+    }
+    // Animate runners advancing
+    const advances = getRunnerAdvances(sc);
+    Object.entries(advances).forEach(([from,to])=>{
+      if(runnerEls[from]) moveRunner(runnerEls[from],to);
+    });
+  }
+
+  later(()=>{
+    if(activeBall) activeBall.classList.remove('ball-spin');
+
+    if(isRight){
+      showOutBurst(targetPos.x,targetPos.y);
+      const advances = getRunnerAdvances(sc);
+      Object.entries(advances).forEach(([from,to])=>{
+        if(to===choice && runnerEls[from]) runnerEls[from].classList.add('out');
+      });
+    } else {
+      const advances = getRunnerAdvances(sc);
+      Object.entries(advances).forEach(([from,to])=>{
+        if(runnerEls[from]) runnerEls[from].classList.add('safe');
+      });
+    }
+
+    const fb = $('feedback');
+    fb.style.display='block';
+    if(isRight){
+      correct++; streak++;
+      let msg = '<strong>NICE PLAY! ⚾</strong> ';
+      if(isAcceptable && !isFullyCorrect) msg = '<strong>GOOD CALL! ⚾</strong> That works — ';
+      fb.className='feedback correct';
+      fb.innerHTML = msg + sc.why;
+      checkPromotion();
+    } else {
+      streak = 0;
+      fb.className='feedback wrong';
+      const correctList = (sc.correct||[]).map(nameForBase).join(' or ');
+      fb.innerHTML = `<strong>NOT QUITE.</strong> The best play is <strong>${correctList}</strong>. ${sc.why}`;
+    }
+    updateScoreboard();
+    $('next-btn').style.display='inline-block';
+  }, THROW_MS+100);
+}
+
+function nameForBase(b){
+  return {
+    home:'HOME', first:'1ST', second:'2ND', third:'3RD',
+    cutoff:'the CUTOFF MAN',
+    'behind-first':'behind 1ST (backup)',
+    'behind-third':'behind 3RD (backup)',
+    'behind-second':'behind 2ND (backup)',
+    'behind-home':'behind HOME (backup)',
+    hold:'HOLD / stay put'
+  }[b] || b;
+}
+
+/* ===========================================================
+   PROGRESSION
+   =========================================================== */
+function updateScoreboard(){
+  $('streak').textContent = streak;
+  $('correct').textContent = correct;
+  $('total').textContent = total;
+  const target = STREAK_TO_PROMOTE[currentLevel] || 5;
+  $('streak-progress').textContent = Math.min(streak, target);
+  $('streak-target').textContent = target;
+  const pct = Math.min(100, (streak/target)*100);
+  $('progress-fill').style.width = pct+'%';
+}
+
+// Track which levels have already shown a "you mastered this!" banner this session
+// so it doesn't fire repeatedly while the streak holds.
+let mastered = new Set();
+
+function checkPromotion(){
+  const target = STREAK_TO_PROMOTE[currentLevel] || 5;
+  if(streak < target) return;
+  if(mastered.has(currentLevel)) return; // already celebrated, don't pester
+  mastered.add(currentLevel);
+
+  const idx = LEVELS.indexOf(currentLevel);
+  const isFinalLevel = (idx === LEVELS.length-1);
+  const nextLevel = isFinalLevel ? null : LEVELS[idx+1];
+
+  const banner = $('promo-banner');
+  if(isFinalLevel){
+    $('promo-title').textContent = `🏆 LEVEL MASTERED! 🏆`;
+    $('promo-text').textContent = `Streak of ${target} at the hardest level. You're a true ballplayer.`;
+    $('promo-continue').textContent = 'KEEP PLAYING ➤';
+    $('promo-continue').onclick = ()=>{
+      banner.classList.remove('show');
+    };
+  } else {
+    $('promo-title').textContent = `🏆 ${LEVEL_NAMES[currentLevel].toUpperCase()} MASTERED!`;
+    $('promo-text').textContent = `Streak of ${target} correct plays. Ready for ${LEVEL_NAMES[nextLevel]}?`;
+    $('promo-continue').textContent = `JUMP TO ${LEVEL_NAMES[nextLevel].toUpperCase()} ➤`;
+    $('promo-continue').onclick = ()=>{
+      banner.classList.remove('show');
+      currentLevel = nextLevel;
+      document.querySelectorAll('.diff-btn').forEach(b=>b.classList.toggle('active',b.dataset.level===nextLevel));
+      streak = 0;
+      updateScoreboard();
+      loadScenario();
+    };
+  }
+  banner.classList.add('show');
+}
+
+/* ===========================================================
+   UI WIRING
+   =========================================================== */
+document.querySelectorAll('.diff-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    if(btn.getAttribute('data-locked')==='true') return;
+    document.querySelectorAll('.diff-btn').forEach(x=>x.classList.remove('active'));
+    btn.classList.add('active');
+    currentLevel = btn.dataset.level;
+    streak = 0;
+    mastered.delete(currentLevel); // re-arm celebration if they come back
+    updateScoreboard();
+    loadScenario();
+  });
+});
+
+$('next-btn').addEventListener('click',loadScenario);
+$('hint-btn').addEventListener('click',()=>{
+  if(!currentScenario) return;
+  const h = $('hint');
+  h.style.display = h.style.display==='none' ? 'block' : 'none';
+  h.innerHTML = '<strong>HINT:</strong> '+currentScenario.hint;
+});
+$('reset-btn').addEventListener('click',()=>{
+  streak=0; correct=0; total=0;
+  updateScoreboard();
+  loadScenario();
+});
+
+// Initial render
+updateScoreboard();
+loadScenario();
+
+/* ===========================================================
+   DRILLS LIBRARY
+   =========================================================== */
+const drills = [
+  // ---------------- HITTING ----------------
+  {title:"Tee Work — Inside, Middle, Outside", cat:"hitting", age:"6U", solo:true,
+    equip:"Tee, ball(s), bat, net or fence (optional)",
+    desc:"Set the tee in 3 different spots — inside, middle, outside — and hit 5 balls from each. Teaches you to drive the ball to all fields.",
+    steps:["Set tee at inside corner, hit 5 balls — try to pull them.","Move tee to middle, hit 5 balls back up the middle.","Move tee outside, hit 5 balls the other way.","Repeat the round 3 times."]},
+  {title:"Soft Toss into a Net", cat:"hitting", age:"8U", solo:false,
+    equip:"Net, bat, soft toss balls, partner",
+    desc:"A partner kneels to the side and tosses balls upward into your hitting zone. Great for tracking the ball and a smooth swing.",
+    steps:["Partner kneels 6–8 feet to your front-side.","They underhand toss balls into your hitting zone.","Take 10 swings, focus on contact out front.","Switch hitter/tosser."]},
+  {title:"One-Handed Tee Drill", cat:"hitting", age:"10U", solo:true,
+    equip:"Tee, lighter bat or one-handed trainer, balls",
+    desc:"Hit off the tee with just your top hand, then just your bottom hand. Builds bat control and isolates each hand's job.",
+    steps:["Top hand only: 5 swings, focus on staying inside the ball.","Bottom hand only: 5 swings, focus on bat speed through zone.","Two hands: 5 swings, feel the difference.","Repeat 3 rounds."]},
+  {title:"Mirror Swings", cat:"hitting", age:"6U", solo:true,
+    equip:"Bat, mirror or window reflection",
+    desc:"Take slow, controlled swings in front of a mirror. Watch your stance, hands, and follow-through.",
+    steps:["Stand sideways to a mirror in your athletic stance.","Take a slow swing, freeze at contact — check hands & hips.","Take 10 slow swings checking form.","Take 10 normal-speed swings."]},
+  {title:"Pitch Recognition (Color Ball)", cat:"hitting", age:"10U", solo:false,
+    equip:"Different color balls, partner, tee or front toss",
+    desc:"Partner calls a color while pitching/tossing. You only swing at one specific color — trains your eyes to track and decide.",
+    steps:["Pick one color to swing at (e.g. yellow).","Partner mixes colors and tosses one at a time.","Only swing at the chosen color — let others pass.","Switch colors after 10 reps."]},
+
+  // ---------------- FIELDING ----------------
+  {title:"Wall Ball — Grounders", cat:"fielding", age:"6U", solo:true,
+    equip:"Tennis ball or rubber ball, glove, flat wall",
+    desc:"Throw a ball against a wall and field the rebound like a grounder. Master fielding mechanics by yourself.",
+    steps:["Stand 10–15 feet from a wall.","Throw the ball low so it rebounds as a grounder.","Get in front of the ball, glove down, soft hands.","Aim for 50 clean fielded grounders."]},
+  {title:"Triangle Footwork", cat:"fielding", age:"8U", solo:true,
+    equip:"3 cones or markers, glove, ball, wall",
+    desc:"Set up 3 cones in a triangle. After each grounder, shuffle to the next cone and field again. Builds quick feet and range.",
+    steps:["Place cones 4–5 feet apart in a triangle.","Throw against wall, field grounder at first cone.","Shuffle to next cone, field again.","Do 3 full triangle laps."]},
+  {title:"Backhand Picks", cat:"fielding", age:"10U", solo:true,
+    equip:"Ball, glove, wall (or partner)",
+    desc:"Practice fielding balls on your backhand side. Lots of kids ignore this — gold-glove infielders don't.",
+    steps:["Stand with the ball on your backhand side.","Roll the ball away, then field it backhand.","Glove out front, palm up, knee down.","Do 25 reps each session."]},
+  {title:"Pop Fly Drop Drill", cat:"fielding", age:"8U", solo:false,
+    equip:"Ball, glove, partner",
+    desc:"Partner tosses pop flies high — you call 'I got it!' loud and clear before catching. Great for outfielders.",
+    steps:["Partner tosses a high pop fly.","Loudly call 'I GOT IT!' three times.","Catch with two hands above your head.","Repeat 20 times."]},
+  {title:"Short Hops", cat:"fielding", age:"10U", solo:false,
+    equip:"Ball, glove, partner kneeling close",
+    desc:"Partner throws short-hop bounces from 8–10 feet away. You must field on the short hop with soft hands. Best drill for confident hands.",
+    steps:["Partner kneels 8 feet away.","They throw short-hop bounces directly at you.","Glove out front, soft hands, give with the ball.","20 reps then switch."]},
+  {title:"Crossover Step Range Drill", cat:"fielding", age:"12U", solo:true,
+    equip:"Cones, glove, ball, wall",
+    desc:"Practice the crossover step infielders use to extend their range to either side.",
+    steps:["Stand in athletic position.","Take a hard crossover step (left foot crosses right) and shuffle 3 steps.","Stop, get back in athletic position.","Switch directions. 10 each way."]},
+
+  // ---------------- THROWING ----------------
+  {title:"Wrist Flicks", cat:"throwing", age:"6U", solo:false,
+    equip:"Ball, partner",
+    desc:"Throw using ONLY your wrist (no arm motion). Builds proper finger-on-top release and spin.",
+    steps:["Stand 10 feet from partner.","Hold elbow with the other hand.","Flick the ball using just your wrist.","Make 25 throws with backspin."]},
+  {title:"4-Seam Grip Practice", cat:"throwing", age:"6U", solo:true,
+    equip:"Ball",
+    desc:"Practice gripping the ball across the horseshoe seams without looking. Quick grip = quicker, straighter throws.",
+    steps:["Hold ball behind your back.","Find the 4-seam grip with your fingers across the seams.","Bring ball to front and check.","Repeat 25 times."]},
+  {title:"Long Toss Progression", cat:"throwing", age:"10U", solo:false,
+    equip:"Ball, partner, open space",
+    desc:"Start at 30 feet, gradually back up to your max distance, then come back in. Builds arm strength safely.",
+    steps:["Start at 30 feet, throw 5 easy throws.","Back up 10 feet every 5 throws.","When you reach max distance, work back in.","Finish at 30 feet with sharp throws on a line."]},
+  {title:"Quick-Hands Exchange", cat:"throwing", age:"8U", solo:true,
+    equip:"Ball, glove, wall",
+    desc:"Field a wall-ball grounder, exchange to throwing hand FAST, throw back to wall. The transfer is what saves runs.",
+    steps:["Throw ball against wall (low).","Field grounder cleanly.","Exchange ball to throwing hand in under 1 second.","Throw back. Repeat 30 times."]},
+  {title:"Crow Hop & Throw", cat:"throwing", age:"10U", solo:false,
+    equip:"Ball, partner, open space",
+    desc:"Outfielder's secret weapon — the crow hop adds steam to long throws. Make it second nature.",
+    steps:["Catch a fly ball or grounder.","Plant back foot, hop forward off the same foot.","Land, stride, throw with momentum.","20 reps."]},
+
+  // ---------------- FOOTWORK ----------------
+  {title:"Base Running — Round the Bag", cat:"footwork", age:"6U", solo:true,
+    equip:"Open yard, base or marker",
+    desc:"Practice rounding first base properly — hitting the inside corner so you can take an extra base.",
+    steps:["Sprint from 'home' toward 'first'.","Veer slightly right 15 feet before the bag.","Touch inside corner with your left foot.","Lean toward second base."]},
+  {title:"Lead-Off Shuffles", cat:"footwork", age:"8U", solo:true,
+    equip:"Base or marker, open space",
+    desc:"Practice your lead from a base — short, controlled shuffles. (Note: leadoffs aren't allowed in most younger leagues, but it's still great footwork.)",
+    steps:["Stand on base in athletic stance.","Take 2 quick shuffle steps off the bag.","Stop balanced, ready to react.","Shuffle back. 15 reps."]},
+  {title:"Reaction Sprints", cat:"footwork", age:"10U", solo:false,
+    equip:"Open space, partner",
+    desc:"Partner points left, right, forward, or back — you sprint that direction for 5 yards. Trains base-running and fielding instincts.",
+    steps:["Stand in athletic stance facing partner.","Partner points a direction with no warning.","Sprint that way for 5 yards.","10 reps then switch."]},
+  {title:"First-Step Quickness", cat:"footwork", age:"8U", solo:true,
+    equip:"Open space",
+    desc:"Practice exploding out of your athletic stance in any direction. The first step decides if you reach the ball.",
+    steps:["Get in athletic stance, weight on balls of feet.","Pick a direction — explode that way for 3 steps.","Reset. Pick a different direction.","Do 20 first-steps total."]},
+
+  // ---------------- MENTAL GAME ----------------
+  {title:"Pre-Pitch Routine", cat:"mental", age:"8U", solo:true,
+    equip:"Just yourself",
+    desc:"Before every pitch in the field, ask yourself: outs? runners? where do I throw if it's hit to me? Make this a HABIT.",
+    steps:["Picture yourself at your position.","Say out loud: 'X outs, runner on Y.'","Say: 'If it's hit to me, I throw to ____.'","Do this 10 times before bed each night."]},
+  {title:"Visualization", cat:"mental", age:"10U", solo:true,
+    equip:"Quiet spot",
+    desc:"Close your eyes and picture yourself making a great play — fielding a tough grounder, hitting a line drive, throwing a strike. Pros do this every day.",
+    steps:["Sit somewhere quiet, eyes closed.","Picture a specific game situation.","See yourself making the perfect play.","Spend 5 minutes a day on this."]},
+  {title:"Count the Outs Out Loud", cat:"mental", age:"6U", solo:true,
+    equip:"Just yourself",
+    desc:"After every pitch (in real games or practice), say the count and outs out loud. The biggest mental mistakes happen when kids forget the situation.",
+    steps:["After each pitch, say: 'X outs, X-X count.'","Say where the runners are.","Say what you'd do on a ground ball or fly ball.","Make this AUTOMATIC."]},
+  {title:"Two-Strike Approach", cat:"mental", age:"12U", solo:true,
+    equip:"Tee or front toss",
+    desc:"With two strikes, choke up, widen stance, and battle. Practice your two-strike swing — shorter, more contact, foul off tough pitches.",
+    steps:["Set up at the tee with two strikes in mind.","Choke up an inch on the bat.","Take a shorter, more compact swing.","Just hit the ball hard somewhere — no homers."]},
+];
+
+const ageOrder = {'6U':0,'8U':1,'10U':2,'12U':3};
+
+// Mini animated SVG illustrations for each drill category.
+// Drawn small, looped via CSS keyframes defined in the stylesheet.
+function drillAnimSvg(cat){
+  // Common: green grass background, simple stick figure or gear
+  switch(cat){
+    case 'hitting':
+      return `
+        <svg viewBox="0 0 220 90" xmlns="http://www.w3.org/2000/svg">
+          <!-- ground -->
+          <rect x="0" y="78" width="220" height="12" fill="#7a9866"/>
+          <!-- batter -->
+          <g>
+            <circle cx="50" cy="32" r="7" fill="#0f2545"/>
+            <line x1="50" y1="39" x2="50" y2="65" stroke="#0f2545" stroke-width="3"/>
+            <line x1="50" y1="65" x2="42" y2="78" stroke="#0f2545" stroke-width="3"/>
+            <line x1="50" y1="65" x2="58" y2="78" stroke="#0f2545" stroke-width="3"/>
+            <!-- bat -->
+            <line class="anim-bat" x1="50" y1="48" x2="80" y2="32" stroke="#8b5a2b" stroke-width="4" stroke-linecap="round"/>
+          </g>
+          <!-- ball that flies away on swing -->
+          <circle class="anim-ball-toss" cx="35" cy="50" r="4" fill="#fff" stroke="#b3271e" stroke-width="1.5"/>
+        </svg>`;
+    case 'fielding':
+      return `
+        <svg viewBox="0 0 220 90" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0" y="78" width="220" height="12" fill="#a08560"/>
+          <!-- fielder -->
+          <g transform="translate(170,30)">
+            <circle cx="0" cy="0" r="7" fill="#0f2545"/>
+            <line x1="0" y1="7" x2="0" y2="32" stroke="#0f2545" stroke-width="3"/>
+            <line x1="0" y1="32" x2="-8" y2="48" stroke="#0f2545" stroke-width="3"/>
+            <line x1="0" y1="32" x2="8" y2="48" stroke="#0f2545" stroke-width="3"/>
+            <!-- glove -->
+            <ellipse cx="-12" cy="20" rx="6" ry="5" fill="#8b5a2b"/>
+          </g>
+          <!-- grounder rolling toward fielder -->
+          <circle class="anim-grounder" cx="10" cy="68" r="4" fill="#fff" stroke="#b3271e" stroke-width="1.5"/>
+        </svg>`;
+    case 'throwing':
+      return `
+        <svg viewBox="0 0 220 90" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0" y="78" width="220" height="12" fill="#7a9866"/>
+          <!-- thrower -->
+          <g transform="translate(30,30)">
+            <circle cx="0" cy="0" r="7" fill="#0f2545"/>
+            <line x1="0" y1="7" x2="0" y2="32" stroke="#0f2545" stroke-width="3"/>
+            <line x1="0" y1="32" x2="-8" y2="48" stroke="#0f2545" stroke-width="3"/>
+            <line x1="0" y1="32" x2="8" y2="48" stroke="#0f2545" stroke-width="3"/>
+            <!-- throwing arm -->
+            <line x1="0" y1="13" x2="14" y2="6" stroke="#0f2545" stroke-width="3"/>
+          </g>
+          <!-- target / catcher -->
+          <g transform="translate(195,32)" opacity="0.6">
+            <circle cx="0" cy="0" r="6" fill="#0f2545"/>
+            <line x1="0" y1="6" x2="0" y2="28" stroke="#0f2545" stroke-width="3"/>
+          </g>
+          <!-- ball arcing -->
+          <circle class="anim-throw" cx="48" cy="35" r="4" fill="#fff" stroke="#b3271e" stroke-width="1.5"/>
+        </svg>`;
+    case 'footwork':
+      return `
+        <svg viewBox="0 0 220 90" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0" y="78" width="220" height="12" fill="#a08560"/>
+          <!-- bases -->
+          <rect x="20" y="68" width="12" height="12" fill="#fff" stroke="#0f2545" stroke-width="1.5" transform="rotate(45 26 74)"/>
+          <rect x="180" y="68" width="12" height="12" fill="#fff" stroke="#0f2545" stroke-width="1.5" transform="rotate(45 186 74)"/>
+          <!-- runner moving back and forth -->
+          <g class="anim-runner">
+            <g class="anim-bob" transform="translate(40,30)">
+              <circle cx="0" cy="0" r="7" fill="#b3271e"/>
+              <line x1="0" y1="7" x2="0" y2="30" stroke="#b3271e" stroke-width="3"/>
+              <line x1="0" y1="30" x2="-8" y2="45" stroke="#b3271e" stroke-width="3"/>
+              <line x1="0" y1="30" x2="8" y2="45" stroke="#b3271e" stroke-width="3"/>
+            </g>
+          </g>
+        </svg>`;
+    case 'mental':
+      return `
+        <svg viewBox="0 0 220 90" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0" y="78" width="220" height="12" fill="#7a9866"/>
+          <!-- player thinking -->
+          <g transform="translate(110,30)">
+            <circle cx="0" cy="0" r="9" fill="#0f2545"/>
+            <line x1="0" y1="9" x2="0" y2="38" stroke="#0f2545" stroke-width="3"/>
+            <line x1="0" y1="38" x2="-9" y2="55" stroke="#0f2545" stroke-width="3"/>
+            <line x1="0" y1="38" x2="9" y2="55" stroke="#0f2545" stroke-width="3"/>
+          </g>
+          <!-- thought bubbles pulsing -->
+          <g class="anim-think">
+            <circle cx="135" cy="22" r="4" fill="#fff" stroke="#0f2545" stroke-width="1.5"/>
+            <circle cx="148" cy="14" r="6" fill="#fff" stroke="#0f2545" stroke-width="1.5"/>
+            <circle cx="166" cy="18" r="9" fill="#fff" stroke="#0f2545" stroke-width="1.5"/>
+            <text x="166" y="22" text-anchor="middle" font-family="Bungee" font-size="9" fill="#b3271e">?</text>
+          </g>
+        </svg>`;
+    default:
+      return '';
+  }
+}
+
+function ytSearchUrl(title){
+  const q = encodeURIComponent('baseball drill ' + title);
+  return `https://www.youtube.com/results?search_query=${q}`;
+}
+function ytEmbedById(id){
+  return `https://www.youtube.com/embed/${id}?rel=0`;
+}
+
+// Curated video IDs for specific drills.
+// Keyed by drill title. If a drill is in this map, the WATCH VIDEO button
+// embeds that specific video inline. Otherwise, the button opens a YouTube
+// search in a new tab — which always works and lets you pick from current top results.
+const drillVideos = {
+  "Soft Toss into a Net": "WuuIgh9VJ-g",      // Bill Ripken — Soft Toss from Behind
+  "Tee Work — Inside, Middle, Outside": "V8J7qKFWR2U", // Todd Whitting tee work
+  "Wall Ball — Grounders": null,               // open search; multiple short variants exist
+  // Add more as you find videos you like — leave them out to default to YouTube search
+};
+
+const grid = $('drill-grid');
+let activeCat='all', activeAge='all';
+
+function renderDrills(){
+  grid.innerHTML='';
+  const filtered = drills.filter(d=>{
+    const catOk = activeCat==='all' || d.cat===activeCat;
+    const ageOk = activeAge==='all' || ageOrder[d.age] <= ageOrder[activeAge];
+    return catOk && ageOk;
+  });
+
+  if(filtered.length===0){
+    grid.innerHTML='<p style="font-family:\'Special Elite\',monospace;text-align:center;padding:2rem;color:var(--navy)">No drills match your filters. Try a different combo!</p>';
+    return;
+  }
+
+  filtered.forEach((d,i)=>{
+    const videoId = drillVideos[d.title];
+    const hasInlineVideo = !!videoId;
+
+    const card = document.createElement('div');
+    card.className='drill-card';
+    card.innerHTML = `
+      <div class="drill-anim">${drillAnimSvg(d.cat)}</div>
+      <div class="drill-meta">
+        <span class="tag tag-age">${d.age}+</span>
+        <span class="tag tag-cat">${d.cat.toUpperCase()}</span>
+        ${d.solo?'<span class="tag tag-solo">SOLO OK</span>':''}
+      </div>
+      <h3>${d.title}</h3>
+      <div class="drill-equip">📦 ${d.equip}</div>
+      <div class="drill-desc">${d.desc}</div>
+      <div class="drill-actions">
+        ${hasInlineVideo ? `
+          <button class="yt-btn toggle-video" type="button" data-video="${videoId}">
+            <svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+            <span class="yt-label">WATCH VIDEO</span>
+          </button>
+        ` : `
+          <a class="yt-btn" href="${ytSearchUrl(d.title)}" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+            FIND ON YOUTUBE ↗
+          </a>
+        `}
+        <button class="toggle-steps">▸ HOW TO DO IT</button>
+      </div>
+      ${hasInlineVideo ? `<div class="yt-embed"></div>` : ''}
+      <div class="drill-steps">
+        <ol>${d.steps.map(s=>`<li>${s}</li>`).join('')}</ol>
+      </div>`;
+    grid.appendChild(card);
+
+    const stepsBtn = card.querySelector('.toggle-steps');
+    const steps = card.querySelector('.drill-steps');
+    stepsBtn.addEventListener('click',()=>{
+      const open = steps.classList.toggle('open');
+      stepsBtn.textContent = open ? '▾ HIDE STEPS' : '▸ HOW TO DO IT';
+    });
+
+    if(hasInlineVideo){
+      const vidBtn = card.querySelector('.toggle-video');
+      const embed = card.querySelector('.yt-embed');
+      const label = vidBtn.querySelector('.yt-label');
+      vidBtn.addEventListener('click',()=>{
+        const isOpen = embed.classList.contains('open');
+        if(isOpen){
+          embed.classList.remove('open');
+          embed.innerHTML = '';
+          label.textContent = 'WATCH VIDEO';
+        } else {
+          const id = vidBtn.dataset.video;
+          embed.innerHTML = `<iframe src="${ytEmbedById(id)}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>`;
+          embed.classList.add('open');
+          label.textContent = 'HIDE VIDEO';
+        }
+      });
+    }
+  });
+}
+
+document.querySelectorAll('[data-filter]').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('[data-filter]').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    activeCat = b.dataset.filter;
+    renderDrills();
+  });
+});
+document.querySelectorAll('[data-age]').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('[data-age]').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    activeAge = b.dataset.age;
+    renderDrills();
+  });
+});
+
+renderDrills();
+</script>
+</body>
+</html>
