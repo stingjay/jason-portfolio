@@ -240,8 +240,17 @@
   }
   .promo-banner.show{
     opacity:1;
+    pointer-events:auto;
     transform:translate(-50%,-50%) scale(1);
   }
+  .promo-close{
+    position:absolute;top:.55rem;right:.7rem;
+    background:none;border:none;
+    color:var(--cream);font-family:'Bungee',sans-serif;font-size:1rem;
+    cursor:pointer;line-height:1;padding:.2rem .35rem;
+    opacity:.7;transition:opacity .15s;box-shadow:none;
+  }
+  .promo-close:hover{opacity:1;transform:none;box-shadow:none;}
   .promo-banner .promo-pennant{
     font-size:.7rem;letter-spacing:.3em;color:var(--cream);
     background:var(--red);padding:.3rem .8rem;display:inline-block;
@@ -941,6 +950,7 @@
 
 <!-- Promotion banner (shown when level is unlocked) -->
 <div class="promo-banner" id="promo-banner">
+  <button class="promo-close" id="promo-close" aria-label="Close">✕</button>
   <span class="promo-pennant">★ PROMOTION ★</span>
   <h2 id="promo-title">YOU LEVELED UP!</h2>
   <p id="promo-text">You've earned your way to the next age level.</p>
@@ -1609,6 +1619,8 @@ document.querySelectorAll('.diff-btn').forEach(btn=>{
     loadScenario();
   });
 });
+
+$('promo-close').addEventListener('click',()=>{ $('promo-banner').classList.remove('show'); });
 
 $('next-btn').addEventListener('click',loadScenario);
 $('hint-btn').addEventListener('click',()=>{
