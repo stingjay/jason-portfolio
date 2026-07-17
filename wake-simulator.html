@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wake Effect Sandbox — Wind Farm Siting & Layout</title>
+<style>
+  :root{
+    --navy:#16324F; --navy2:#1F4265; --teal:#2E7DA1; --gold:#E8A33D;
+    --light:#F4F7FA; --ink:#24313C; --mute:#5B6B78;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:'Segoe UI', Calibri, Arial, sans-serif;
+    background:var(--navy); color:#fff; min-height:100vh;
+    display:flex; flex-direction:column; align-items:center; padding:18px;
+  }
+  h1{font-family:Cambria, Georgia, serif; font-size:26px; margin-bottom:2px;}
+  .sub{color:#C9D8E4; font-size:14px; font-style:italic; margin-bottom:14px;}
+  .panel{
+    background:#fff; color:var(--ink); border-radius:12px; padding:16px;
+    width:min(980px, 100%); box-shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  .controls{
+    display:flex; flex-wrap:wrap; gap:14px; align-items:center;
+    padding-bottom:12px; border-bottom:1px solid #E2EAF0; margin-bottom:12px;
+  }
+  .ctl{display:flex; align-items:center; gap:8px; font-size:14px;}
+  .ctl label{font-weight:600; color:var(--navy);}
+  input[type=range]{width:170px; accent-color:var(--teal);}
+  button{
+    background:var(--navy); color:#fff; border:none; border-radius:8px;
+    padding:8px 14px; font-size:13.5px; font-weight:600; cursor:pointer;
+  }
+  button:hover{background:var(--navy2);}
+  button.ghost{background:var(--light); color:var(--navy); border:1px solid #D5E2EB;}
+  button.ghost:hover{background:#E8EFF5;}
+  .stats{margin-left:auto; text-align:right;}
+  .stats .big{font-size:30px; font-weight:800; color:var(--navy); line-height:1;}
+  .stats .lbl{font-size:11.5px; color:var(--mute); letter-spacing:.5px; text-transform:uppercase;}
+  canvas{width:100%; border-radius:8px; background:linear-gradient(180deg,#EEF4F8,#E4EDF3); cursor:grab; touch-action:none; display:block;}
+  canvas.dragging{cursor:grabbing;}
+  .foot{font-size:12px; color:var(--mute); margin-top:10px; line-height:1.5;}
+  .foot b{color:var(--navy);}
+</style>
+</head>
+<body>
+  <h1>Wake Effect Sandbox</h1>
+  <div class="sub">Drag turbines. Watch what parking one in another's wake does to its output.</div>
+
+  <div class="panel">
+    <div class="controls">
+      <div class="ctl">
+        <label for="dir">Wind direction</label>
+        <input type="range" id="dir" min="0" max="359" value="270">
+        <span id="dirLabel" style="min-width:86px;">from W (270°)</span>
+      </div>
+      <button class="ghost" id="addBtn">+ Turbine</button>
+      <button class="ghost" id="rmBtn">− Turbine</button>
+      <button id="resetBtn">Reset layout</button>
+      <div class="stats">
+        <div class="big" id="farmPct">100%</div>
+        <div class="lbl">farm output vs. wake-free</div>
+      </div>
+    </div>
+    <canvas id="cv"></canvas>
+    <div class="foot">
+      <b>Model:</b> simplified Jensen ("top-hat") wake — each rotor casts an expanding cone of slowed air downwind;
+      overlapping deficits combine root-sum-square; power scales with wind speed cubed.
+      Grid squares = 1 rotor diameter (D ≈ 163 m, a modern onshore machine).
+      Real siting tools (Openwind, WindPRO) use the same physics with far more sophistication — this is the intuition, not the engineering.
+    </div>
+  </div>
+
+<script>
+(() => {
+  const D = 1;                 // rotor diameter, model unit
+  const R0 = D / 2;
+  const K = 0.075;             // wake expansion coefficient (onshore)
+  const CT = 0.8;              // thrust coefficient
+  const A = 1 - Math.sqrt(1 - CT); // initial velocity deficit factor
+  const WORLD_W = 30, WORLD_H = 18; // world size in rotor diameters
+
+  const cv = document.getElementById('cv');
+  const ctx = cv.getContext('2d');
+  const dirSlider = document.getElementById('dir');
+  const dirLabel = document.getElementById('dirLabel');
+  const farmPct = document.getElementById('farmPct');
+
+  let scale = 30, dpr = 1;
+
+  function resize() {
+    dpr = window.devicePixelRatio || 1;
+    const cssW = cv.clientWidth || cv.parentElement.clientWidth - 32;
+    scale = cssW / WORLD_W;
+    const cssH = WORLD_H * scale;
+    cv.style.height = cssH + 'px';
+    cv.width = Math.round(cssW * dpr);
+    cv.height = Math.round(cssH * dpr);
+    draw();
+  }
+
+  const defaultLayout = () => ([
+    {x: 6,  y: 4},
+    {x: 6,  y: 9},
+    {x: 6,  y: 14},
+    {x: 14, y: 4},
+    {x: 14, y: 9},
+    {x: 22, y: 6.5},
+  ]);
+  let turbines = defaultLayout();
+
+  // wind direction: meteorological "from" degrees (270 = from west -> blowing east)
+  let windFrom = 270;
+  const windVec = () => {
+    const toRad = (270 - windFrom) * Math.PI / 180; // direction wind travels TO, canvas coords (y down)
+    return { x: Math.cos(toRad), y: -Math.sin(toRad) };
+  };
+  const compass = d => {
+    const names = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+    return names[Math.round(d / 22.5) % 16];
+  };
+
+  function deficits() {
+    const w = windVec();
+    return turbines.map((t, i) => {
+      let sum2 = 0;
+      turbines.forEach((u, j) => {
+        if (i === j) return;
+        const dxw = (t.x - u.x) * w.x + (t.y - u.y) * w.y;      // downwind distance
+        const dyw = -(t.x - u.x) * w.y + (t.y - u.y) * w.x;     // crosswind offset
+        if (dxw <= 0.1) return;
+        const rw = R0 + K * dxw;
+        const off = Math.abs(dyw);
+        let shade = 0;
+        if (off <= rw) shade = 1;
+        else if (off <= rw + R0) shade = 1 - (off - rw) / R0;   // soft edge
+        if (shade > 0) {
+          const d = A * Math.pow(R0 / rw, 2) * shade;
+          sum2 += d * d;
+        }
+      });
+      return Math.min(0.95, Math.sqrt(sum2));
+    });
+  }
+
+  function outputColor(p) { // p = 0..1 power fraction
+    const t = Math.max(0, Math.min(1, (p - 0.6) / 0.4)); // 60%..100%
+    const hue = 8 + t * 130;   // red -> green
+    return `hsl(${hue}, 62%, ${38 + t * 6}%)`;
+  }
+
+  function draw() {
+    const w = windVec();
+    const defs = deficits();
+    ctx.setTransform(dpr * scale, 0, 0, dpr * scale, 0, 0);
+    ctx.clearRect(0, 0, WORLD_W, WORLD_H);
+
+    // grid (1 D squares)
+    ctx.strokeStyle = 'rgba(22,50,79,0.08)';
+    ctx.lineWidth = 0.02;
+    for (let x = 0; x <= WORLD_W; x++) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, WORLD_H); ctx.stroke(); }
+    for (let y = 0; y <= WORLD_H; y++) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(WORLD_W, y); ctx.stroke(); }
+
+    // wakes
+    turbines.forEach(t => {
+      const len = 14;
+      const rEnd = R0 + K * len;
+      const px = -w.y, py = w.x; // perpendicular
+      ctx.beginPath();
+      ctx.moveTo(t.x + px * R0, t.y + py * R0);
+      ctx.lineTo(t.x + w.x * len + px * rEnd, t.y + w.y * len + py * rEnd);
+      ctx.lineTo(t.x + w.x * len - px * rEnd, t.y + w.y * len - py * rEnd);
+      ctx.lineTo(t.x - px * R0, t.y - py * R0);
+      ctx.closePath();
+      const g = ctx.createLinearGradient(t.x, t.y, t.x + w.x * len, t.y + w.y * len);
+      g.addColorStop(0, 'rgba(46,125,161,0.30)');
+      g.addColorStop(1, 'rgba(46,125,161,0.02)');
+      ctx.fillStyle = g;
+      ctx.fill();
+    });
+
+    // wind arrow
+    const ax = 2.4, ay = 2.2;
+    ctx.strokeStyle = '#E8A33D'; ctx.fillStyle = '#E8A33D'; ctx.lineWidth = 0.14;
+    ctx.beginPath();
+    ctx.moveTo(ax - w.x * 1.2, ay - w.y * 1.2);
+    ctx.lineTo(ax + w.x * 1.2, ay + w.y * 1.2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(ax + w.x * 1.7, ay + w.y * 1.7);
+    ctx.lineTo(ax + w.x * 1.0 - w.y * 0.4, ay + w.y * 1.0 + w.x * 0.4);
+    ctx.lineTo(ax + w.x * 1.0 + w.y * 0.4, ay + w.y * 1.0 - w.x * 0.4);
+    ctx.closePath(); ctx.fill();
+    ctx.font = '600 0.55px "Segoe UI", sans-serif';
+    ctx.fillStyle = '#16324F';
+    ctx.fillText('wind', ax - 0.62, ay + 2.75);
+
+    // turbines
+    turbines.forEach((t, i) => {
+      const p = Math.pow(1 - defs[i], 3);
+      const col = outputColor(p);
+      // blades perpendicular to wind (rotor faces the wind)
+      const bl = 0.62;
+      const baseAng = Math.atan2(windVec().y, windVec().x) + Math.PI / 2;
+      ctx.strokeStyle = col; ctx.lineWidth = 0.14; ctx.lineCap = 'round';
+      for (const off of [0, 2.0944, 4.1888]) {
+        ctx.beginPath();
+        ctx.moveTo(t.x, t.y);
+        ctx.lineTo(t.x + bl * Math.cos(baseAng + off), t.y + bl * Math.sin(baseAng + off));
+        ctx.stroke();
+      }
+      ctx.beginPath();
+      ctx.arc(t.x, t.y, 0.22, 0, Math.PI * 2);
+      ctx.fillStyle = '#fff'; ctx.fill();
+      ctx.strokeStyle = col; ctx.lineWidth = 0.12; ctx.stroke();
+      // label
+      ctx.font = '700 0.52px "Segoe UI", sans-serif';
+      ctx.fillStyle = col;
+      const label = Math.round(p * 100) + '%';
+      ctx.fillText(label, t.x - ctx.measureText(label).width / 2, t.y + 1.35);
+    });
+
+    // farm total
+    const avg = turbines.length
+      ? turbines.reduce((s, _, i) => s + Math.pow(1 - defs[i], 3), 0) / turbines.length : 1;
+    farmPct.textContent = Math.round(avg * 100) + '%';
+    farmPct.style.color = avg > 0.92 ? '#16324F' : (avg > 0.8 ? '#B07A16' : '#B03A2E');
+  }
+
+  // --- interaction ---
+  let dragIdx = -1;
+  const toWorld = e => {
+    const r = cv.getBoundingClientRect();
+    return { x: (e.clientX - r.left) / scale, y: (e.clientY - r.top) / scale };
+  };
+  cv.addEventListener('pointerdown', e => {
+    const p = toWorld(e);
+    dragIdx = turbines.findIndex(t => Math.hypot(t.x - p.x, t.y - p.y) < 1.0);
+    if (dragIdx >= 0) { cv.setPointerCapture(e.pointerId); cv.classList.add('dragging'); }
+  });
+  cv.addEventListener('pointermove', e => {
+    if (dragIdx < 0) return;
+    const p = toWorld(e);
+    turbines[dragIdx].x = Math.max(0.8, Math.min(WORLD_W - 0.8, p.x));
+    turbines[dragIdx].y = Math.max(0.8, Math.min(WORLD_H - 0.8, p.y));
+    draw();
+  });
+  const endDrag = () => { dragIdx = -1; cv.classList.remove('dragging'); };
+  cv.addEventListener('pointerup', endDrag);
+  cv.addEventListener('pointercancel', endDrag);
+
+  dirSlider.addEventListener('input', () => {
+    windFrom = +dirSlider.value;
+    dirLabel.textContent = `from ${compass(windFrom)} (${windFrom}°)`;
+    draw();
+  });
+  document.getElementById('addBtn').addEventListener('click', () => {
+    if (turbines.length >= 12) return;
+    turbines.push({ x: WORLD_W / 2 + (Math.random() - 0.5) * 4, y: WORLD_H / 2 + (Math.random() - 0.5) * 4 });
+    draw();
+  });
+  document.getElementById('rmBtn').addEventListener('click', () => {
+    if (turbines.length > 1) { turbines.pop(); draw(); }
+  });
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    turbines = defaultLayout(); dirSlider.value = 270; windFrom = 270;
+    dirLabel.textContent = 'from W (270°)'; draw();
+  });
+
+  window.addEventListener('resize', resize);
+  resize();
+})();
+</script>
+</body>
+</html>
