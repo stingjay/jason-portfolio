@@ -1,77 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wake Effect Sandbox — Wind Farm Siting & Layout</title>
-<style>
-  :root{
-    --navy:#16324F; --navy2:#1F4265; --teal:#2E7DA1; --gold:#E8A33D;
-    --light:#F4F7FA; --ink:#24313C; --mute:#5B6B78;
-  }
-  *{box-sizing:border-box; margin:0; padding:0;}
-  body{
-    font-family:'Segoe UI', Calibri, Arial, sans-serif;
-    background:var(--navy); color:#fff; min-height:100vh;
-    display:flex; flex-direction:column; align-items:center; padding:18px;
-  }
-  h1{font-family:Cambria, Georgia, serif; font-size:26px; margin-bottom:2px;}
-  .sub{color:#C9D8E4; font-size:14px; font-style:italic; margin-bottom:14px;}
-  .panel{
-    background:#fff; color:var(--ink); border-radius:12px; padding:16px;
-    width:min(980px, 100%); box-shadow:0 8px 30px rgba(0,0,0,.35);
-  }
-  .controls{
-    display:flex; flex-wrap:wrap; gap:14px; align-items:center;
-    padding-bottom:12px; border-bottom:1px solid #E2EAF0; margin-bottom:12px;
-  }
-  .ctl{display:flex; align-items:center; gap:8px; font-size:14px;}
-  .ctl label{font-weight:600; color:var(--navy);}
-  input[type=range]{width:170px; accent-color:var(--teal);}
-  button{
-    background:var(--navy); color:#fff; border:none; border-radius:8px;
-    padding:8px 14px; font-size:13.5px; font-weight:600; cursor:pointer;
-  }
-  button:hover{background:var(--navy2);}
-  button.ghost{background:var(--light); color:var(--navy); border:1px solid #D5E2EB;}
-  button.ghost:hover{background:#E8EFF5;}
-  .stats{margin-left:auto; text-align:right;}
-  .stats .big{font-size:30px; font-weight:800; color:var(--navy); line-height:1;}
-  .stats .lbl{font-size:11.5px; color:var(--mute); letter-spacing:.5px; text-transform:uppercase;}
-  canvas{width:100%; border-radius:8px; background:linear-gradient(180deg,#EEF4F8,#E4EDF3); cursor:grab; touch-action:none; display:block;}
-  canvas.dragging{cursor:grabbing;}
-  .foot{font-size:12px; color:var(--mute); margin-top:10px; line-height:1.5;}
-  .foot b{color:var(--navy);}
-</style>
+  <meta charset="UTF-8" />
+  <title>Wake Effect Sandbox | Jay's Sandbox</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Drag wind turbines around a virtual farm and watch wake losses change with spacing and wind direction." />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Wake Effect Sandbox | Jay's Sandbox" />
+  <meta property="og:description" content="Drag wind turbines around a virtual farm and watch wake losses change with spacing and wind direction." />
+  <meta property="og:image" content="https://conoverprojects.com/images/og.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Inter+Tight:wght@500;600;700&display=swap" rel="stylesheet" />
+  <script>(function(){var r=document.documentElement;if(r.hasAttribute('data-theme-lock'))return;var d=r.getAttribute('data-theme-default');try{var t=localStorage.getItem('theme');if(t){r.setAttribute('data-theme',t);return}}catch(e){}if(d)r.setAttribute('data-theme',d)})();</script>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: var(--muted); text-decoration: none; margin-bottom: 14px; }
+    .back-link:hover { color: var(--accent); }
+    .wake-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-top: 18px; }
+    .controls { display: flex; flex-wrap: wrap; gap: 12px 14px; align-items: center; padding-bottom: 14px; border-bottom: 1px solid var(--border); margin-bottom: 14px; }
+    .ctl { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text-2); flex-wrap: wrap; }
+    .ctl label { font-weight: 600; color: var(--text); }
+    .ctl input[type=range] { width: 170px; accent-color: var(--accent); }
+    .dir-label { min-width: 92px; font-variant-numeric: tabular-nums; }
+    .wbtn { background: transparent; color: var(--text); border: 1px solid var(--border-strong); border-radius: 999px; padding: 7px 14px; font: inherit; font-size: 13.5px; font-weight: 500; cursor: pointer; }
+    .wbtn:hover { background: var(--surface-2); }
+    .wbtn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+    .wbtn.primary:hover { filter: brightness(1.06); background: var(--accent); }
+    .stats { margin-left: auto; text-align: right; }
+    .stats .big { font-family: var(--font-head); font-size: 30px; font-weight: 700; color: var(--text); line-height: 1; font-variant-numeric: tabular-nums; }
+    .stats .lbl { font-size: 11.5px; color: var(--muted); letter-spacing: .05em; text-transform: uppercase; margin-top: 4px; }
+    .loss-chip { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; margin-top: 6px; }
+    .loss-chip.ok { background: var(--ok-soft); color: var(--ok); }
+    .loss-chip.warn { background: var(--gold-soft); color: var(--gold); }
+    .loss-chip.bad { background: rgba(208,59,59,.14); color: #d65555; }
+    @media (max-width: 640px) { .stats { margin-left: 0; text-align: left; width: 100%; } }
+    #cv { width: 100%; border-radius: 10px; background: var(--bg-2); border: 1px solid var(--border); cursor: grab; touch-action: none; display: block; }
+    #cv.dragging { cursor: grabbing; }
+    .foot { font-size: 13px; color: var(--muted); margin-top: 12px; line-height: 1.6; }
+    .foot b { color: var(--text-2); }
+  </style>
 </head>
 <body>
-  <h1>Wake Effect Sandbox</h1>
-  <div class="sub">Drag turbines. Watch what parking one in another's wake does to its output.</div>
+  <header class="topbar">
+    <div class="wrap">
+      <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">J</span>Jason Conover</a>
+      <button class="icon-btn menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="nav">&#9776;</button>
+      <nav class="nav" id="nav" aria-label="Main">
+        <a href="index.html">Home</a>
+        <a href="work.html">Work &amp; Methods</a>
+        <a href="sandbox.html" aria-current="page">Sandbox</a>
+        <a href="playground.html">Playground</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+      <button class="icon-btn" id="themeBtn" aria-label="Toggle light or dark theme" title="Toggle theme"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></svg></button>
+    </div>
+  </header>
 
-  <div class="panel">
-    <div class="controls">
-      <div class="ctl">
-        <label for="dir">Wind direction</label>
-        <input type="range" id="dir" min="0" max="359" value="270">
-        <span id="dirLabel" style="min-width:86px;">from W (270°)</span>
+  <div class="wrap site-body">
+    <main class="page-content">
+      <a class="back-link" href="sandbox.html">&larr; Back to Sandbox</a>
+      <div>
+        <span class="highlight-badge badge-live">Experiment #3 &middot; Live</span>
       </div>
-      <button class="ghost" id="addBtn">+ Turbine</button>
-      <button class="ghost" id="rmBtn">− Turbine</button>
-      <button id="resetBtn">Reset layout</button>
-      <div class="stats">
-        <div class="big" id="farmPct">100%</div>
-        <div class="lbl">farm output vs. wake-free</div>
+      <h1 class="section-heading" style="margin-top:0.4rem; margin-bottom:0.2rem;">Wake Effect Sandbox</h1>
+      <p class="muted">Drag turbines around the farm. Watch what parking one in another&rsquo;s wake does to its output.</p>
+
+      <div class="wake-panel">
+        <div class="controls">
+          <div class="ctl">
+            <label for="dir">Wind direction</label>
+            <input type="range" id="dir" min="0" max="359" value="270">
+            <span id="dirLabel" class="dir-label">from W (270°)</span>
+          </div>
+          <button class="wbtn" id="addBtn" type="button">+ Turbine</button>
+          <button class="wbtn" id="rmBtn" type="button">&minus; Turbine</button>
+          <button class="wbtn primary" id="resetBtn" type="button">Reset layout</button>
+          <div class="stats" aria-live="polite">
+            <div class="big" id="farmPct">100%</div>
+            <div class="lbl">farm output vs. wake-free</div>
+            <span class="loss-chip ok" id="farmLoss">Light wake losses</span>
+          </div>
+        </div>
+        <canvas id="cv" aria-label="Wind farm layout. Drag turbines to move them."></canvas>
+        <div class="foot">
+          <b>Model:</b> simplified Jensen (&ldquo;top-hat&rdquo;) wake &mdash; each rotor casts an expanding cone of slowed air downwind;
+          overlapping deficits combine root-sum-square; power scales with wind speed cubed.
+          Grid squares = 1 rotor diameter (D &asymp; 163 m, a modern onshore machine).
+          Real siting tools (Openwind, WindPRO) use the same physics with far more sophistication &mdash; this is the intuition, not the engineering.
+        </div>
       </div>
-    </div>
-    <canvas id="cv"></canvas>
-    <div class="foot">
-      <b>Model:</b> simplified Jensen ("top-hat") wake — each rotor casts an expanding cone of slowed air downwind;
-      overlapping deficits combine root-sum-square; power scales with wind speed cubed.
-      Grid squares = 1 rotor diameter (D ≈ 163 m, a modern onshore machine).
-      Real siting tools (Openwind, WindPRO) use the same physics with far more sophistication — this is the intuition, not the engineering.
-    </div>
+    </main>
   </div>
 
+  <footer class="site-footer">
+    <div class="wrap">
+      <span>&copy; <span data-year></span> Jason Conover &middot; Austin, TX</span>
+      <nav aria-label="Footer">
+        <a href="work.html">Work</a>
+        <a href="sandbox.html">Sandbox</a>
+        <a href="https://www.linkedin.com/in/jason-conover-97079b95" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script src="js/site.js"></script>
 <script>
 (() => {
   const D = 1;                 // rotor diameter, model unit
@@ -88,6 +124,15 @@
   const farmPct = document.getElementById('farmPct');
 
   let scale = 30, dpr = 1;
+
+  // Colors follow the site's light/dark theme tokens (styles.css)
+  const root = document.documentElement;
+  const css = n => getComputedStyle(root).getPropertyValue(n).trim();
+  const isDark = () => {
+    const t = root.getAttribute('data-theme');
+    if (t) return t !== 'light';
+    return !window.matchMedia('(prefers-color-scheme: light)').matches;
+  };
 
   function resize() {
     dpr = window.devicePixelRatio || 1;
@@ -147,7 +192,7 @@
   function outputColor(p) { // p = 0..1 power fraction
     const t = Math.max(0, Math.min(1, (p - 0.6) / 0.4)); // 60%..100%
     const hue = 8 + t * 130;   // red -> green
-    return `hsl(${hue}, 62%, ${38 + t * 6}%)`;
+    return isDark() ? `hsl(${hue}, 60%, ${55 + t * 4}%)` : `hsl(${hue}, 62%, ${38 + t * 6}%)`;
   }
 
   function draw() {
@@ -157,7 +202,7 @@
     ctx.clearRect(0, 0, WORLD_W, WORLD_H);
 
     // grid (1 D squares)
-    ctx.strokeStyle = 'rgba(22,50,79,0.08)';
+    ctx.strokeStyle = css('--border');
     ctx.lineWidth = 0.02;
     for (let x = 0; x <= WORLD_W; x++) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, WORLD_H); ctx.stroke(); }
     for (let y = 0; y <= WORLD_H; y++) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(WORLD_W, y); ctx.stroke(); }
@@ -174,15 +219,15 @@
       ctx.lineTo(t.x - px * R0, t.y - py * R0);
       ctx.closePath();
       const g = ctx.createLinearGradient(t.x, t.y, t.x + w.x * len, t.y + w.y * len);
-      g.addColorStop(0, 'rgba(46,125,161,0.30)');
-      g.addColorStop(1, 'rgba(46,125,161,0.02)');
+      g.addColorStop(0, isDark() ? 'rgba(75,168,209,0.32)' : 'rgba(46,125,161,0.30)');
+      g.addColorStop(1, isDark() ? 'rgba(75,168,209,0.02)' : 'rgba(46,125,161,0.02)');
       ctx.fillStyle = g;
       ctx.fill();
     });
 
     // wind arrow
     const ax = 2.4, ay = 2.2;
-    ctx.strokeStyle = '#E8A33D'; ctx.fillStyle = '#E8A33D'; ctx.lineWidth = 0.14;
+    ctx.strokeStyle = css('--gold'); ctx.fillStyle = css('--gold'); ctx.lineWidth = 0.14;
     ctx.beginPath();
     ctx.moveTo(ax - w.x * 1.2, ay - w.y * 1.2);
     ctx.lineTo(ax + w.x * 1.2, ay + w.y * 1.2);
@@ -192,8 +237,8 @@
     ctx.lineTo(ax + w.x * 1.0 - w.y * 0.4, ay + w.y * 1.0 + w.x * 0.4);
     ctx.lineTo(ax + w.x * 1.0 + w.y * 0.4, ay + w.y * 1.0 - w.x * 0.4);
     ctx.closePath(); ctx.fill();
-    ctx.font = '600 0.55px "Segoe UI", sans-serif';
-    ctx.fillStyle = '#16324F';
+    ctx.font = '600 0.55px Inter, system-ui, sans-serif';
+    ctx.fillStyle = css('--text-2');
     ctx.fillText('wind', ax - 0.62, ay + 2.75);
 
     // turbines
@@ -212,11 +257,11 @@
       }
       ctx.beginPath();
       ctx.arc(t.x, t.y, 0.22, 0, Math.PI * 2);
-      ctx.fillStyle = '#fff'; ctx.fill();
+      ctx.fillStyle = css('--surface'); ctx.fill();
       ctx.strokeStyle = col; ctx.lineWidth = 0.12; ctx.stroke();
       // label
-      ctx.font = '700 0.52px "Segoe UI", sans-serif';
-      ctx.fillStyle = col;
+      ctx.font = '600 0.52px Inter, system-ui, sans-serif';
+      ctx.fillStyle = css('--text');
       const label = Math.round(p * 100) + '%';
       ctx.fillText(label, t.x - ctx.measureText(label).width / 2, t.y + 1.35);
     });
@@ -225,7 +270,10 @@
     const avg = turbines.length
       ? turbines.reduce((s, _, i) => s + Math.pow(1 - defs[i], 3), 0) / turbines.length : 1;
     farmPct.textContent = Math.round(avg * 100) + '%';
-    farmPct.style.color = avg > 0.92 ? '#16324F' : (avg > 0.8 ? '#B07A16' : '#B03A2E');
+    const lossEl = document.getElementById('farmLoss');
+    const [cls, txt] = avg > 0.92 ? ['ok', 'Light wake losses'] : avg > 0.8 ? ['warn', 'Moderate wake losses'] : ['bad', 'Heavy wake losses'];
+    lossEl.className = 'loss-chip ' + cls;
+    lossEl.textContent = txt;
   }
 
   // --- interaction ---
@@ -269,6 +317,8 @@
   });
 
   window.addEventListener('resize', resize);
+  new MutationObserver(draw).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+  window.matchMedia('(prefers-color-scheme: light)').addEventListener?.('change', draw);
   resize();
 })();
 </script>

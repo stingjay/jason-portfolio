@@ -25,12 +25,47 @@
   <!-- Leaflet core CSS & JS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <!-- Leaflet.TimeDimension -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-timedimension@1.1.0/dist/leaflet.timedimension.control.css" />
-  <script src="https://cdn.jsdelivr.net/npm/leaflet-timedimension@1.1.0/dist/leaflet.timedimension.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/leaflet-timedimension@1.1.0/dist/leaflet.timedimension.util.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/leaflet-timedimension@1.1.0/dist/leaflet.timedimension.layer.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/leaflet-timedimension@1.1.0/dist/leaflet.timedimension.layer.geojson.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    /* ── Experiment #1: turbine timeline ── */
+    .tt-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 14px; }
+    @media (max-width: 720px) { .tt-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    .tt-stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; }
+    .tt-stat-label { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+    .tt-stat-value { font-family: var(--font-head); font-size: 1.5rem; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; line-height: 1.15; }
+    .tt-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin-bottom: 12px; }
+    .tt-play {
+      background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 999px;
+      font: inherit; font-size: 14px; font-weight: 600; padding: 7px 16px; cursor: pointer; min-width: 92px;
+    }
+    .tt-play:disabled { opacity: .5; cursor: progress; }
+    .tt-slider { flex: 1 1 220px; accent-color: var(--accent); min-width: 0; }
+    .tt-toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: var(--text-2); cursor: pointer; }
+    .tt-toggle input { accent-color: var(--gold); }
+    .tt-status { font-size: 14px; color: var(--muted); margin-bottom: 10px; }
+    .tt-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; font-size: 13px; color: var(--text-2); margin-top: 10px; }
+    .tt-legend-title { color: var(--muted); }
+    .tt-legend-item { display: inline-flex; align-items: center; gap: 6px; }
+    .tt-swatch { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    .tt-source { font-size: 13px; color: var(--muted); margin-top: 6px; }
+    .tt-source a { color: var(--accent); }
+    .tt-charts { display: grid; gap: 16px; grid-template-columns: 1fr; margin-top: 22px; }
+    @media (min-width: 820px) { .tt-charts { grid-template-columns: 1fr 1fr; } }
+    .tt-chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px 10px; }
+    .tt-chart-title { font-family: var(--font-head); font-size: 1rem; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+    .tt-chart-sub { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+    .tt-chart-wrap { position: relative; height: 240px; }
+    .tt-note { font-size: 13px; color: var(--muted); margin-top: 14px; line-height: 1.6; }
+    /* popups on the turbine map */
+    .tt-popup .leaflet-popup-content-wrapper, .tt-popup .leaflet-popup-tip { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+    .tt-popup .leaflet-popup-content { margin: 10px 14px; font: 13px/1.5 var(--font); }
+    .tt-popup a.leaflet-popup-close-button { color: var(--muted); }
+    .tt-pop-state { color: var(--muted); font-size: 12px; }
+    .tt-pop { margin-top: 6px; border-collapse: collapse; }
+    .tt-pop td { padding: 1px 0; }
+    .tt-pop td:first-child { color: var(--muted); padding-right: 12px; }
+    #map { background: var(--bg-2); }
+  </style>
 </head>
 <body>
   <header class="topbar">
@@ -65,8 +100,8 @@
               <span class="highlight-badge badge-live">Experiment #1 &middot; Live</span>
               <h3 class="card-title">U.S. Wind Turbine Timeline</h3>
               <p class="card-body">
-                Watch the growth of wind energy across the United States over time. Each point is an individual turbine
-                appearing at its commercial operation date—explore how projects expanded region by region.
+                Watch U.S. wind build out year by year&mdash;every turbine in the USGS database, colored by hub height,
+                loaded live. See how towers and rotors have grown since the 1980s.
               </p>
               <p class="card-tagline">→ Jump to map</p>
             </article>
@@ -94,12 +129,34 @@
               <p class="card-tagline">→ Open simulator</p>
             </article>
           </a>
+          <a class="card-link" href="ptc-calculator.html">
+            <article class="card">
+              <span class="highlight-badge badge-live">Experiment #4 &middot; Live</span>
+              <h3 class="card-title">Wind PTC Value Calculator</h3>
+              <p class="card-body">
+                What&rsquo;s a wind project&rsquo;s production tax credit worth? Size the project, toggle prevailing wage and
+                the bonus adders, and see the 10-year &sect;45Y credit stream at the IRS&rsquo;s 2026 rates.
+              </p>
+              <p class="card-tagline">→ Open calculator</p>
+            </article>
+          </a>
+          <a class="card-link" href="wind-resource.html">
+            <article class="card">
+              <span class="highlight-badge badge-live">Experiment #5 &middot; Live</span>
+              <h3 class="card-title">Wind Resource &amp; Energy Estimate</h3>
+              <p class="card-body">
+                Click anywhere in the U.S. for a year of hourly winds, a wind rose, and the energy a modern turbine
+                would make there&mdash;at 80 m up to 160 m hub heights.
+              </p>
+              <p class="card-tagline">→ Pick a site</p>
+            </article>
+          </a>
           <article class="card card--muted">
             <span class="highlight-badge badge-soon">Coming Soon</span>
             <h3 class="card-title">More experiments in progress&hellip;</h3>
             <p class="card-body">
-              Ideas in the queue: wind resource overlays, interconnection queue maps, and automation tools
-              for development workflows.
+              Ideas in the queue: FAA obstruction explorer, interconnection queue maps, ERCOT wind &amp; solar vs.
+              demand, and a wind rose builder.
             </p>
           </article>
         </div>
@@ -110,10 +167,47 @@
           Experiment #1 &mdash; U.S. Wind Turbine Timeline
         </h2>
         <p class="section-subtext" style="margin-bottom:1rem;">
-          Each point represents an individual wind turbine. Use the timeline below the map to play through
-          commercial operation dates and watch the build-out unfold region by region.
+          Every dot is a wind turbine standing today, shaded by hub height. Press play to watch the fleet
+          build out by the year each project came online&mdash;and how much taller the machines have grown.
+          Click any turbine for its details.
         </p>
-        <div id="map" style="height: min(600px, 75vh);"></div>
+
+        <div class="tt-stats" aria-live="polite">
+          <div class="tt-stat"><div class="tt-stat-label">Year</div><div class="tt-stat-value" id="tt-year">—</div></div>
+          <div class="tt-stat"><div class="tt-stat-label">Turbines online</div><div class="tt-stat-value" id="tt-count">—</div></div>
+          <div class="tt-stat"><div class="tt-stat-label">Installed capacity</div><div class="tt-stat-value" id="tt-cap">—</div></div>
+          <div class="tt-stat"><div class="tt-stat-label" id="tt-hh-label">Median hub height</div><div class="tt-stat-value" id="tt-hh">—</div></div>
+        </div>
+
+        <div class="tt-controls">
+          <button class="tt-play" id="tt-play" type="button" aria-pressed="false" disabled>&#9654; Play</button>
+          <input class="tt-slider" id="tt-slider" type="range" min="1982" max="2026" step="1" value="2026" aria-label="Install year" disabled />
+          <label class="tt-toggle"><input type="checkbox" id="tt-repower" /> Outline repowered turbines</label>
+        </div>
+
+        <p class="tt-status" id="tt-status">Loading&hellip;</p>
+        <div id="map" style="height: min(560px, 70vh);"></div>
+        <div class="tt-legend" id="tt-legend"></div>
+        <p class="tt-source" id="tt-source"></p>
+
+        <div class="tt-charts">
+          <div class="tt-chart-card">
+            <p class="tt-chart-title">Turbines keep getting bigger</p>
+            <p class="tt-chart-sub">Median hub height and rotor diameter of turbines installed each year</p>
+            <div class="tt-chart-wrap"><canvas id="tt-trend" aria-label="Median hub height and rotor diameter by install year"></canvas></div>
+          </div>
+          <div class="tt-chart-card">
+            <p class="tt-chart-title">New capacity by year</p>
+            <p class="tt-chart-sub">Capacity of today&rsquo;s turbines, by the year they came online &middot; click a bar to jump there</p>
+            <div class="tt-chart-wrap"><canvas id="tt-cap-chart" aria-label="New wind capacity installed by year"></canvas></div>
+          </div>
+        </div>
+
+        <p class="tt-note">
+          Note: the database tracks turbines standing today, so older years show only the machines that are still
+          operating&mdash;turbines since removed aren&rsquo;t counted. Install dates are recorded by year.
+          Repowered turbines keep their original online year.
+        </p>
       </section>
     </main>
   </div>
@@ -132,6 +226,6 @@
 
   <script src="js/site.js"></script>
 
-  <script src="js/map.js"></script>
+  <script src="js/map.js?v=2"></script>
 </body>
 </html>

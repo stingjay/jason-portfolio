@@ -46,17 +46,20 @@ for (const [g, r] of Object.entries(REGIONS)) r.members.forEach(m => { BA_GROUP[
 const ALL_BAS = Object.keys(BA_GROUP);
 
 // ─── Fuel config ───────────────────────────────────────────────────────────
+// Fuel colors are checked for color-blind separation against the site's light
+// and dark surfaces, in this stacking order. Solar + storage reuses the solar
+// hue with diagonal hatching so it reads as "solar, plus something".
 const FUELS = {
-  WND: { label: 'Wind',              color: '#22c55e' },
-  SUN: { label: 'Solar',             color: '#fbbf24' },
-  SNB: { label: 'Solar + storage',   color: '#fef08a' },
-  WAT: { label: 'Hydro',             color: '#38bdf8' },
-  NUC: { label: 'Nuclear',           color: '#818cf8' },
-  BAT: { label: 'Battery & storage', color: '#e879f9' },
-  NG:  { label: 'Natural Gas',       color: '#f97316' },
-  COL: { label: 'Coal',              color: '#78716c' },
-  OIL: { label: 'Petroleum',         color: '#dc2626' },
-  OTH: { label: 'Other',             color: '#94a3b8' },
+  WND: { label: 'Wind',              light: '#008300', dark: '#008300' },
+  SUN: { label: 'Solar',             light: '#eda100', dark: '#c98500' },
+  SNB: { label: 'Solar + storage',   light: '#eda100', dark: '#c98500', hatch: true },
+  WAT: { label: 'Hydro',             light: '#2a78d6', dark: '#3987e5' },
+  BAT: { label: 'Battery & storage', light: '#e87ba4', dark: '#d55181' },
+  NUC: { label: 'Nuclear',           light: '#4a3aa7', dark: '#9085e9' },
+  NG:  { label: 'Natural Gas',       light: '#eb6834', dark: '#d95926' },
+  COL: { label: 'Coal',              light: '#8a857d', dark: '#a8a39b' },
+  OIL: { label: 'Petroleum',         light: '#e34948', dark: '#e66767' },
+  OTH: { label: 'Other',             light: '#b5b2aa', dark: '#8b95a1' },
 };
 
 // EIA codes that map onto a different display bucket.
@@ -64,16 +67,59 @@ const FUELS = {
 // Anything else not in FUEL_ORDER (GEO, BIO, …) folds into OTH.
 const FUEL_ALIAS = { PS: 'BAT', UES: 'BAT' };
 
-const FUEL_ORDER      = ['WND', 'SUN', 'SNB', 'WAT', 'NUC', 'BAT', 'NG', 'COL', 'OIL', 'OTH'];
+const FUEL_ORDER      = ['WND', 'SUN', 'SNB', 'WAT', 'BAT', 'NUC', 'NG', 'COL', 'OIL', 'OTH'];
 const RENEWABLE_FUELS = ['WND', 'SUN', 'SNB', 'WAT'];
 const CLEAN_FUELS     = ['WND', 'SUN', 'SNB', 'WAT', 'NUC'];
 // Storage only counts its discharge (charging hours report negative values and
 // are clamped to 0). It isn't counted as clean, since it re-releases grid power.
 
-const NO_DATA_COLOR = '#475569';
+// Clean-energy share is a magnitude → one hue (green), stepped by lightness.
+// On the dark map, cleaner = brighter; on the light map, cleaner = deeper.
+const CLEAN_RAMP = {
+  dark:  ['#1d4433', '#24794a', '#35b46a', '#9cf0bb'],
+  light: ['#c6ead5', '#86cfa4', '#34a063', '#13703d'],
+};
+const CLEAN_BINS = [
+  { min: 0,  label: '<20%' }, { min: 20, label: '20–40%' },
+  { min: 40, label: '40–60%' }, { min: 60, label: '≥60%' },
+];
+const TILES = {
+  dark:  'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+  light: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+};
+
+// ─── Theme helpers (follows the site's light/dark toggle) ─────────────────
+const rootEl = document.documentElement;
+function themeMode() {
+  const t = rootEl.getAttribute('data-theme');
+  if (t) return t === 'light' ? 'light' : 'dark';
+  return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+}
+const cssVar = name => getComputedStyle(rootEl).getPropertyValue(name).trim();
+
+const hatchCache = {};
+function fuelColor(key, { forCanvas = true } = {}) {
+  const f = FUELS[key], mode = themeMode(), base = f[mode];
+  if (!f.hatch) return base;
+  if (!forCanvas) {
+    return `repeating-linear-gradient(135deg, ${base} 0 3px, ${cssVar('--surface')} 3px 5px)`;
+  }
+  const id = mode + base;
+  if (!hatchCache[id]) {
+    const c = document.createElement('canvas');
+    c.width = c.height = 8;
+    const x = c.getContext('2d');
+    x.fillStyle = base; x.fillRect(0, 0, 8, 8);
+    x.strokeStyle = cssVar('--surface'); x.lineWidth = 1.6;
+    x.beginPath(); x.moveTo(-2, 10); x.lineTo(10, -2); x.moveTo(-2, 2); x.lineTo(2, -2); x.moveTo(6, 10); x.lineTo(10, 6); x.stroke();
+    hatchCache[id] = x.createPattern(c, 'repeat');
+  }
+  return hatchCache[id];
+}
 
 // ─── State ─────────────────────────────────────────────────────────────────
 let leafletMap = null;
+let tileLayer = null;
 let donutChart = null;
 let barChart = null;
 let regionLayers = {};   // region key → L.GeoJSON
@@ -91,12 +137,11 @@ let selBA = null;
 // ─── Helpers ───────────────────────────────────────────────────────────────
 // Map color is based on % clean (renewable + nuclear) for better regional variation
 function cleanColor(pct) {
-  if (pct >= 60) return '#22c55e';
-  if (pct >= 40) return '#86efac';
-  if (pct >= 20) return '#fde68a';
-  return '#f87171';
+  const ramp = CLEAN_RAMP[themeMode()];
+  for (let i = CLEAN_BINS.length - 1; i >= 0; i--) if (pct >= CLEAN_BINS[i].min) return ramp[i];
+  return ramp[0];
 }
-const colorFor = d => (d && d.total > 0) ? cleanColor(d.cleanPct) : NO_DATA_COLOR;
+const colorFor = d => (d && d.total > 0) ? cleanColor(d.cleanPct) : cssVar('--muted');
 
 function fmtGWh(mwh) {
   return mwh >= 1000 ? `${(mwh / 1000).toFixed(1)} GWh` : `${Math.round(mwh)} MWh`;
@@ -228,8 +273,8 @@ function initMap() {
   leafletMap = L.map('eia-map', { zoomControl: true, scrollWheelZoom: false })
     .setView([38.5, -96], 4);
 
-  // Esri Dark Gray Canvas — no API key required
-  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+  // Esri Gray Canvas (dark or light to match the site theme) — no API key required
+  tileLayer = L.tileLayer(TILES[themeMode()], {
     attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
     maxZoom: 16
   }).addTo(leafletMap);
@@ -240,12 +285,13 @@ function styleFor(d, { active = false, dim = false } = {}) {
   const noData = !(d && d.total > 0);
   if (dim) {
     // Out-of-focus BAs fade back so the zoomed region stands out
-    return { fillColor: '#64748b', fillOpacity: 0.06, color: '#64748b', weight: 0.6, opacity: 0.3, dashArray: null };
+    const m = cssVar('--muted');
+    return { fillColor: m, fillOpacity: 0.06, color: m, weight: 0.6, opacity: 0.3, dashArray: null };
   }
   return {
     fillColor: color,
-    fillOpacity: active ? 0.68 : (noData ? 0.3 : 0.42),
-    color: active ? '#f9fafb' : color,
+    fillOpacity: noData ? 0.25 : (active ? 0.85 : 0.68),
+    color: active ? cssVar('--text') : color,
     weight: active ? 2.5 : (view === 'bas' ? 1 : 1.5),
     opacity: 0.85,
     dashArray: noData ? '4 3' : null,
@@ -271,7 +317,7 @@ function drawLayers() {
       const d = regionData[key];
       const layer = L.geoJSON(feature, { style: styleFor(d, { active: key === selRegion }) });
       const n = region.members.length;
-      const extra = n > 1 ? `<br><span style="color:#9ca3af">${n} balancing authorities · click to explore</span>` : '';
+      const extra = n > 1 ? `<br><span class="eia-tip-sub">${n} balancing authorities · click to explore</span>` : '';
       layer.bindTooltip(tipFor(region.name, d, extra), { sticky: true, className: 'eia-tip' });
       layer.on('click', () => selectRegion(key));
       layer.addTo(leafletMap);
@@ -285,7 +331,7 @@ function drawLayers() {
       const d = baData[code];
       const dim = focusGroup && g !== focusGroup;
       const layer = L.geoJSON(feature, { style: styleFor(d, { active: code === selBA, dim }) });
-      const extra = `<br><span style="color:#9ca3af">${code} · ${REGIONS[g].name}</span>`;
+      const extra = `<br><span class="eia-tip-sub">${code} · ${REGIONS[g].name}</span>`;
       layer.bindTooltip(tipFor(baLabel(code), d, extra), { sticky: true, className: 'eia-tip' });
       layer.on('click', () => {
         if (focusGroup && g !== focusGroup) { setFocus(g); }
@@ -376,7 +422,7 @@ function renderPanel({ eyebrow, title, d, note, action }) {
 
   if (!d || !(d.total > 0)) {
     pctEl.textContent = '—';
-    pctEl.style.color = '#374151';
+    pctEl.style.color = '';
     document.getElementById('panel-pct-sub').textContent = 'No fuel-mix data reported to EIA for this area';
     fill.style.width = '0%';
     legendEl.innerHTML = '';
@@ -386,7 +432,6 @@ function renderPanel({ eyebrow, title, d, note, action }) {
 
   const color = cleanColor(d.cleanPct);
   pctEl.textContent = `${d.cleanPct.toFixed(1)}%`;
-  pctEl.style.color = color;
   document.getElementById('panel-pct-sub').textContent =
     `clean (incl. nuclear) · ${d.renewablePct.toFixed(1)}% renewable · ${fmtGWh(d.total)} this hour`;
   fill.style.width = `${Math.min(d.cleanPct, 100)}%`;
@@ -396,13 +441,14 @@ function renderPanel({ eyebrow, title, d, note, action }) {
   for (const k of FUEL_ORDER) {
     const v = d.fuels[k] ?? 0;
     if (v <= 0) continue;
-    labels.push(FUELS[k].label); values.push(v); colors.push(FUELS[k].color);
+    labels.push(FUELS[k].label); values.push(v); colors.push(k);
   }
 
   if (donutChart) donutChart.destroy();
   donutChart = new Chart(document.getElementById('donut-chart').getContext('2d'), {
     type: 'doughnut',
-    data: { labels, datasets: [{ data: values, backgroundColor: colors, borderWidth: 0 }] },
+    data: { labels, datasets: [{ data: values, backgroundColor: colors.map(k => fuelColor(k)),
+      borderColor: cssVar('--surface'), borderWidth: 2 }] },
     options: {
       cutout: '64%',
       animation: { duration: 380 },
@@ -424,7 +470,7 @@ function renderPanel({ eyebrow, title, d, note, action }) {
   labels.forEach((label, i) => {
     const el = document.createElement('span');
     el.className = 'fuel-item';
-    el.innerHTML = `<span class="fuel-dot" style="background:${colors[i]};"></span>${label}`;
+    el.innerHTML = `<span class="fuel-dot" style="background:${fuelColor(colors[i], { forCanvas: false })};"></span>${label}`;
     legendEl.appendChild(el);
   });
 }
@@ -490,7 +536,8 @@ function renderBarChart() {
   const datasets = FUEL_ORDER.map(f => {
     const vals = keys.map(k => data[k].total ? ((data[k].fuels[f] ?? 0) / data[k].total) * 100 : 0);
     if (!vals.some(v => v > 0)) return null;
-    return { label: FUELS[f].label, data: vals, backgroundColor: FUELS[f].color, borderWidth: 0 };
+    return { label: FUELS[f].label, data: vals, backgroundColor: fuelColor(f),
+             borderColor: cssVar('--bg'), borderWidth: { top: 1, bottom: 0, left: 0, right: 0 } };
   }).filter(Boolean);
 
   if (barChart) barChart.destroy();
@@ -506,11 +553,11 @@ function renderBarChart() {
         view === 'regions' ? selectRegion(k) : selectBA(k);
       },
       scales: {
-        x: { stacked: true, ticks: { color: '#9ca3af', autoSkip: false, maxRotation: 50 }, grid: { color: 'rgba(148,163,184,0.07)' } },
-        y: { stacked: true, min: 0, max: 100, ticks: { color: '#9ca3af', callback: v => `${v}%` }, grid: { color: 'rgba(148,163,184,0.07)' } }
+        x: { stacked: true, ticks: { color: cssVar('--muted'), autoSkip: false, maxRotation: 50 }, grid: { display: false } },
+        y: { stacked: true, min: 0, max: 100, border: { display: false }, ticks: { color: cssVar('--muted'), callback: v => `${v}%` }, grid: { color: cssVar('--border') } }
       },
       plugins: {
-        legend: { position: 'bottom', labels: { color: '#9ca3af', boxWidth: 11, padding: 11, font: { size: 11 } } },
+        legend: { position: 'bottom', labels: { color: cssVar('--text-2'), boxWidth: 11, padding: 11, font: { size: 11 } } },
         tooltip: {
           callbacks: {
             title: items => {
@@ -594,7 +641,29 @@ async function loadData() {
   }
 }
 
+// ─── Map legend & theme changes ──────────────────────────────────────────
+function renderMapLegend() {
+  const ramp = CLEAN_RAMP[themeMode()];
+  const el = document.getElementById('map-legend');
+  if (!el) return;
+  el.innerHTML = '<span>% Clean energy (renewable + nuclear):</span>' +
+    CLEAN_BINS.map((b, i) => `<span class="map-legend-item"><span class="map-swatch" style="background:${ramp[i]};"></span>${b.label}</span>`).join('') +
+    '<span class="map-legend-item"><span class="map-swatch map-swatch--none"></span>No fuel data</span>';
+}
+
+function applyTheme() {
+  renderMapLegend();
+  if (!leafletMap) return;
+  tileLayer.setUrl(TILES[themeMode()]);
+  restyle();
+  renderBarChart();
+  if (view === 'regions') selectRegion(selRegion); else selectBA(selBA);
+}
+new MutationObserver(applyTheme).observe(rootEl, { attributes: true, attributeFilter: ['data-theme'] });
+window.matchMedia('(prefers-color-scheme: light)').addEventListener?.('change', applyTheme);
+
 // ─── Boot ──────────────────────────────────────────────────────────────────
+renderMapLegend();
 loadData();
 // Auto-refresh every 10 minutes (EIA data updates hourly)
 setInterval(loadData, 10 * 60 * 1000);

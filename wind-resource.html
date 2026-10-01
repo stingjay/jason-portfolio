@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Wind Resource & Energy Estimate | Jay's Sandbox</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Click a U.S. location to see a year of hourly hub-height winds, a wind rose, and estimated wind energy output by tower height." />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Wind Resource & Energy Estimate | Jay's Sandbox" />
+  <meta property="og:description" content="Click a U.S. location to see a year of hourly hub-height winds, a wind rose, and estimated wind energy output by tower height." />
+  <meta property="og:image" content="https://conoverprojects.com/images/og.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Inter+Tight:wght@500;600;700&display=swap" rel="stylesheet" />
+  <script>(function(){var r=document.documentElement;if(r.hasAttribute('data-theme-lock'))return;var d=r.getAttribute('data-theme-default');try{var t=localStorage.getItem('theme');if(t){r.setAttribute('data-theme',t);return}}catch(e){}if(d)r.setAttribute('data-theme',d)})();</script>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: var(--muted); text-decoration: none; margin-bottom: 14px; }
+    .back-link:hover { color: var(--accent); }
+    .wr-grid { display: grid; gap: 16px; grid-template-columns: 1fr; margin-top: 18px; }
+    @media (min-width: 900px) { .wr-grid { grid-template-columns: 1.45fr 1fr; align-items: stretch; } }
+    .tool-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; min-width: 0; }
+    .tool-card h2 { font-family: var(--font-head); font-size: 1rem; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .sub { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+    #wr-map { height: 440px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-2); }
+    .map-hint { font-size: 13px; color: var(--muted); margin-top: 8px; }
+    .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; align-items: end; }
+    .field { display: grid; gap: 4px; }
+    .field label { font-size: 13px; font-weight: 600; color: var(--text); }
+    .field select, .field input {
+      width: 100%; background: var(--bg-2); color: var(--text); border: 1px solid var(--border-strong);
+      border-radius: 8px; padding: 7px 10px; font: inherit; font-size: 14px;
+    }
+    .loc { font-size: 14px; color: var(--text-2); margin-bottom: 12px; font-variant-numeric: tabular-nums; }
+    .loc strong { color: var(--text); }
+    .kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .kpi { background: var(--bg-2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
+    .kpi-label { font-size: 12px; color: var(--muted); margin-bottom: 2px; }
+    .kpi-value { font-family: var(--font-head); font-size: 1.4rem; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; line-height: 1.2; }
+    .kpi-sub { font-size: 12px; color: var(--text-2); }
+    .status { font-size: 14px; color: var(--muted); margin: 6px 0 12px; min-height: 1.4em; }
+    .status.err { color: var(--text); background: rgba(208,59,59,.12); border: 1px solid #d03b3b; border-radius: 8px; padding: 8px 10px; }
+    .ptc-link { display: inline-flex; margin-top: 14px; font-size: 14px; font-weight: 600; color: var(--accent); text-decoration: none; }
+    .ptc-link:hover { text-decoration: underline; }
+    .charts { display: grid; gap: 16px; grid-template-columns: 1fr; margin-top: 16px; }
+    @media (min-width: 900px) { .charts { grid-template-columns: 1.2fr 1.2fr 1fr; } }
+    .chart-wrap { position: relative; height: 230px; }
+    .notes { font-size: 13px; color: var(--muted); line-height: 1.65; margin-top: 18px; }
+    .notes li { margin: 0 0 6px 18px; }
+    .notes a { color: var(--accent); }
+    .is-loading { opacity: .55; transition: opacity .2s; }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap">
+      <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">J</span>Jason Conover</a>
+      <button class="icon-btn menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="nav">&#9776;</button>
+      <nav class="nav" id="nav" aria-label="Main">
+        <a href="index.html">Home</a>
+        <a href="work.html">Work &amp; Methods</a>
+        <a href="sandbox.html" aria-current="page">Sandbox</a>
+        <a href="playground.html">Playground</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+      <button class="icon-btn" id="themeBtn" aria-label="Toggle light or dark theme" title="Toggle theme"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></svg></button>
+    </div>
+  </header>
+
+  <div class="wrap site-body">
+    <main class="page-content">
+      <a class="back-link" href="sandbox.html">&larr; Back to Sandbox</a>
+      <div><span class="highlight-badge badge-live">Experiment #5 &middot; Live</span></div>
+      <h1 class="section-heading" style="margin-top:0.4rem; margin-bottom:0.2rem;">Wind Resource &amp; Energy Estimate</h1>
+      <p class="muted">Click anywhere in the U.S. to pull a year of hourly winds and see what a modern turbine would produce there&mdash;and how much a taller tower helps.</p>
+
+      <div class="wr-grid">
+        <div class="tool-card">
+          <div id="wr-map" role="application" aria-label="Map. Click to choose a site."></div>
+          <p class="map-hint">Click the map or drag the pin to move the site.</p>
+        </div>
+
+        <div class="tool-card" aria-live="polite">
+          <div class="controls">
+            <div class="field">
+              <label for="wr-hh">Hub height</label>
+              <select id="wr-hh">
+                <option value="80">80 m</option><option value="100">100 m</option>
+                <option value="120" selected>120 m</option><option value="140">140 m</option><option value="160">160 m</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="wr-year">Weather year</label>
+              <select id="wr-year"></select>
+            </div>
+            <div class="field">
+              <label for="wr-loss">Losses (%)</label>
+              <input type="number" id="wr-loss" min="0" max="40" step="1" value="15" />
+            </div>
+            <div class="field">
+              <label for="wr-mw">Project size (MW)</label>
+              <input type="number" id="wr-mw" min="1" max="5000" step="1" value="200" />
+            </div>
+          </div>
+          <p class="loc" id="wr-loc">—</p>
+          <p class="status" id="wr-status"></p>
+          <div class="kpis" id="wr-kpis">
+            <div class="kpi"><div class="kpi-label">Mean wind speed at hub</div><div class="kpi-value" id="k-ws">—</div><div class="kpi-sub" id="k-ws-sub"></div></div>
+            <div class="kpi"><div class="kpi-label">Net capacity factor</div><div class="kpi-value" id="k-cf">—</div><div class="kpi-sub" id="k-cf-sub"></div></div>
+            <div class="kpi"><div class="kpi-label">Annual energy (project)</div><div class="kpi-value" id="k-aep">—</div><div class="kpi-sub" id="k-aep-sub"></div></div>
+            <div class="kpi"><div class="kpi-label">Wind shear exponent</div><div class="kpi-value" id="k-shear">—</div><div class="kpi-sub">from 10 m &amp; 100 m winds</div></div>
+          </div>
+          <a class="ptc-link" id="ptc-link" href="ptc-calculator.html">Value this project&rsquo;s tax credits &rarr;</a>
+        </div>
+      </div>
+
+      <div class="charts">
+        <div class="tool-card">
+          <h2>Taller towers, more energy</h2>
+          <p class="sub">Net capacity factor by hub height at this site</p>
+          <div class="chart-wrap"><canvas id="c-height" aria-label="Net capacity factor by hub height"></canvas></div>
+        </div>
+        <div class="tool-card">
+          <h2>Seasonality</h2>
+          <p class="sub">Monthly mean wind speed at hub height</p>
+          <div class="chart-wrap"><canvas id="c-month" aria-label="Monthly mean wind speed"></canvas></div>
+        </div>
+        <div class="tool-card">
+          <h2>Wind rose</h2>
+          <p class="sub">Share of hours by direction the wind blows from (100 m)</p>
+          <div class="chart-wrap"><canvas id="c-rose" aria-label="Wind rose"></canvas></div>
+        </div>
+      </div>
+
+      <div class="notes">
+        <p><strong>How it works</strong></p>
+        <ul>
+          <li>Hourly 10 m and 100 m winds come from the ECMWF ERA5 reanalysis (about 30 km grid) through the free
+            <a href="https://open-meteo.com/en/docs/historical-weather-api" target="_blank" rel="noopener">Open-Meteo historical weather API</a>.</li>
+          <li>Each hour is scaled from 100 m to hub height with that hour&rsquo;s shear (power law), adjusted for air density at the site&rsquo;s elevation,
+            then run through a generic power curve for a modern ~3.6 MW, 140 m-rotor turbine. Losses cover wakes, availability, electrical and curtailment.</li>
+          <li>Reanalysis data smooths terrain and often reads low at hub height. Treat this as a screening estimate&mdash;real projects use a year or more of on-site met tower or lidar data.</li>
+        </ul>
+        <p>Weather data: <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a> (CC BY 4.0), ERA5 by Copernicus / ECMWF.</p>
+      </div>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <span>&copy; <span data-year></span> Jason Conover &middot; Austin, TX</span>
+      <nav aria-label="Footer">
+        <a href="work.html">Work</a>
+        <a href="sandbox.html">Sandbox</a>
+        <a href="https://www.linkedin.com/in/jason-conover-97079b95" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script src="js/site.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script>
+  (() => {
+    'use strict';
+    const $ = id => document.getElementById(id);
+    const root = document.documentElement;
+    const css = n => getComputedStyle(root).getPropertyValue(n).trim();
+    const isLight = () => {
+      const t = root.getAttribute('data-theme');
+      return t ? t === 'light' : window.matchMedia('(prefers-color-scheme: light)').matches;
+    };
+    const accent = () => (isLight() ? '#2479A6' : '#3D97C2');   // validated series blue
+
+    const HEIGHTS = [80, 100, 120, 140, 160];
+    const RATED_KW = 3600;
+    // Generic power curve, fraction of rated output by wind speed (m/s) at standard air density.
+    const PC_V = [0, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 25, 25.01];
+    const PC_P = [0, 0, .04, .09, .17, .27, .40, .56, .73, .88, .97, 1, 1, 0];
+    function power(v) {
+      if (v < 3 || v > 25) return 0;
+      let i = 1;
+      while (PC_V[i] < v) i++;
+      const t = (v - PC_V[i - 1]) / (PC_V[i] - PC_V[i - 1]);
+      return PC_P[i - 1] + t * (PC_P[i] - PC_P[i - 1]);
+    }
+
+    // ── Map ──
+    const TILES = {
+      dark:  'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+      light: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+    };
+    const qs = new URLSearchParams(location.search);
+    let site = { lat: +qs.get('lat') || 32.47, lon: +qs.get('lon') || -100.41 };   // default: Sweetwater, TX
+    const map = L.map('wr-map', { scrollWheelZoom: false }).setView([39, -97], 4);
+    const tiles = L.tileLayer(TILES[isLight() ? 'light' : 'dark'], { maxZoom: 16, attribution: 'Tiles &copy; Esri' }).addTo(map);
+    const pin = L.marker([site.lat, site.lon], { draggable: true, keyboard: true, title: 'Selected site' }).addTo(map);
+    map.on('click', e => moveTo(e.latlng.lat, e.latlng.lng));
+    pin.on('dragend', () => { const p = pin.getLatLng(); moveTo(p.lat, p.lng); });
+
+    function moveTo(lat, lon) {
+      site = { lat: +lat.toFixed(3), lon: +lon.toFixed(3) };
+      pin.setLatLng([site.lat, site.lon]);
+      history.replaceState(null, '', `?lat=${site.lat}&lon=${site.lon}`);
+      load();
+    }
+
+    // ── Controls ──
+    const yearSel = $('wr-year');
+    const lastFull = new Date().getUTCFullYear() - 1;
+    for (let y = lastFull; y >= lastFull - 9; y--) yearSel.add(new Option(String(y), String(y)));
+    yearSel.addEventListener('change', load);
+    ['wr-hh', 'wr-loss', 'wr-mw'].forEach(id => $(id).addEventListener('input', render));
+
+    // ── Data ──
+    let data = null;     // { v10[], v100[], dir[], months[], elev }
+    let reqId = 0;
+    const cache = new Map();
+
+    async function load() {
+      const id = ++reqId;
+      const year = yearSel.value;
+      const key = `${site.lat},${site.lon},${year}`;
+      $('wr-loc').innerHTML = `<strong>${site.lat.toFixed(3)}°, ${site.lon.toFixed(3)}°</strong> &middot; ${year}`;
+      setStatus('Loading a year of hourly winds…');
+      $('wr-kpis').classList.add('is-loading');
+      try {
+        let d = cache.get(key);
+        if (!d) {
+          const url = 'https://archive-api.open-meteo.com/v1/archive?' + new URLSearchParams({
+            latitude: site.lat, longitude: site.lon, start_date: `${year}-01-01`, end_date: `${year}-12-31`,
+            hourly: 'wind_speed_10m,wind_speed_100m,wind_direction_100m', wind_speed_unit: 'ms',
+            models: 'era5', timezone: 'UTC',
+          });
+          const res = await fetch(url);
+          const json = await res.json().catch(() => ({}));
+          if (!res.ok || json.error) throw new Error(json.reason || `HTTP ${res.status}`);
+          d = parse(json);
+          cache.set(key, d);
+        }
+        if (id !== reqId) return;
+        data = d;
+        setStatus('');
+        render();
+      } catch (err) {
+        if (id !== reqId) return;
+        setStatus(`Couldn't load wind data: ${err.message}`, true);
+        console.error('[Wind resource]', err);
+      } finally {
+        if (id === reqId) $('wr-kpis').classList.remove('is-loading');
+      }
+    }
+
+    function parse(json) {
+      const h = json.hourly || {};
+      const pick = prefix => h[Object.keys(h).find(k => k.startsWith(prefix))] || [];
+      const t = h.time || [], a10 = pick('wind_speed_10m'), a100 = pick('wind_speed_100m'), ad = pick('wind_direction_100m');
+      const v10 = [], v100 = [], dir = [], months = [];
+      for (let i = 0; i < t.length; i++) {
+        if (a100[i] == null || a10[i] == null) continue;
+        v10.push(a10[i]); v100.push(a100[i]); dir.push(ad[i]); months.push(+t[i].slice(5, 7) - 1);
+      }
+      if (v100.length < 1000) throw new Error('not enough data for this location');
+      return { v10, v100, dir, months, elev: json.elevation ?? 0 };
+    }
+
+    // ── Model ──
+    function analyze(hh) {
+      const { v10, v100, elev } = data;
+      const n = v100.length;
+      const mean10 = v10.reduce((a, b) => a + b, 0) / n;
+      const mean100 = v100.reduce((a, b) => a + b, 0) / n;
+      const alphaAnnual = Math.min(0.45, Math.max(0.05, Math.log(mean100 / Math.max(mean10, 0.1)) / Math.log(10)));
+      const rho = 1.225 * Math.exp(-Math.max(0, elev) / 8435);
+      const densityFactor = Math.cbrt(rho / 1.225);          // equivalent-speed adjustment for the power curve
+      const heights = {};
+      for (const h of HEIGHTS.concat([hh])) {
+        if (heights[h]) continue;
+        let sumV = 0, sumP = 0;
+        const monthV = new Array(12).fill(0), monthN = new Array(12).fill(0);
+        for (let i = 0; i < n; i++) {
+          let a = v10[i] > 0.5 && v100[i] > 0.5 ? Math.log(v100[i] / v10[i]) / Math.log(10) : alphaAnnual;
+          a = Math.min(0.5, Math.max(0, a));
+          const v = v100[i] * Math.pow(h / 100, a);
+          sumV += v; sumP += power(v * densityFactor);
+          monthV[data.months[i]] += v; monthN[data.months[i]]++;
+        }
+        heights[h] = { meanV: sumV / n, grossCF: sumP / n, monthly: monthV.map((s, m) => monthN[m] ? s / monthN[m] : null) };
+      }
+      return { heights, alphaAnnual, rho, elev, n };
+    }
+
+    let charts = {};
+    function render() {
+      if (!data) return;
+      const hh = +$('wr-hh').value;
+      const loss = Math.min(60, Math.max(0, +$('wr-loss').value || 0)) / 100;
+      const mw = Math.max(0, +$('wr-mw').value || 0);
+      const r = analyze(hh);
+      const H = r.heights[hh];
+      const netCF = H.grossCF * (1 - loss);
+      const aepGWh = mw * 8.76 * netCF;
+
+      $('k-ws').textContent = `${H.meanV.toFixed(1)} m/s`;
+      $('k-ws-sub').textContent = `${(H.meanV * 2.23694).toFixed(1)} mph · ${r.n.toLocaleString()} hours`;
+      $('k-cf').textContent = `${(netCF * 100).toFixed(1)}%`;
+      $('k-cf-sub').textContent = `gross ${(H.grossCF * 100).toFixed(1)}% less ${Math.round(loss * 100)}% losses`;
+      $('k-aep').textContent = aepGWh >= 1 ? `${Math.round(aepGWh).toLocaleString()} GWh` : `${Math.round(aepGWh * 1000)} MWh`;
+      $('k-aep-sub').textContent = `${mw.toLocaleString()} MW · ${(8.76 * netCF * RATED_KW / 1000).toFixed(1)} GWh per turbine`;
+      $('k-shear').textContent = r.alphaAnnual.toFixed(2);
+      $('ptc-link').href = `ptc-calculator.html?cf=${(netCF * 100).toFixed(1)}&mw=${mw}`;
+      $('wr-loc').innerHTML = `<strong>${site.lat.toFixed(3)}°, ${site.lon.toFixed(3)}°</strong> &middot; ${yearSel.value} &middot; ground ~${Math.round(r.elev).toLocaleString()} m`;
+
+      drawCharts(r, hh, loss);
+    }
+
+    function baseOpts(unitFmt) {
+      const muted = css('--muted'), grid = css('--border');
+      return {
+        responsive: true, maintainAspectRatio: false, animation: { duration: 250 },
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` ${unitFmt(c.raw)}` } } },
+        scales: {
+          x: { ticks: { color: muted }, grid: { display: false } },
+          y: { beginAtZero: true, border: { display: false }, grid: { color: grid }, ticks: { color: muted, callback: unitFmt } },
+        },
+      };
+    }
+
+    function drawCharts(r, hh, loss) {
+      const blue = accent(), faded = css('--border-strong');
+      const cfVals = HEIGHTS.map(h => +(r.heights[h].grossCF * (1 - loss) * 100).toFixed(1));
+      const bar = { borderRadius: { topLeft: 4, topRight: 4 }, borderSkipped: 'start', barPercentage: 0.7 };
+
+      charts.h?.destroy();
+      charts.h = new Chart($('c-height'), {
+        type: 'bar',
+        data: { labels: HEIGHTS.map(h => `${h} m`), datasets: [{ data: cfVals, ...bar,
+          backgroundColor: HEIGHTS.map(h => h === hh ? blue : faded) }] },
+        options: baseOpts(v => `${v}%`),
+      });
+
+      const H = r.heights[hh];
+      charts.m?.destroy();
+      charts.m = new Chart($('c-month'), {
+        type: 'bar',
+        data: { labels: ['J','F','M','A','M','J','J','A','S','O','N','D'],
+                datasets: [{ data: H.monthly.map(v => v == null ? null : +v.toFixed(2)), backgroundColor: blue, ...bar }] },
+        options: { ...baseOpts(v => `${v} m/s`), plugins: { legend: { display: false }, tooltip: { callbacks: {
+          title: i => ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][i[0].dataIndex],
+          label: c => ` ${c.raw} m/s` } } } },
+      });
+
+      // Wind rose: 16 sectors, share of hours
+      const sectors = new Array(16).fill(0);
+      data.dir.forEach(d => { if (d != null) sectors[Math.round(d / 22.5) % 16]++; });
+      const total = sectors.reduce((a, b) => a + b, 0) || 1;
+      const names = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+      charts.r?.destroy();
+      charts.r = new Chart($('c-rose'), {
+        type: 'polarArea',
+        data: { labels: names, datasets: [{ data: sectors.map(s => +(s / total * 100).toFixed(1)),
+          backgroundColor: blue + 'b3', borderColor: css('--surface'), borderWidth: 1 }] },
+        options: {
+          responsive: true, maintainAspectRatio: false, animation: { duration: 250 },
+          startAngle: -11.25,
+          plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` ${c.label}: ${c.raw}% of hours` } } },
+          scales: { r: { grid: { color: css('--border') }, angleLines: { color: css('--border') },
+            ticks: { display: false }, pointLabels: { display: true, centerPointLabels: true, color: css('--muted'),
+              font: { size: 10 }, callback: (l, i) => i % 4 === 0 ? l : '' } } },
+        },
+      });
+    }
+
+    function setStatus(msg, isErr = false) {
+      const el = $('wr-status');
+      el.textContent = msg;
+      el.className = 'status' + (isErr ? ' err' : '');
+    }
+
+    new MutationObserver(() => { tiles.setUrl(TILES[isLight() ? 'light' : 'dark']); render(); })
+      .observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+
+    if (qs.get('lat')) map.setView([site.lat, site.lon], 6);
+    load();
+  })();
+  </script>
+</body>
+</html>
