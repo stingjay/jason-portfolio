@@ -6,23 +6,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <meta name="description" content="Thank you for contacting Jason Conover." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Inter+Tight:wght@500;600;700&display=swap" rel="stylesheet" />
+  <script>(function(){var r=document.documentElement;if(r.hasAttribute('data-theme-lock'))return;var d=r.getAttribute('data-theme-default');try{var t=localStorage.getItem('theme');if(t){r.setAttribute('data-theme',t);return}}catch(e){}if(d)r.setAttribute('data-theme',d)})();</script>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="site-wrapper">
-    <header>
-      <nav class="navbar">
-        <div class="brand">JASON CONOVER</div>
-        <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">&#9776;</button>
-        <div class="nav-links">
-          <a href="index.html">Home</a>
-          <a href="work.html">Work &amp; Methods</a>
-          <a href="sandbox.html">Jay's Sandbox</a>
-          <a href="playground.html">Playground</a>
-          <a href="contact.html">Contact</a>
-        </div>
+  <header class="topbar">
+    <div class="wrap">
+      <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">J</span>Jason Conover</a>
+      <button class="icon-btn menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="nav">&#9776;</button>
+      <nav class="nav" id="nav" aria-label="Main">
+        <a href="index.html">Home</a>
+        <a href="work.html">Work &amp; Methods</a>
+        <a href="sandbox.html">Sandbox</a>
+        <a href="playground.html">Playground</a>
+        <a href="contact.html">Contact</a>
       </nav>
-    </header>
+      <button class="icon-btn" id="themeBtn" aria-label="Toggle light or dark theme" title="Toggle theme"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></svg></button>
+    </div>
+  </header>
+
+  <div class="wrap site-body">
 
     <main class="section" style="text-align:center; padding-top:2rem;">
       <h1 class="section-heading" style="font-size:1.8rem; margin-bottom:1rem;">
@@ -42,26 +48,25 @@
       <p class="section-subtext" style="margin-top:2rem;">
         Prefer LinkedIn? You can also reach me here:<br>
         <a href="https://www.linkedin.com/in/jason-conover-97079b95"
-           target="_blank" rel="noopener"
-           style="color:#93c5fd; text-decoration:none; font-size:0.95rem;">
+           target="_blank" rel="noopener">
           linkedin.com/in/jason-conover-97079b95
         </a>
       </p>
     </main>
   </div>
 
-  <footer>
-    &copy; <span id="year"></span> Jason Conover
+  <footer class="site-footer">
+    <div class="wrap">
+      <span>&copy; <span data-year></span> Jason Conover &middot; Austin, TX</span>
+      <nav aria-label="Footer">
+        <a href="work.html">Work</a>
+        <a href="sandbox.html">Sandbox</a>
+        <a href="https://www.linkedin.com/in/jason-conover-97079b95" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+    </div>
   </footer>
 
-  <script>
-    document.getElementById("year").textContent = new Date().getFullYear();
-    const toggle = document.querySelector('.nav-toggle');
-    const navLinks = document.querySelector('.nav-links');
-    if (toggle) toggle.addEventListener('click', () => {
-      navLinks.classList.toggle('nav-open');
-      toggle.setAttribute('aria-expanded', navLinks.classList.contains('nav-open'));
-    });
-  </script>
+  <script src="js/site.js"></script>
 </body>
 </html>

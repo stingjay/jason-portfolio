@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" data-theme-default="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>This Week | Intro to Wind Energy</title>
+  <meta name="description" content="Course hub for Introduction to Wind Energy at Austin Community College." />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="This Week | Intro to Wind Energy" />
+  <meta property="og:description" content="Course hub for Introduction to Wind Energy at Austin Community College." />
+  <meta property="og:image" content="https://conoverprojects.com/images/og.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="This Week | Intro to Wind Energy" />
+  <meta name="twitter:description" content="Course hub for Introduction to Wind Energy at Austin Community College." />
+  <meta name="twitter:image" content="https://conoverprojects.com/images/og.jpg" />
+  <meta name="robots" content="noindex" />
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Inter+Tight:wght@500;600;700&display=swap" rel="stylesheet" />
+  <script>(function(){var r=document.documentElement;if(r.hasAttribute('data-theme-lock'))return;var d=r.getAttribute('data-theme-default');try{var t=localStorage.getItem('theme');if(t){r.setAttribute('data-theme',t);return}}catch(e){}if(d)r.setAttribute('data-theme',d)})();</script>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap">
+      <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">J</span>Jason Conover</a>
+      <button class="icon-btn menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="nav">&#9776;</button>
+      <nav class="nav" id="nav" aria-label="Main">
+        <a href="../index.html">Home</a>
+        <a href="../work.html">Work &amp; Methods</a>
+        <a href="../sandbox.html">Sandbox</a>
+        <a href="../playground.html">Playground</a>
+        <a href="../contact.html">Contact</a>
+      </nav>
+      <button class="icon-btn" id="themeBtn" aria-label="Toggle light or dark theme" title="Toggle theme"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></svg></button>
+    </div>
+  </header>
+
+  <div class="course-head">
+    <div class="wrap">
+      <div class="meta" data-course-meta>ACC · Spring 2027 · Highland</div>
+      <h1>Introduction to Wind Energy</h1>
+      <nav class="tabs" aria-label="Course pages">
+        <a href="index.html" aria-current="page">This Week</a>
+        <a href="schedule.html">Schedule</a>
+        <a href="resources.html">Resources</a>
+      </nav>
+    </div>
+  </div>
+
+  <main class="course-body">
+    <div class="wrap">
+      <p class="notice" id="previewNote" hidden>Preview mode. Remove <code>?week=</code> from the address to see the actual current week.</p>
+      <div class="week" id="weekCard">
+        <div class="main">
+          <div class="wk-kick"><b id="wNum"></b><span id="wDates"></span></div>
+          <div class="wk-title" id="wTitle"></div>
+          <div class="bar"><span id="wBar"></span></div>
+          <div id="wBtns" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+          <p class="next" id="wNext"></p>
+        </div>
+        <div class="side">
+          <div class="label">Read before class</div>
+          <ul class="links" id="wRead"></ul>
+        </div>
+      </div>
+
+      <div class="c-grid" style="margin-top:20px">
+        <section class="c-card" style="margin:0">
+          <h3 style="margin-bottom:10px">New? Start here</h3>
+          <ol class="start">
+            <li id="cSyllabus"></li>
+            <li>Install <a href="resources.html#software">Google Earth Pro &amp; QGIS</a></li>
+            <li>Bookmark this page</li>
+          </ol>
+        </section>
+        <section class="c-card" style="margin:0">
+          <h3 style="margin-bottom:10px">Contact</h3>
+          <div class="contact-rows">
+            <span><b>Email</b> <span id="cEmail"></span></span>
+            <span><b>Office hours</b> <span id="cHours"></span></span>
+            <span><b>Grades &amp; submissions</b> ACC course system</span>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <span>&copy; <span data-year></span> Jason Conover &middot; Austin, TX</span>
+      <nav aria-label="Footer">
+        <a href="../work.html">Work</a>
+        <a href="../sandbox.html">Sandbox</a>
+        <a href="https://www.linkedin.com/in/jason-conover-97079b95" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="../contact.html">Contact</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script src="../js/site.js"></script>
+  <script src="course.js"></script>
+</body>
+</html>
