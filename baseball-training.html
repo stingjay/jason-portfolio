@@ -728,10 +728,99 @@
     .scoreboard{font-size:.7rem;gap:.5rem;padding:.6rem .8rem}
     .game-card{padding:1rem;box-shadow:4px 4px 0 var(--navy)}
   }
+
+  /* ============= GAME FEEL (v4) ============= */
+  .difficulty-row .mute-btn{
+    margin-left:auto;background:var(--cream);border:2px solid var(--navy);color:var(--navy);
+    border-radius:50%;width:2.3rem;height:2.3rem;font-size:1.05rem;cursor:pointer;line-height:1;
+    display:inline-flex;align-items:center;justify-content:center;transition:transform .15s;
+  }
+  .difficulty-row .mute-btn:hover{transform:scale(1.1)}
+  #points{font-size:1.5rem!important;color:var(--gold);min-width:3.2ch;display:inline-block;text-align:right}
+  .score-item.points.bump #points{animation:bump .45s cubic-bezier(.3,1.8,.5,1)}
+  @keyframes bump{0%{transform:scale(1)}40%{transform:scale(1.45);color:#fff}100%{transform:scale(1)}}
+  .combo-chip{
+    font-weight:normal;
+    font-family:'Bungee',sans-serif;font-size:.75rem;background:var(--red);color:var(--cream);
+    padding:.15rem .5rem;border-radius:20px;letter-spacing:.05em;display:none;
+    box-shadow:0 0 0 2px var(--gold);animation:chip-glow 1.2s ease-in-out infinite;
+  }
+  .combo-chip.on{display:inline-block}
+  @keyframes chip-glow{0%,100%{box-shadow:0 0 0 2px var(--gold)}50%{box-shadow:0 0 0 2px var(--gold),0 0 12px var(--gold)}}
+  .fire{font-style:normal;display:inline-block;transform-origin:bottom center;animation:flicker .5s ease-in-out infinite alternate}
+  .fire.lvl2{font-size:1.2em;filter:drop-shadow(0 0 4px #ff9a2e)}
+  .fire.lvl3{font-size:1.45em;filter:drop-shadow(0 0 8px #ff6a00)}
+  @keyframes flicker{from{transform:rotate(-6deg) scale(1)}to{transform:rotate(6deg) scale(1.12)}}
+  .best-item span:last-child{color:var(--cream)!important;font-size:.95rem!important;opacity:.85}
+
+  /* Pitch clock */
+  .pitch-clock{display:flex;align-items:center;gap:.6rem;margin:-.6rem 0 1rem}
+  .pitch-clock .pc-label{font-family:'Bungee',sans-serif;font-size:.6rem;letter-spacing:.15em;color:var(--navy);white-space:nowrap}
+  .pitch-clock .pc-track{flex:1;height:8px;border-radius:6px;background:var(--cream-dark);border:1.5px solid var(--navy);overflow:hidden}
+  .pitch-clock .pc-fill{height:100%;width:100%;background:var(--grass);transform-origin:left center}
+  .pitch-clock .pc-bonus{font-family:'Bungee',sans-serif;font-size:.65rem;color:var(--red-dark);min-width:5.5ch;text-align:right}
+
+  /* Stamp overlay on the field */
+  .field-wrap{position:relative}
+  .stamp{
+    position:absolute;left:50%;top:42%;transform:translate(-50%,-50%) rotate(-8deg) scale(3);
+    font-family:'Bungee',sans-serif;font-size:clamp(1.8rem,7vw,3.2rem);letter-spacing:.04em;
+    padding:.2rem 1rem;border:5px solid currentColor;border-radius:8px;background:rgba(250,244,227,.88);
+    opacity:0;pointer-events:none;white-space:nowrap;z-index:5;
+  }
+  .stamp.good{color:var(--grass)}
+  .stamp.bad{color:var(--red)}
+  .stamp.hot{color:#e8590c;text-shadow:0 0 12px rgba(255,160,0,.6)}
+  .stamp.show{animation:stamp-in 1.3s cubic-bezier(.2,1.4,.4,1) forwards}
+  @keyframes stamp-in{
+    0%{opacity:0;transform:translate(-50%,-50%) rotate(-8deg) scale(3)}
+    18%{opacity:1;transform:translate(-50%,-50%) rotate(-8deg) scale(1)}
+    75%{opacity:1;transform:translate(-50%,-50%) rotate(-8deg) scale(1)}
+    100%{opacity:0;transform:translate(-50%,-60%) rotate(-8deg) scale(.9)}
+  }
+
+  /* Floating score popups */
+  .pop-points{
+    position:fixed;z-index:9000;pointer-events:none;transform:translate(-50%,-50%);
+    font-family:'Bungee',sans-serif;text-align:center;color:var(--gold);
+    text-shadow:2px 2px 0 var(--navy),-1px -1px 0 var(--navy),1px -1px 0 var(--navy),-1px 1px 0 var(--navy);
+    animation:float-up 1.5s ease-out forwards;
+  }
+  .pop-points .big{font-size:2rem;display:block;line-height:1}
+  .pop-points .small{font-size:.7rem;display:block;color:var(--cream);margin-top:.15rem}
+  @keyframes float-up{
+    0%{opacity:0;transform:translate(-50%,-30%) scale(.5)}
+    15%{opacity:1;transform:translate(-50%,-60%) scale(1.15)}
+    30%{transform:translate(-50%,-70%) scale(1)}
+    100%{opacity:0;transform:translate(-50%,-190%) scale(1)}
+  }
+
+  /* Shake on a miss */
+  .shake{animation:shake .45s cubic-bezier(.36,.07,.19,.97)}
+  @keyframes shake{
+    10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(4px)}
+    30%,50%,70%{transform:translateX(-8px)}40%,60%{transform:translateX(8px)}
+  }
+  .flash-good{animation:flash-good .6s ease-out}
+  @keyframes flash-good{0%{box-shadow:6px 6px 0 var(--navy),0 0 0 0 rgba(212,165,72,.9)}100%{box-shadow:6px 6px 0 var(--navy),0 0 0 18px rgba(212,165,72,0)}}
+
+  /* After a miss, show where the play should have gone */
+  .base.reveal{animation:reveal 1s ease-in-out infinite}
+  @keyframes reveal{0%,100%{filter:drop-shadow(0 0 0 var(--gold))}50%{filter:drop-shadow(0 0 10px var(--gold)) drop-shadow(0 0 4px #fff)}}
+
+  #next-btn.ready{animation:next-pulse 1.4s ease-in-out infinite}
+  @keyframes next-pulse{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px);box-shadow:5px 7px 0 var(--red-dark)}}
+
+  #confetti{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:9500}
+
+  @media (prefers-reduced-motion: reduce){
+    .shake,.stamp.show,.fire,#next-btn.ready,.combo-chip{animation:none!important}
+    .stamp.show{opacity:1}
+  }
 </style>
 </head>
 <body>
-<a href="playground.html" style="display:inline-block;font-family:'Special Elite',monospace;color:#0f2545;text-decoration:none;padding:0.9rem 1.2rem;font-size:0.85rem;letter-spacing:0.05em;background:#f4ecd8;">← Back to Playground</a>
+<a href='/playground' style='display:inline-block;font-family:\'Special Elite\',monospace;color:#0f2545;text-decoration:none;padding:0.9rem 1.2rem;font-size:0.85rem;letter-spacing:0.05em;background:#f4ecd8;'>← Back to Playground</a>
 
 <header>
   <span class="pennant">★ CONOVER PROJECTS ★</span>
@@ -756,6 +845,7 @@
       <button class="diff-btn" data-level="easy">8U</button>
       <button class="diff-btn" data-level="medium">9U–10U</button>
       <button class="diff-btn" data-level="hard">11U–12U</button>
+      <button class="mute-btn" id="mute-btn" type="button" aria-label="Mute sound" title="Sound on/off">🔊</button>
     </div>
 
     <div class="progress-wrap">
@@ -767,16 +857,25 @@
     </div>
 
     <div class="scoreboard">
-      <div class="score-item"><span>STREAK:</span><span id="streak">0</span></div>
+      <div class="score-item points" id="points-item"><span>POINTS:</span><span id="points">0</span><b class="combo-chip" id="combo-chip">x1.5</b></div>
+      <div class="score-item"><span>STREAK:</span><span id="streak">0</span><i class="fire" id="streak-fire"></i></div>
       <div class="score-item"><span>CORRECT:</span><span id="correct">0</span></div>
       <div class="score-item"><span>PLAYS:</span><span id="total">0</span></div>
+      <div class="score-item best-item"><span>BEST:</span><span id="best">0</span></div>
     </div>
 
     <div class="scenario-text" id="scenario">
       Pick a level above and a play will load. Tap the base where you'd throw the ball.
     </div>
 
+    <div class="pitch-clock" aria-hidden="true">
+      <span class="pc-label">⏱ PITCH CLOCK</span>
+      <div class="pc-track"><div class="pc-fill" id="pc-fill"></div></div>
+      <span class="pc-bonus" id="pc-bonus">+100</span>
+    </div>
+
     <div class="field-wrap">
+      <div class="stamp" id="stamp"></div>
       <svg class="diamond" viewBox="0 0 400 460" id="field">
         <!-- Outfield grass — dark green base -->
         <path d="M 200 440 Q 10 320 10 90 Q 10 -10 200 -10 Q 390 -10 390 90 Q 390 320 200 440 Z"
@@ -885,6 +984,12 @@
           <text class="base-label" x="200" y="204" text-anchor="middle" font-size="7" fill="#d4a548">HOLD</text>
         </g>
 
+        <!-- Back up the fielder who has the ball (positioned per scenario) -->
+        <g class="base zone" data-base="back-fielder" style="display:none">
+          <circle id="backf-marker" cx="200" cy="200" r="13" fill="#5a8a4d" stroke="#0f2545" stroke-width="2" stroke-dasharray="3,2"/>
+          <text class="base-label" x="200" y="204" text-anchor="middle" font-size="7" fill="#fff">BACK</text>
+        </g>
+
         <!-- "You are here" marker for off-ball role scenarios -->
         <g id="user-marker" style="display:none">
           <circle cx="200" cy="200" r="11" fill="none" stroke="#d4a548" stroke-width="3"/>
@@ -912,7 +1017,7 @@
   <div class="game-card" style="font-size:.95rem">
     <h3 style="font-family:'Bungee',sans-serif;color:var(--navy);margin-bottom:.6rem;letter-spacing:.05em">HOW TO PLAY</h3>
     <p style="margin-bottom:.5rem">Read the play. If a <strong>YOU</strong> marker appears, you're playing that position — tap where you should run, throw, or back up. Otherwise, you're the fielder with the ball — tap the base where you'd throw it.</p>
-    <p style="margin-bottom:.5rem"><strong>Get promoted!</strong> Build a streak of correct plays to unlock the next age level. The hint button always works — there's no penalty for using it.</p>
+    <p style="margin-bottom:.5rem"><strong>Get promoted!</strong> Build a streak of correct plays to unlock the next age level. Rack up <strong>points</strong>: answer before the pitch clock runs out for a speed bonus, and keep a streak going for a combo multiplier (x1.5 at 3, x2 at 5, x3 at 10). The hint button never breaks your streak — it just skips the speed bonus.</p>
     <p><strong>Position cheat sheet:</strong> P = pitcher, C = catcher, 1B/2B/3B = first/second/third basemen, SS = shortstop, LF/CF/RF = left, center, right field. <strong>BACK</strong> circles mean "back up that base."</p>
   </div>
 </section>
@@ -947,6 +1052,7 @@
   Built for the love of the game
   <span class="stitches">⎯⎯⎯</span>
 </footer>
+<canvas id="confetti"></canvas>
 
 <!-- Promotion banner (shown when level is unlocked) -->
 <div class="promo-banner" id="promo-banner">
@@ -970,6 +1076,251 @@ document.querySelectorAll('.tab').forEach(t=>{
   });
 });
 
+
+/* ===========================================================
+   GAME FEEL LAYER (v4): sound, confetti, points, pitch clock
+   =========================================================== */
+const REDUCED_MOTION = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function store(k,v){ try{ if(v===undefined) return JSON.parse(localStorage.getItem(k)); localStorage.setItem(k,JSON.stringify(v)); }catch(e){ return null; } }
+
+/* ---------- Sound (all synthesized — no audio files) ---------- */
+const sfx = (()=>{
+  let ctx = null, master = null;
+  let muted = !!store('sandlot-muted');
+  function ensure(){
+    if(!ctx){
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if(!AC) return null;
+      ctx = new AC(); master = ctx.createGain(); master.gain.value = .55; master.connect(ctx.destination);
+    }
+    if(ctx.state==='suspended') ctx.resume();
+    return ctx;
+  }
+  // Browsers only allow audio after a user gesture
+  ['pointerdown','keydown'].forEach(ev=>window.addEventListener(ev,ensure,{passive:true}));
+  const ok = ()=> !muted && ctx && ctx.state==='running';
+  function noiseBuf(sec){
+    const b = ctx.createBuffer(1, Math.floor(ctx.sampleRate*sec), ctx.sampleRate);
+    const d = b.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1; return b;
+  }
+  function env(g,t,a,peak,dec){ g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(peak,t+a); g.gain.exponentialRampToValueAtTime(0.0001,t+a+dec); }
+  function tone(type,freq,t,dur,peak=.3,dest=master){
+    const o=ctx.createOscillator(), g=ctx.createGain(); o.type=type; o.frequency.setValueAtTime(freq,t);
+    env(g,t,.01,peak,dur); o.connect(g).connect(dest); o.start(t); o.stop(t+dur+.05); return o;
+  }
+  return {
+    get muted(){return muted},
+    toggle(){ muted=!muted; store('sandlot-muted',muted); if(!muted) ensure(); return muted; },
+    crack(){ if(!ok()) return; const t=ctx.currentTime;
+      const n=ctx.createBufferSource(); n.buffer=noiseBuf(.12);
+      const f=ctx.createBiquadFilter(); f.type='bandpass'; f.frequency.value=2400; f.Q.value=.9;
+      const g=ctx.createGain(); env(g,t,.002,.9,.09); n.connect(f).connect(g).connect(master); n.start(t);
+      tone('triangle',1900,t,.05,.25); tone('sine',140,t,.08,.35);
+    },
+    pop(){ if(!ok()) return; const t=ctx.currentTime;
+      const o=ctx.createOscillator(), g=ctx.createGain(); o.type='sine';
+      o.frequency.setValueAtTime(220,t); o.frequency.exponentialRampToValueAtTime(55,t+.09);
+      env(g,t,.003,.6,.1); o.connect(g).connect(master); o.start(t); o.stop(t+.15);
+      const n=ctx.createBufferSource(); n.buffer=noiseBuf(.05);
+      const f=ctx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=900;
+      const g2=ctx.createGain(); env(g2,t,.001,.4,.04); n.connect(f).connect(g2).connect(master); n.start(t);
+    },
+    whoosh(){ if(!ok()) return; const t=ctx.currentTime;
+      const n=ctx.createBufferSource(); n.buffer=noiseBuf(.35);
+      const f=ctx.createBiquadFilter(); f.type='bandpass'; f.Q.value=1.2;
+      f.frequency.setValueAtTime(500,t); f.frequency.exponentialRampToValueAtTime(2500,t+.3);
+      const g=ctx.createGain(); env(g,t,.12,.12,.2); n.connect(f).connect(g).connect(master); n.start(t);
+    },
+    cheer(size=1){ if(!ok()) return; const t=ctx.currentTime, dur=1.2+size*.8;
+      const n=ctx.createBufferSource(); n.buffer=noiseBuf(dur);
+      const f=ctx.createBiquadFilter(); f.type='bandpass'; f.frequency.value=1100; f.Q.value=.6;
+      const g=ctx.createGain(); g.gain.setValueAtTime(.0001,t);
+      g.gain.exponentialRampToValueAtTime(.18*size,t+.25); g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+      const lfo=ctx.createOscillator(), lg=ctx.createGain(); lfo.frequency.value=7; lg.gain.value=.05*size;
+      lfo.connect(lg).connect(g.gain); lfo.start(t); lfo.stop(t+dur);
+      n.connect(f).connect(g).connect(master); n.start(t);
+    },
+    ding(step=0){ if(!ok()) return; const t=ctx.currentTime, base=880*Math.pow(2,step/12);
+      tone('sine',base,t,.25,.18); tone('sine',base*1.5,t+.06,.3,.12);
+    },
+    charge(){ if(!ok()) return; const t=ctx.currentTime;
+      // ballpark organ: G C E G . E G
+      const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=2600; lp.connect(master);
+      const seq=[[392,0,.13],[523,.14,.13],[659,.28,.13],[784,.42,.28],[659,.74,.13],[784,.88,.55]];
+      seq.forEach(([f,o,d])=>{ tone('square',f,t+o,d,.09,lp); tone('sine',f*2,t+o,d,.06,lp); tone('sine',f/2,t+o,d,.08,lp); });
+    },
+    trombone(){ if(!ok()) return; const t=ctx.currentTime;
+      const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=1100; lp.connect(master);
+      [[311,0,.32],[294,.36,.32],[277,.72,.32],[262,1.08,.9]].forEach(([f,o,d],i)=>{
+        const osc=tone('sawtooth',f,t+o,d,.14,lp);
+        if(i===3){ const v=ctx.createOscillator(), vg=ctx.createGain(); v.frequency.value=6; vg.gain.value=7;
+          v.connect(vg).connect(osc.frequency); v.start(t+o+.15); v.stop(t+o+d); }
+      });
+    },
+    buzz(){ if(!ok()) return; const t=ctx.currentTime; tone('square',110,t,.22,.12); tone('square',104,t,.22,.1); }
+  };
+})();
+
+/* ---------- Confetti ---------- */
+const confetti = (()=>{
+  const cv = document.getElementById('confetti'); const c2 = cv.getContext('2d');
+  let parts=[], raf=null;
+  const COLORS=['#b3271e','#d4a548','#0f2545','#3d6b3a','#ffffff','#e8590c'];
+  function resize(){ cv.width=innerWidth*devicePixelRatio; cv.height=innerHeight*devicePixelRatio; }
+  addEventListener('resize',resize); resize();
+  function tick(){
+    c2.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+    c2.clearRect(0,0,innerWidth,innerHeight);
+    parts = parts.filter(p=>p.life>0 && p.y<innerHeight+40);
+    parts.forEach(p=>{
+      p.vy+=p.g; p.vx*=.985; p.vy*=.985; p.x+=p.vx; p.y+=p.vy; p.rot+=p.vr; p.life--;
+      c2.save(); c2.translate(p.x,p.y); c2.rotate(p.rot); c2.globalAlpha=Math.min(1,p.life/30);
+      c2.fillStyle=p.color;
+      if(p.shape==='ball'){ c2.beginPath(); c2.arc(0,0,p.s*.7,0,Math.PI*2); c2.fill(); c2.strokeStyle='#b3271e'; c2.lineWidth=1; c2.stroke(); }
+      else c2.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);
+      c2.restore();
+    });
+    raf = parts.length ? requestAnimationFrame(tick) : (c2.clearRect(0,0,innerWidth,innerHeight), null);
+  }
+  return {
+    burst(x,y,n=40,power=1){
+      if(REDUCED_MOTION) n=Math.min(n,8);
+      for(let i=0;i<n;i++){
+        const a=-Math.PI/2+(Math.random()-.5)*Math.PI*1.3, v=(4+Math.random()*7)*power;
+        parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,g:.22,rot:Math.random()*6,vr:(Math.random()-.5)*.4,
+          s:6+Math.random()*7,life:70+Math.random()*50,color:COLORS[i%COLORS.length],shape:Math.random()<.12?'ball':'rect'});
+      }
+      if(!raf) raf=requestAnimationFrame(tick);
+    },
+    shower(){
+      for(let k=0;k<5;k++) setTimeout(()=>this.burst(innerWidth*(.15+.175*k), innerHeight*.35, 45, 1.25), k*140);
+    }
+  };
+})();
+
+/* ---------- Points, combos, pitch clock ---------- */
+const CLOCK_MS = 10000;     // speed-bonus window
+const BASE_PTS = 100, OK_PTS = 60, MAX_SPEED_BONUS = 100;
+let points = 0, displayedPoints = 0;
+let best = store('sandlot-best') || 0;
+let bestAnnounced = false;
+let hintUsed = false;
+let clockStart = 0, clockRaf = null, clockFrac = 1;
+
+function comboMult(s){ return s>=10?3 : s>=5?2 : s>=3?1.5 : 1; }
+
+function startPitchClock(){
+  stopPitchClock(); clockStart = performance.now(); clockFrac = 1;
+  const fill=$('pc-fill'), bonus=$('pc-bonus');
+  const step=()=>{
+    clockFrac = Math.max(0, 1-(performance.now()-clockStart)/CLOCK_MS);
+    fill.style.transform = `scaleX(${clockFrac})`;
+    fill.style.background = clockFrac>.6 ? 'var(--grass)' : clockFrac>.3 ? 'var(--gold)' : 'var(--red)';
+    bonus.textContent = hintUsed ? 'HINT' : clockFrac>0 ? '+'+Math.round(MAX_SPEED_BONUS*clockFrac) : 'NO BONUS';
+    if(clockFrac>0) clockRaf=requestAnimationFrame(step);
+  };
+  clockRaf=requestAnimationFrame(step);
+}
+function stopPitchClock(){ if(clockRaf) cancelAnimationFrame(clockRaf); clockRaf=null; }
+function resetPitchClockBar(){
+  stopPitchClock(); clockFrac=1;
+  $('pc-fill').style.transform='scaleX(1)'; $('pc-fill').style.background='var(--grass)'; $('pc-bonus').textContent='+'+MAX_SPEED_BONUS;
+}
+
+function animatePoints(){
+  const el=$('points'), from=displayedPoints, to=points, t0=performance.now(), dur=700;
+  const item=$('points-item'); item.classList.remove('bump'); void item.offsetWidth; item.classList.add('bump');
+  const step=now=>{
+    const k=Math.min(1,(now-t0)/dur), e=1-Math.pow(1-k,3);
+    displayedPoints=Math.round(from+(to-from)*e); el.textContent=displayedPoints.toLocaleString();
+    if(k<1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+function svgToScreen(x,y){
+  const pt=field.createSVGPoint(); pt.x=x; pt.y=y;
+  const p=pt.matrixTransform(field.getScreenCTM()); return {x:p.x,y:p.y};
+}
+function popPoints(x,y,big,small){
+  const d=document.createElement('div'); d.className='pop-points';
+  d.innerHTML=`<span class="big">${big}</span>${small?`<span class="small">${small}</span>`:''}`;
+  d.style.left=x+'px'; d.style.top=y+'px'; document.body.appendChild(d);
+  setTimeout(()=>d.remove(),1600);
+}
+function showStamp(text,kind){
+  const st=$('stamp'); st.className='stamp '+kind; st.textContent=text; void st.offsetWidth; st.classList.add('show');
+}
+function renderFire(){
+  const f=$('streak-fire');
+  f.className='fire'+(streak>=10?' lvl3':streak>=5?' lvl2':'');
+  f.textContent = streak>=10?'🔥🔥🔥' : streak>=5?'🔥🔥' : streak>=3?'🔥' : '';
+  const m=comboMult(streak), chip=$('combo-chip');
+  chip.textContent='x'+m; chip.classList.toggle('on', m>1);
+}
+function renderBest(){ $('best').textContent=best.toLocaleString(); }
+
+/* Called from handleAnswer once the throw lands */
+function playResultFx(sc, choice, isRight, isFullyCorrect, targetPos, isOffBall){
+  const scr = svgToScreen(targetPos.x, targetPos.y);
+  const card = field.closest('.game-card');
+  if(isRight){
+    const mult = comboMult(streak);                // streak already includes this play
+    const base = isFullyCorrect ? BASE_PTS : OK_PTS;
+    const speed = hintUsed ? 0 : Math.round(MAX_SPEED_BONUS*clockFrac);
+    const gained = Math.round((base+speed)*mult/5)*5;
+    points += gained; animatePoints();
+    const bits=[]; if(speed>=60) bits.push('⚡ FAST +'+speed); else if(speed>0) bits.push('+'+speed+' speed');
+    if(mult>1) bits.push('🔥 x'+mult+' COMBO');
+    popPoints(scr.x, scr.y-20, '+'+gained, bits.join(' · '));
+
+    // Stamp text
+    let word;
+    if(!isFullyCorrect) word='GOOD CALL!';
+    else if(choice==='cutoff') word='PERFECT RELAY!';
+    else if(isOffBall || choice==='hold' || choice.startsWith('behind') || choice==='back-fielder') word='HEADS-UP PLAY!';
+    else word=['YER OUT!','GOT HIM!','OUT!','BULLSEYE!'][Math.floor(Math.random()*4)];
+
+    const milestone = streak===3 ? 'HEATING UP!' : streak===5 ? 'ON FIRE!' : streak===10 ? 'UNSTOPPABLE!' : (streak>10 && streak%5===0) ? 'LEGENDARY!' : null;
+    showStamp(word,'good');
+    sfx.pop(); setTimeout(()=>sfx.cheer(isFullyCorrect?1:.6),60);
+    confetti.burst(scr.x, scr.y, isFullyCorrect?45:20, isFullyCorrect?1:.7);
+    if(!REDUCED_MOTION){ card.classList.remove('flash-good'); void card.offsetWidth; card.classList.add('flash-good'); }
+    if(milestone){
+      later(()=>{ showStamp(milestone,'hot'); sfx.charge(); confetti.shower(); }, 1100);
+    } else if(mult>1){ sfx.ding(Math.min(streak,12)); }
+
+    if(points>best){
+      best=points; store('sandlot-best',best); renderBest();
+      if(!bestAnnounced && best>300){ bestAnnounced=true; later(()=>popPoints(innerWidth/2, innerHeight*.3,'NEW BEST!','personal record'), milestone?2300:900); }
+    }
+  } else {
+    const throwToBase = !isOffBall && ['first','second','third','home','cutoff'].includes(choice);
+    showStamp(throwToBase ? 'SAFE!' : 'NOT QUITE!', 'bad');
+    sfx.buzz(); setTimeout(()=>sfx.trombone(),250);
+    if(!REDUCED_MOTION){ card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake'); }
+    // light up the right answer(s)
+    (sc.correct||[]).forEach(k=>{ const el=field.querySelector(`[data-base="${k}"]`); if(el) el.classList.add('reveal'); });
+  }
+  renderFire();
+  $('next-btn').classList.add('ready');
+}
+
+function wireGameFx(){
+$('mute-btn').textContent = sfx.muted ? '🔇' : '🔊';
+$('mute-btn').addEventListener('click',()=>{
+  const m=sfx.toggle(); $('mute-btn').textContent = m ? '🔇' : '🔊';
+  $('mute-btn').setAttribute('aria-label', m ? 'Unmute sound' : 'Mute sound');
+});
+// Enter / space = next play
+document.addEventListener('keydown',e=>{
+  if((e.key==='Enter'||e.key===' ') && $('next-btn').style.display!=='none' && document.activeElement.tagName!=='BUTTON'){
+    e.preventDefault(); loadScenario();
+  }
+});
+renderBest(); renderFire();
+}
+
 /* ===========================================================
    STRATEGY GAME (rebuilt for v3)
    ===========================================================
@@ -985,7 +1336,7 @@ document.querySelectorAll('.tab').forEach(t=>{
      acceptable: ['first'],   // ARRAY of acceptable but not optimal (counts as correct, with "good call")
      targets: [...],          // OPTIONAL override of which clickable zones are shown
                               //   default = ['first','second','third','home'] (+ cutoff on med/hard)
-                              //   include 'behind-first', 'behind-third', 'behind-second', 'behind-home', 'hold'
+                              //   include 'behind-first', 'behind-third', 'behind-second', 'behind-home', 'back-fielder', 'hold'
      hint: "...",
      why: "..."
    }
@@ -1046,24 +1397,24 @@ const scenarios = {
     {fielder:"1b",runners:[],text:"<strong>NOBODY ON.</strong> Ground ball right at the first baseman. He fields it. What now?",correct:["first"],hint:"He's right next to the bag!",why:"He just steps on first base himself! Easiest out in baseball."},
     {fielder:"2b",runners:['first'],text:"<strong>RUNNER ON 1ST.</strong> Hard ground ball to the second baseman. What's the FIRST throw?",correct:["second"],acceptable:["first"],hint:"Get the lead runner first.",why:"The runner on first is heading to second. Throw to second to get him first, then we can try for first too. (Throwing straight to first is OK if it's a sure out.)"},
     {fielder:"ss",runners:['first'],text:"<strong>RUNNER ON 1ST.</strong> Ground ball to the shortstop. Where's the throw?",correct:["second"],acceptable:["first"],hint:"Lead runner is going to second.",why:"Throw to second base to get the runner who's running there. That's the lead runner — get him first!"},
-    {fielder:"3b",runners:['third'],text:"<strong>RUNNER ON 3RD, 2 OUTS.</strong> Slow grounder to the third baseman. Where do you throw?",correct:["first"],hint:"With 2 outs, just get the easy out.",why:"With 2 outs, you only need ONE more out. Throw to first — the runner can't score before you record the third out!"},
-    {fielder:"ss",runners:[],text:"<strong>NOBODY ON.</strong> Pop fly to the shortstop — he catches it! Now what?",correct:["hold"],acceptable:["first","second","third","home"],hint:"The play is OVER!",why:"When you catch a fly ball with no one on, the batter is already out. Just hold the ball — the play is done!",targets:["first","second","third","home","hold"]},
-    {fielder:"cf",runners:[],text:"<strong>NOBODY ON.</strong> Easy fly ball to center field. CF catches it. Now what?",correct:["hold"],acceptable:["second"],hint:"Inning's over (or the batter's out).",why:"You caught the ball — that's the out! Toss it back to the infield, no big throw needed.",targets:["first","second","third","home","hold"]},
-    {fielder:"2b",runners:['first','second'],text:"<strong>RUNNERS ON 1ST AND 2ND.</strong> Ground ball to the second baseman. Where's the easiest out?",correct:["first"],acceptable:["second"],hint:"He's right by first base — quickest play.",why:"The 2B is closest to first base. The simplest out is at first. Going to second is also OK if the runner from first is closer."},
+    {fielder:"3b",runners:['third'],text:"<strong>RUNNER ON 3RD, 2 OUTS.</strong> Slow grounder to the third baseman. Where do you throw?",correct:["first"],hint:"With 2 outs, just get the easy out.",why:"With 2 outs you only need ONE more out. Even if the runner crosses the plate first, the run does NOT count when the third out is the batter-runner put out before reaching first. Throw to first!"},
+    {fielder:"ss",runners:[],text:"<strong>NOBODY ON.</strong> Pop fly to the shortstop — he catches it! Now what?",correct:["hold"],hint:"The play is OVER!",why:"When you catch a fly ball with no one on, the batter is already out. No throw needed — just hold the ball and toss it back to the pitcher.",targets:["first","second","third","home","hold"]},
+    {fielder:"cf",runners:[],text:"<strong>NOBODY ON.</strong> Easy fly ball to center field. CF catches it. Now what?",correct:["hold"],acceptable:["second"],hint:"The catch is the out — nobody is running.",why:"You caught the ball — that's the out! Toss it back to the infield, no big throw needed.",targets:["first","second","third","home","hold"]},
+    {fielder:"2b",runners:['first','second'],text:"<strong>RUNNERS ON 1ST AND 2ND.</strong> Ground ball to the second baseman. Where's the easiest out?",correct:["first","second"],hint:"He's close to first — and close to second.",why:"Both are good outs for the 2B. First base is the simplest throw to get the batter. A short toss to second gets the force on the runner from first (and could even start a double play)."},
     {fielder:"ss",runners:['second'],text:"<strong>RUNNER ON 2ND.</strong> Ground ball to the shortstop. Where do you throw?",correct:["first"],hint:"The runner on 2nd does NOT have to run.",why:"With only a runner on 2nd, he doesn't HAVE to run anywhere. Throw to first to get the batter."},
     {fielder:"1b",runners:['first'],text:"<strong>RUNNER ON 1ST.</strong> Ground ball to the first baseman. He fields it. What now?",correct:["first"],acceptable:["second"],hint:"He's right by the bag.",why:"Easiest play: step on first himself! That gets the batter out. Going to second works too if the runner is far behind."},
     {fielder:"3b",runners:['second'],text:"<strong>RUNNER ON 2ND.</strong> Ground ball to the third baseman. Where's the throw?",correct:["first"],hint:"Runner on 2nd doesn't have to run.",why:"The runner on 2nd isn't forced anywhere. Throw to first for the batter out!"},
     {fielder:"rf",runners:[],text:"<strong>NOBODY ON.</strong> Pop fly caught by the right fielder. Now what?",correct:["hold"],acceptable:["second"],hint:"The play is over.",why:"You caught it — that's the out! Just toss it back in. No need for a big throw.",targets:["first","second","third","home","hold"]},
     // Off-ball positioning — intro to the concept
     {fielder:"ss",role:"rf",runners:[],text:"You are the <strong>RIGHT FIELDER</strong>. Ground ball goes to the SHORTSTOP. The throw is going to first base. Where should you go?",correct:["behind-first"],hint:"Your job: back up first base in case the throw is wild!",why:"Right fielders always back up throws to first. If the SS throws wide, YOU stop it from going into the outfield. Hustle behind first!",targets:["first","second","behind-first","hold"]},
-    {fielder:"3b",role:"lf",runners:[],text:"You are the <strong>LEFT FIELDER</strong>. Ground ball goes to the THIRD BASEMAN, who throws to first. Where should you go?",correct:["hold"],acceptable:["behind-third"],hint:"The throw isn't coming your way.",why:"On a throw across the diamond to first, the LF doesn't have a backup job. Stay alert in case the ball gets through, but you don't need to run anywhere specific.",targets:["first","third","behind-third","hold"]},
+    {fielder:"3b",role:"lf",runners:[],text:"You are the <strong>LEFT FIELDER</strong>. Ground ball goes to the THIRD BASEMAN, who throws to first. Where should you go?",correct:["back-fielder"],acceptable:["hold"],hint:"What if the ball gets past the third baseman?",why:"Outfielders back up the infielder on every ground ball hit their way. Run in behind the 3B — if the ball scoots under his glove, YOU stop it from rolling into the outfield.",targets:["first","third","back-fielder","hold"]},
     {fielder:"ss",runners:['third'],text:"<strong>RUNNER ON 3RD, 0 OUTS.</strong> Ground ball to the shortstop. The runner is RUNNING HOME! Where's the throw?",correct:["home"],hint:"Don't let the run score!",why:"The runner is going home — throw home to stop the run! You can't let an easy run score early in the inning."},
     {fielder:"p",runners:['second'],text:"<strong>RUNNER ON 2ND.</strong> Ground ball back to the pitcher. Where's the throw?",correct:["first"],hint:"The runner on 2nd doesn't have to run.",why:"Just get the batter at first. The runner on 2nd isn't forced — he might advance, but the easy out is the batter."},
     {fielder:"2b",runners:[],text:"<strong>NOBODY ON.</strong> Ground ball to the second baseman. Where's the throw?",correct:["first"],hint:"He's pretty close to first.",why:"Quick throw across to first — the 2B has the shortest throw of any infielder. Easy out!"},
     {fielder:"cf",runners:['first'],text:"<strong>RUNNER ON 1ST.</strong> Single hit to center field. The runner stops at second. Where's the throw?",correct:["second"],acceptable:["cutoff"],hint:"Try to keep the runner from going to third.",why:"Throw to second base (or hit the cutoff) to keep the runner from going further. Don't let him keep going to third!"},
     {fielder:"lf",runners:[],text:"<strong>NOBODY ON.</strong> Single to left field. The batter is heading hard for second. Where's the throw?",correct:["second"],hint:"He's trying to stretch it into a double.",why:"Throw to second to try to get him out trying to stretch the hit. Don't let him take the extra base!"},
-    {fielder:"3b",runners:['first','third'],text:"<strong>RUNNERS ON 1ST AND 3RD, 2 OUTS.</strong> Slow grounder to the third baseman. Where do you throw?",correct:["first"],hint:"With 2 outs, just get the easy out.",why:"2 outs means just get one more out anywhere! Throw to first for the easiest play. Game-winning runs don't matter if you record the third out."},
-    {fielder:"ss",role:"cf",runners:[],text:"You are the <strong>CENTER FIELDER</strong>. Ground ball to the SHORTSTOP, throw is going to first. Where should you go?",correct:["hold"],acceptable:["behind-second","behind-first"],hint:"You don't have a specific backup job here.",why:"On a routine grounder to SS, the CF stays alert in case the ball gets through. No specific backup spot for this play.",targets:["first","second","behind-first","behind-second","hold"]},
+    {fielder:"3b",runners:['first','third'],text:"<strong>RUNNERS ON 1ST AND 3RD, 2 OUTS.</strong> Slow grounder to the third baseman. Where do you throw?",correct:["first"],acceptable:["second"],hint:"With 2 outs, just get the easy out.",why:"2 outs means you only need one more out anywhere! Throw to first for the easiest play. If you get the batter before he reaches first, the runner from 3rd does NOT score — even if he crossed the plate. (A force at second also ends the inning.)"},
+    {fielder:"ss",role:"cf",runners:[],text:"You are the <strong>CENTER FIELDER</strong>. Ground ball to the SHORTSTOP, throw is going to first. Where should you go?",correct:["back-fielder"],acceptable:["hold"],hint:"What if the ball gets past the shortstop?",why:"Outfielders back up infielders on ground balls. Charge in behind the SS so a ball that gets through doesn't turn into extra bases. (Right field — not center — backs up first base.)",targets:["first","second","back-fielder","hold"]},
     {fielder:"1b",runners:['second'],text:"<strong>RUNNER ON 2ND.</strong> Ground ball to the first baseman. He fields it. What now?",correct:["first"],hint:"Easiest play.",why:"He's right at first — step on the bag for the out! The runner on 2nd may try to advance, but get the sure out first."},
     {fielder:"2b",runners:['third'],text:"<strong>RUNNER ON 3RD, 1 OUT.</strong> Hard grounder to the second baseman. The runner on 3rd is running home! Where's the throw?",correct:["home"],acceptable:["first"],hint:"Stop the run!",why:"With 1 out and a runner heading home, throw home to keep the run off the board. (If the runner held, throwing to first for the out is fine too.)"}
   ],
@@ -1082,10 +1433,10 @@ const scenarios = {
     {fielder:"rf",runners:['first'],text:"<strong>RUNNER ON 1ST.</strong> Fly ball caught by the right fielder. The runner tags up and goes for second. Where's the throw?",correct:["second"],hint:"The runner is heading to second.",why:"After a tag-up, throw to the base the runner is going to. He's heading to second, so the throw goes there!"},
     {fielder:"rf",runners:[],text:"<strong>NOBODY ON.</strong> Single to right field. The batter rounds first hard. Where's the throw?",correct:["second"],acceptable:["cutoff"],hint:"He's trying to stretch it.",why:"If the batter is going for second, throw there to try to get him. Hitting the cutoff man is also a smart play to control where the ball goes."},
     // Off-ball: backups and positioning
-    {fielder:"ss",role:"rf",runners:['first'],text:"You are the <strong>RIGHT FIELDER</strong>. Ground ball to SS — he's throwing to first. Where do you go?",correct:["behind-first"],hint:"Back up first base!",why:"On any throw to first, the right fielder ALWAYS sprints to back it up. If the throw goes wild, you stop it from rolling away.",targets:["first","second","behind-first","hold"]},
+    {fielder:"ss",role:"rf",runners:['first'],text:"You are the <strong>RIGHT FIELDER</strong>. Ground ball to SS — he's turning a double play: second base, then first. Where do you go?",correct:["behind-first"],hint:"Back up first base!",why:"On throws from the infield to first, the right fielder sprints to back it up. If the relay throw to first goes wild, you stop it from rolling away.",targets:["first","second","behind-first","hold"]},
     {fielder:"3b",role:"lf",runners:['second'],text:"You are the <strong>LEFT FIELDER</strong>. Grounder to 3B, throw will go across to first. Where do you go?",correct:["behind-third"],acceptable:["hold"],hint:"What if the runner on 2nd tries to take 3rd?",why:"LF should drift toward 3rd base in case the runner from 2nd tries to advance. Backing up 3rd is your job!",targets:["first","third","behind-third","hold"]},
-    {fielder:"cf",role:"cf",runners:['first'],text:"You are the <strong>CENTER FIELDER</strong>. The shortstop just caught a line drive. Where do you go?",correct:["second"],acceptable:["behind-second","hold"],hint:"The runner on 1st left early!",why:"Get to second base or back up the SS — the runner on 1st may have left early and you might need to throw him out at second!",targets:["second","behind-second","hold"]},
-    {fielder:"ss",runners:['first','second'],text:"<strong>RUNNERS ON 1ST AND 2ND.</strong> Ground ball to the shortstop. What's the BEST throw?",correct:["third"],acceptable:["second","first"],hint:"Both runners are forced.",why:"With both runners forced, you can get the lead runner at third! That's the toughest force, but the biggest out. Second or first also work for sure outs."},
+    {fielder:"ss",runners:['first'],text:"<strong>RUNNER ON 1ST, 0 OUTS.</strong> Line drive caught by the shortstop! The runner on 1st took off on the pitch and can't get back. Where's the throw?",correct:["first"],hint:"On a caught ball, a runner must go back and touch his base.",why:"When a line drive is caught, runners have to return to the base they started on. Throw to FIRST before he gets back — that's a double play! (Throwing to second does nothing — he doesn't have to go there.)"},
+    {fielder:"ss",runners:['first','second'],text:"<strong>RUNNERS ON 1ST AND 2ND.</strong> Ground ball to the shortstop. What's the BEST throw?",correct:["second","third"],acceptable:["first"],hint:"Both runners are forced.",why:"With both runners forced, the SS has two great choices: second base for the force (and maybe a double play), or third base to get the lead runner. First base is OK for a sure out, but you let the lead runners move up."},
     {fielder:"p",runners:['third'],text:"<strong>RUNNER ON 3RD, 0 OUTS.</strong> Ground ball back to the pitcher. The runner is going home! Where's the throw?",correct:["home"],hint:"Don't let the run score early.",why:"With 0 outs, you really don't want to give up an easy run. Throw home to get him at the plate!"},
     {fielder:"lf",runners:['second'],text:"<strong>RUNNER ON 2ND.</strong> Single to left field. The runner is rounding 3rd, heading home. Where's the throw?",correct:["home"],acceptable:["cutoff"],hint:"Try to throw him out at the plate!",why:"Throw home to try to get the runner. (Hitting the cutoff is OK if it's a long throw — let the cutoff decide whether to relay home.)"},
     {fielder:"2b",runners:['first'],text:"<strong>RUNNER ON 1ST, 0 OUTS.</strong> Ground ball to 2B — perfect double-play ball! What's the FIRST throw?",correct:["second"],hint:"Lead runner first, then double up at first.",why:"Throw to second base to get the lead runner forced. Then second base relays to first for the double play!"},
@@ -1093,11 +1444,11 @@ const scenarios = {
     {fielder:"rf",role:"1b",runners:[],text:"You are the <strong>FIRST BASEMAN</strong>. Single to right field. The runner rounded first too hard. RF is going to throw behind him. Where do you cover?",correct:["first"],hint:"Get back to your bag!",why:"Sprint back to first base. RF is going to try to pick him off — you need to be at the bag to catch the ball and apply the tag!",targets:["first","second","behind-first","hold"]},
     {fielder:"cf",runners:['first','second'],text:"<strong>RUNNERS ON 1ST AND 2ND.</strong> Single to center field. Runner from 2nd is heading home, runner from 1st is going to 3rd. Where's the throw?",correct:["home"],acceptable:["cutoff","third"],hint:"Stop the run scoring first.",why:"Throw home (or hit the cutoff) to stop the run. Cutoff can relay home or to 3rd if the lead runner is already across."},
     {fielder:"3b",runners:['third','first'],text:"<strong>RUNNERS ON 1ST AND 3RD, 1 OUT.</strong> Hard grounder to 3B. The runner on 3rd holds. What's the best throw?",correct:["second"],acceptable:["first"],hint:"Try for the double play.",why:"Throw to second to start the double play! With the runner holding at 3rd, you can get the inning-ending double play."},
-    {fielder:"ss",runners:[],text:"<strong>NOBODY ON.</strong> Pop fly to shallow left, SS catches it. What now?",correct:["hold"],acceptable:["first"],hint:"Inning continues, but no runners.",why:"Catch = batter is out. Just hold the ball or toss to the pitcher. No throws needed.",targets:["first","second","third","home","hold"]},
-    {fielder:"2b",runners:['first','second'],text:"<strong>RUNNERS ON 1ST AND 2ND, 0 OUTS.</strong> Ground ball to 2B. What's the BEST first throw?",correct:["third"],acceptable:["second","first"],hint:"All three runners are forced.",why:"With all forced, the BEST play is to third — get the lead runner! If you can't, second or first is fine. Just get an out."},
-    {fielder:"cf",role:"rf",runners:['second'],text:"You are the <strong>RIGHT FIELDER</strong>. Single to CENTER field. Where should you go?",correct:["behind-first"],acceptable:["hold"],hint:"Outfielders back each other up!",why:"When CF fields a ball, RF drifts toward right-center to back up. If the throw is going to first or second, you back up first. Keep moving!",targets:["first","second","behind-first","hold"]},
+    {fielder:"ss",runners:[],text:"<strong>NOBODY ON.</strong> Pop fly to shallow left, SS catches it. What now?",correct:["hold"],hint:"No runners — nobody to throw out.",why:"Catch = batter is out. Just hold the ball or toss it to the pitcher. No throws needed.",targets:["first","second","third","home","hold"]},
+    {fielder:"2b",runners:['first','second'],text:"<strong>RUNNERS ON 1ST AND 2ND, 0 OUTS.</strong> Ground ball to 2B. What's the BEST first throw?",correct:["second"],acceptable:["first"],hint:"Short throw, and it can start a double play.",why:"Throw to second for the force — it's a short toss for the 2B and can turn into a double play at first. Third base is a long throw across your body, so the 2B almost never goes there."},
+    {fielder:"cf",role:"rf",runners:['second'],text:"You are the <strong>RIGHT FIELDER</strong>. Single to CENTER field. Where should you go?",correct:["back-fielder"],acceptable:["hold"],hint:"Outfielders back each other up!",why:"When the CF fields a ball, the right fielder (and left fielder) run over behind him. If the ball gets by the CF, you're there to stop it.",targets:["first","second","behind-first","back-fielder","hold"]},
     {fielder:"lf",runners:['first'],text:"<strong>RUNNER ON 1ST.</strong> Fly ball caught by left fielder. Runner tags up and goes for 2nd. Where's the throw?",correct:["second"],hint:"He's heading to second.",why:"On a tag-up, throw to the base the runner is going to. Throw to second!"},
-    {fielder:"3b",runners:['first'],text:"<strong>RUNNER ON 1ST.</strong> Bunt rolls toward the third baseman. Both runners hustling. Where's the throw?",correct:["first"],acceptable:["second"],hint:"Slow ball — the lead runner has a head start.",why:"On a slow bunt, the runner usually beats the throw to second. Take the sure out at first."},
+    {fielder:"3b",runners:['first'],text:"<strong>RUNNER ON 1ST.</strong> Bunt rolls toward the third baseman. The runner and the batter are both hustling. Where's the throw?",correct:["first"],acceptable:["second"],hint:"Slow ball — the lead runner has a head start.",why:"On a slow bunt, the runner usually beats the throw to second. Take the sure out at first."},
     {fielder:"ss",role:"2b",runners:['first'],text:"You are the <strong>SECOND BASEMAN</strong>. Ground ball to SS, runner on 1st is going to 2nd. Where do you go?",correct:["second"],hint:"Cover the bag!",why:"You cover second base on a grounder to SS. The SS will throw to YOU for the force out. Get to the bag!",targets:["first","second","behind-second","hold"]},
     {fielder:"rf",runners:['first','second'],text:"<strong>RUNNERS ON 1ST AND 2ND.</strong> Single to right field. Runner from 2nd scores. Runner from 1st heads to 3rd. Where's the throw?",correct:["third"],acceptable:["cutoff"],hint:"You can't get the run that already scored.",why:"The runner from 2nd is scoring no matter what. Try to throw out the runner from 1st at 3rd. (Cutoff is also smart on a long throw.)"},
     {fielder:"p",runners:['first','second','third'],text:"<strong>BASES LOADED, 1 OUT.</strong> Ground ball back to the pitcher. Where's the throw?",correct:["home"],acceptable:["second"],hint:"Catcher can step on home for an easy out.",why:"Throw home for the force at the plate! The catcher steps on home for one out, and can throw to first for the double play. No run scores!"}
@@ -1109,32 +1460,32 @@ const scenarios = {
      - Multiple correct answers more often
   */
   medium: [
-    {fielder:"ss",runners:['first','second'],text:"<strong>RUNNERS ON 1ST AND 2ND, 1 OUT.</strong> Sharp grounder to SS — perfect double play ball! What's the FIRST throw?",correct:["second"],hint:"Step on second, throw to first.",why:"Quickest double play: SS steps on second for one out, then throws to first for the second. Going to third is harder — that runner has a head start."},
+    {fielder:"ss",runners:['first','second'],text:"<strong>RUNNERS ON 1ST AND 2ND, 1 OUT.</strong> Sharp grounder to SS — perfect double play ball! What's the FIRST throw?",correct:["second"],acceptable:["third","first"],hint:"Feed second, then on to first.",why:"Quickest double play: SS feeds second for the force, then the relay goes to first to end the inning. Going to third gets the lead runner, but a double play from there is a much longer throw."},
     {fielder:"3b",runners:['second','third'],text:"<strong>RUNNERS ON 2ND AND 3RD, 1 OUT.</strong> Grounder to 3B. Runner on 3rd is going! Where's the throw?",correct:["home"],hint:"You can't let that run score with only 1 out!",why:"With a runner breaking from 3rd, you MUST throw home. Letting the run score with 1 out hurts way more than the chance of getting an out at first."},
-    {fielder:"2b",runners:['first','third'],text:"<strong>RUNNERS ON 1ST AND 3RD, 2 OUTS.</strong> Ground ball to 2B. Where's the throw?",correct:["first"],acceptable:["second"],hint:"With 2 outs, get the sure out.",why:"With 2 outs, the runner on 3rd doesn't matter — he can't score before the third out. Throw to first for the inning-ending out."},
+    {fielder:"2b",runners:['first','third'],text:"<strong>RUNNERS ON 1ST AND 3RD, 2 OUTS.</strong> Ground ball to 2B. Where's the throw?",correct:["first"],acceptable:["second"],hint:"With 2 outs, get the sure out.",why:"With 2 outs, just get the third out. If it's the batter at first (or a force at second), the run doesn't count — even if the runner from 3rd crossed the plate first."},
     {fielder:"rf",runners:['second'],text:"<strong>RUNNER ON 2ND.</strong> Single to right field. Runner is rounding 3rd, heading home. Where's the throw?",correct:["cutoff"],acceptable:["home"],hint:"Use the relay!",why:"On a long throw home, hit the CUTOFF MAN. He decides whether to relay home or hold the batter at first. Don't air-mail it!"},
     {fielder:"3b",runners:['first'],text:"<strong>RUNNER ON 1ST.</strong> Bunt rolls slowly toward 3B. Both runners hustling. Where's the throw?",correct:["first"],acceptable:["second"],hint:"Slow bunt — runner has a head start.",why:"On a slow bunt, the runner usually beats the throw to 2nd. Take the sure out at 1st — don't risk a wild throw that lets everyone advance."},
     {fielder:"ss",runners:['first','second'],text:"<strong>RUNNERS ON 1ST AND 2ND, 0 OUTS.</strong> Hard line drive caught by SS. Runner on 2nd was running on the pitch! Where's the throw?",correct:["second"],hint:"Double him off!",why:"The runner on 2nd was already running — he can't get back. Throw to second to double him off. HUGE momentum swing!"},
     // Outfield backup scenarios
-    {fielder:"3b",role:"lf",runners:['first','second'],text:"You are the <strong>LEFT FIELDER</strong>. Ground ball to 3B. He's throwing to 3rd for the force. Where do you go?",correct:["behind-third"],hint:"Back up the throw!",why:"On a throw to 3rd, the left fielder backs up the bag. If the ball gets past the 3B, you stop it from going to the wall.",targets:["first","second","third","behind-third","hold"]},
+    {fielder:"ss",role:"lf",runners:['first','second'],text:"You are the <strong>LEFT FIELDER</strong>. Ground ball to SS. He's throwing to 3rd for the force. Where do you go?",correct:["behind-third"],hint:"Back up the throw!",why:"On a throw to 3rd from the infield, the left fielder backs up the bag. If the ball gets past the 3B, you stop it from going to the wall.",targets:["first","second","third","behind-third","hold"]},
     {fielder:"ss",role:"cf",runners:['first'],text:"You are the <strong>CENTER FIELDER</strong>. Ground ball to SS. Throw is going to second for the force. Where do you go?",correct:["behind-second"],hint:"Outfielders back up infield throws!",why:"The CF backs up the bag at second on any throw there. If the SS throw is wild, you save runners from advancing.",targets:["first","second","behind-second","hold"]},
-    {fielder:"lf",role:"cf",runners:['second'],text:"You are the <strong>CENTER FIELDER</strong>. Single to LEFT field. Where do you go?",correct:["behind-second"],acceptable:["hold"],hint:"Help your left fielder!",why:"CF reads the ball and runs to back up the LF. If the LF bobbles it, you grab the ball and stop the runner from advancing.",targets:["second","behind-second","hold"]},
-    {fielder:"cf",role:"rf",runners:[],text:"You are the <strong>RIGHT FIELDER</strong>. Single up the middle, CF is fielding it. Where do you go?",correct:["behind-second"],acceptable:["hold"],hint:"Back up your CF.",why:"On a ball to CF, the RF runs to back him up — usually drifting toward right-center or backing up the throw to 2nd.",targets:["first","second","behind-second","hold"]},
+    {fielder:"lf",role:"cf",runners:['second'],text:"You are the <strong>CENTER FIELDER</strong>. Single to LEFT field. Where do you go?",correct:["back-fielder"],acceptable:["hold"],hint:"Help your left fielder!",why:"CF runs over behind the LF. If the LF bobbles it or it skips past him, you grab the ball and stop the runners from taking extra bases.",targets:["second","behind-second","back-fielder","hold"]},
+    {fielder:"cf",role:"rf",runners:[],text:"You are the <strong>RIGHT FIELDER</strong>. Single up the middle, CF is fielding it. Where do you go?",correct:["back-fielder"],acceptable:["hold"],hint:"Back up your CF.",why:"On a ball to CF, the RF runs over behind him (toward right-center). If it gets past the CF, you keep a single from becoming a triple.",targets:["first","second","behind-second","back-fielder","hold"]},
     {fielder:"ss",role:"3b",runners:['first'],text:"You are the <strong>THIRD BASEMAN</strong>. Ground ball to SS, going to be a force at 2nd. Where do you go?",correct:["third"],hint:"What if there's a wild throw?",why:"Stay alert at 3rd! If something goes wrong on the double play, the runner from 1st might try to take 3rd. Cover your bag.",targets:["second","third","behind-third","hold"]},
-    {fielder:"rf",runners:['first'],text:"<strong>RUNNER ON 1ST.</strong> Double down the right field line. Runner from 1st rounding 3rd. Batter heading to 2nd. Where's the relay?",correct:["home"],acceptable:["cutoff"],hint:"Lead runner matters most!",why:"Hit the cutoff, who relays HOME to throw out the runner scoring from 1st. Stop the run first — worry about the batter later."},
+    {fielder:"rf",runners:['first'],text:"<strong>RUNNER ON 1ST.</strong> Double down the right field line. Runner from 1st rounding 3rd. Batter heading to 2nd. Where does the RF throw?",correct:["cutoff"],acceptable:["home"],hint:"That's a LONG throw from the corner.",why:"From the right field corner, hit the cutoff/relay man. He turns and fires HOME to throw out the runner scoring from 1st. Stop the run first — worry about the batter later."},
     {fielder:"cf",runners:['first','second'],text:"<strong>RUNNERS ON 1ST AND 2ND, 2 OUTS.</strong> Single to center. Runner from 2nd is heading home. Where's the throw?",correct:["cutoff"],acceptable:["home"],hint:"Hit the cutoff. He decides.",why:"Always hit the cutoff on long throws. He keeps the throw accurate AND can stop the trail runner. Cutoff decides: relay home or hold the batter."},
-    {fielder:"ss",runners:['second'],text:"<strong>RUNNER ON 2ND.</strong> Slow grounder to SS. Runner on 2nd is going to 3rd! Where's the throw?",correct:["third"],acceptable:["first"],hint:"Lead runner is going.",why:"If the runner on 2nd tries to advance, throw to 3rd to cut him down. (If he's already there safely, take the sure out at 1st.)"},
+    {fielder:"ss",runners:['second'],text:"<strong>RUNNER ON 2ND.</strong> Ground ball to SS. Runner on 2nd breaks for 3rd! Where's the throw?",correct:["third"],acceptable:["first"],hint:"Lead runner is going.",why:"If the runner on 2nd tries to advance, throw to 3rd to cut him down. (If he's already there safely, take the sure out at 1st.)"},
     {fielder:"p",runners:['first','third'],text:"<strong>RUNNERS ON 1ST AND 3RD, 1 OUT.</strong> Comebacker to the pitcher. Where's the throw?",correct:["second"],acceptable:["home","first"],hint:"Try for the double play.",why:"Throw to second to start the double play. The runner on 3rd usually won't try to score against a clean DP. (Home or first also works depending on what you see.)"},
-    {fielder:"3b",runners:['first','second','third'],text:"<strong>BASES LOADED, 0 OUTS.</strong> Ground ball to 3B. Where's the easiest force out?",correct:["third"],acceptable:["home"],hint:"Step on your bag!",why:"3B is standing right at third — easy force! (Or step on home for the force at home — depends on whether you're closer to home plate or third.)"},
+    {fielder:"3b",runners:['first','second','third'],text:"<strong>BASES LOADED, 0 OUTS.</strong> Ground ball to 3B. Where's the BEST throw?",correct:["home"],acceptable:["third"],hint:"Every runner is forced — including the one from 3rd.",why:"Throw HOME for the force — the catcher steps on the plate, no run scores, and he can even throw to first for a double play. Stepping on 3rd gets an out too, but then the runner from 3rd is no longer forced and usually scores."},
     {fielder:"2b",runners:['first','second'],text:"<strong>RUNNERS ON 1ST AND 2ND, 1 OUT.</strong> Ground ball to 2B. What's the BEST play?",correct:["second"],acceptable:["first"],hint:"Try for the double play.",why:"Throw to second for the force, then relay to first for the double play. Get out of the inning! Going just to first is OK if the DP isn't possible."},
     {fielder:"lf",runners:['third'],text:"<strong>RUNNER ON 3RD, 0 OUTS.</strong> Fly ball to LF. Runner tags up. Where's the throw?",correct:["home"],acceptable:["cutoff"],hint:"Try to throw him out at the plate!",why:"Tag-up at 3rd means he's coming home. Throw home (or hit the cutoff if it's a long throw)."},
     {fielder:"3b",role:"1b",runners:[],text:"You are the <strong>FIRST BASEMAN</strong>. Bunt to the third baseman. Where do you go?",correct:["first"],hint:"Cover your bag!",why:"The 3B charged the bunt — you HAVE to cover first base. He's throwing to your bag.",targets:["first","second","behind-first","hold"]},
-    {fielder:"ss",role:"p",runners:['first'],text:"You are the <strong>PITCHER</strong>. Ground ball to SS. Where do you go?",correct:["behind-first"],acceptable:["hold"],hint:"Pitchers back up bases!",why:"On any throw to first, the pitcher runs over to back up first base. Hustle behind the bag!",targets:["first","second","behind-first","hold"]},
+    {fielder:"1b",role:"p",runners:[],text:"You are the <strong>PITCHER</strong>. Ground ball to the FIRST BASEMAN, who has to range way to his right. Where do you go?",correct:["first"],hint:"Who's going to take the throw?",why:"On any ball hit to the right side, the pitcher breaks for first base. The 1B is too far from the bag — you cover first and take his toss for the out!",targets:["first","second","behind-first","hold"]},
     {fielder:"rf",role:"p",runners:['second'],text:"You are the <strong>PITCHER</strong>. Single to right. Throw is going home. Where do you go?",correct:["behind-home"],hint:"Back up the catcher!",why:"On any throw home from the outfield, the pitcher backs up the catcher. If the throw is wild, you stop the runner from going to the next base!",targets:["home","cutoff","behind-home","hold"]},
     {fielder:"cf",runners:['third'],text:"<strong>RUNNER ON 3RD, 0 OUTS.</strong> Deep fly to CF. Runner tags up. Where's the throw?",correct:["home"],acceptable:["cutoff"],hint:"Throw the runner out at home!",why:"On a tag-up from 3rd, throw home to keep the run off the board. Cutoff is fine on a long throw — let him decide."},
     {fielder:"2b",runners:['second'],text:"<strong>RUNNER ON 2ND, 1 OUT.</strong> Ground ball to 2B. Runner stops at 2nd. Where's the throw?",correct:["first"],hint:"Get the sure out.",why:"Runner on 2nd isn't forced. Just get the batter at first. Hold the runner at 2nd."},
-    {fielder:"3b",runners:['second','third'],text:"<strong>RUNNERS ON 2ND AND 3RD, 2 OUTS.</strong> Slow grounder to 3B. Where's the throw?",correct:["first"],hint:"With 2 outs, just get the third out!",why:"With 2 outs, take the inning-ending out at first. The runs that score don't count if you get the third out before they cross."},
-    {fielder:"ss",role:"lf",runners:[],text:"You are the <strong>LEFT FIELDER</strong>. Pop fly to shallow left. SS is calling for it. Where do you go?",correct:["hold"],acceptable:["behind-third"],hint:"Yield to your infielder, but stay close.",why:"On a shallow pop, the SS has a better angle going back. Yield to him and stay close to back up if he drops it.",targets:["second","third","behind-third","hold"]},
+    {fielder:"3b",runners:['second','third'],text:"<strong>RUNNERS ON 2ND AND 3RD, 2 OUTS.</strong> Slow grounder to 3B. Where's the throw?",correct:["first"],hint:"With 2 outs, just get the third out!",why:"With 2 outs, take the inning-ending out at first. If the third out is the batter at first, NO runs count — even ones that crossed the plate before the throw got there."},
+    {fielder:"ss",role:"lf",runners:[],text:"You are the <strong>LEFT FIELDER</strong>. Pop fly to shallow left. The SS is camped under it calling 'I GOT IT!' — you're too far away to reach it. Where do you go?",correct:["back-fielder"],acceptable:["hold"],hint:"Let him have it, but don't just stand there.",why:"Let the SS take it, but run in behind him in case he drops it. (If you CAN get there, the outfielder coming in has priority — call him off loudly!)",targets:["second","third","behind-third","back-fielder","hold"]},
     {fielder:"lf",role:"3b",runners:['first'],text:"You are the <strong>THIRD BASEMAN</strong>. Single to LEFT field. Runner from 1st is heading to 3rd. Where do you go?",correct:["third"],hint:"Cover your bag!",why:"The runner is coming to YOUR base. Get there to take the throw and apply the tag!",targets:["second","third","behind-third","hold"]}
   ],
 
@@ -1152,26 +1503,26 @@ const scenarios = {
     {fielder:"cf",runners:['first','second'],text:"<strong>RUNNERS ON 1ST AND 2ND, 2 OUTS.</strong> Single to CF. Runner from 2nd rounding 3rd, heading home. Where does the CF throw?",correct:["cutoff"],acceptable:["home"],hint:"Hit the cutoff. He can decide.",why:"Always hit the cutoff on long throws. He keeps it accurate AND can stop the trail runner. The cutoff decides: relay home or hold the batter at 1st."},
     {fielder:"ss",runners:['third'],text:"<strong>RUNNER ON 3RD, 0 OUTS, INFIELD BACK.</strong> Ground ball to SS. Runner on 3rd HOLDS. Where's the throw?",correct:["first"],hint:"Infield back = conceding the run.",why:"When the infield plays back, they're saying 'we'll trade an out for a run.' Get the sure out at 1st. If the runner holds, even better — you've got an out and the runner is still at 3rd!"},
     // Backup chains and combined positioning
-    {fielder:"rf",role:"cf",runners:['second'],text:"You are the <strong>CENTER FIELDER</strong>. Double down the right field line. Where do you go?",correct:["behind-second"],acceptable:["hold","behind-first"],hint:"Where will the relay come?",why:"Drift toward right-center to back up the relay. The throw will likely come back through the cutoff to 2nd or 3rd — be there to stop a wild relay.",targets:["second","third","behind-second","behind-first","hold"]},
-    {fielder:"lf",role:"3b",runners:['first'],text:"You are the <strong>THIRD BASEMAN</strong>. Double down the left field line. Runner from 1st is heading home. The throw is coming to YOU as the cutoff. Where do you position?",correct:["cutoff"],hint:"Be the cutoff man!",why:"On a ball down the LF line, the THIRD baseman is the cutoff for throws home. Get out into shallow LF to take the relay and decide where to throw next!",targets:["home","third","cutoff","behind-third","hold"]},
-    {fielder:"rf",role:"1b",runners:['third'],text:"You are the <strong>FIRST BASEMAN</strong>. Single to right field. Runner on 3rd is scoring. Where do you go?",correct:["cutoff"],hint:"You're the cutoff for throws home from RF.",why:"On throws home from right field, the FIRST baseman is the cutoff man. Get into shallow RF to take the relay!",targets:["first","home","cutoff","behind-first","hold"]},
-    {fielder:"cf",role:"2b",runners:[],text:"You are the <strong>SECOND BASEMAN</strong>. Single to center field. Where do you go?",correct:["second"],acceptable:["cutoff"],hint:"Cover your bag — or be the cutoff.",why:"On a single to center, you cover 2nd base in case there's a play there. (Or be the cutoff for a longer throw — the SS often takes 2nd in that case.)",targets:["first","second","cutoff","hold"]},
-    {fielder:"3b",role:"ss",runners:['second'],text:"You are the <strong>SHORTSTOP</strong>. Ground ball to 3B, throw is going across to first. The runner on 2nd is rounding 3rd. Where do you go?",correct:["second"],acceptable:["third"],hint:"Cover your bag — or back up.",why:"With the 3B making the play, you cover SECOND in case the batter rounds too far. Or shift toward 3rd if the runner on 2nd looks like he might come back.",targets:["second","third","behind-third","hold"]},
+    {fielder:"rf",role:"cf",runners:['second'],text:"You are the <strong>CENTER FIELDER</strong>. Double down the right field line. Where do you go?",correct:["back-fielder"],acceptable:["behind-second"],hint:"Help the RF first.",why:"Sprint over to back up the right fielder in the corner. Once he has the ball, drift toward second to back up the relay in case of a wild throw.",targets:["second","third","behind-second","back-fielder","hold"]},
+    {fielder:"lf",role:"3b",runners:['second'],text:"You are the <strong>THIRD BASEMAN</strong>. Single to LEFT field. Runner from 2nd is rounding 3rd, heading home. Where do you go?",correct:["cutoff"],acceptable:["third"],hint:"Who lines up throws home from left field?",why:"On a single to left with a throw home, the THIRD baseman is the cutoff man — line up between the LF and home. The SS covers 3rd. (Some youth teams use a different cutoff system — follow your coach.)",targets:["home","third","cutoff","behind-third","hold"]},
+    {fielder:"rf",role:"1b",runners:['second'],text:"You are the <strong>FIRST BASEMAN</strong>. Single to right field. Runner from 2nd is rounding 3rd, trying to score. Where do you go?",correct:["cutoff"],hint:"You're the cutoff for throws home from RF.",why:"On throws home from right (and center) field, the FIRST baseman is the cutoff man. Line up between the RF and home to take the throw if it needs to be cut!",targets:["first","home","cutoff","behind-first","hold"]},
+    {fielder:"cf",role:"2b",runners:[],text:"You are the <strong>SECOND BASEMAN</strong>. Single to center field. Where do you go?",correct:["second","cutoff"],hint:"One middle infielder covers 2nd; the other goes out toward the ball.",why:"On a single to center, the two middle infielders split the job: one covers 2nd base, the other goes out toward the CF to take the throw. Either is right — just talk to your shortstop so you don't both go to the same place!",targets:["first","second","cutoff","hold"]},
+    {fielder:"3b",role:"ss",runners:['second'],text:"You are the <strong>SHORTSTOP</strong>. Ground ball to 3B, who charges in and throws across to first. The runner on 2nd is heading for 3rd. Where do you go?",correct:["third"],hint:"Who's guarding third base right now?",why:"The 3B left his bag to field the ball, so third base is EMPTY. The shortstop rotates over to cover third so the runner can't take it for free.",targets:["second","third","behind-third","hold"]},
     {fielder:"ss",runners:['first'],text:"<strong>RUNNER ON 1ST, 0 OUTS.</strong> Hard liner caught by SS. The runner is way off the bag! Where's the throw?",correct:["first"],hint:"Double him off!",why:"The runner on 1st was leading off. Throw to first to double him up — easy double play!"},
     {fielder:"3b",runners:['first','second'],text:"<strong>RUNNERS ON 1ST AND 2ND, 1 OUT.</strong> Ground ball to 3B. What's the BEST play?",correct:["third"],acceptable:["second","first"],hint:"Step on your bag — easy force.",why:"3B steps on 3rd for the easy force on the lead runner, then can throw across for the double play! Going to 2nd or 1st also works."},
     {fielder:"cf",runners:['second','third'],text:"<strong>RUNNERS ON 2ND AND 3RD, 1 OUT.</strong> Sac fly to deep CF. Runner on 3rd tags up and scores. Runner on 2nd tags up and goes to 3rd. Where's the throw?",correct:["third"],acceptable:["cutoff"],hint:"You can't get the run from 3rd.",why:"The runner from 3rd scores on a deep fly — accept that. Throw to 3rd to try to keep the runner from 2nd from advancing. Or hit the cutoff."},
-    {fielder:"2b",role:"rf",runners:['second'],text:"You are the <strong>RIGHT FIELDER</strong>. Ground ball to 2B. Runner on 2nd rounds 3rd. Throw goes home. Where do you go?",correct:["behind-first"],acceptable:["hold"],hint:"Backup duties.",why:"On a throw home, the RF backs up first base — in case there's a follow-up throw there. Stay alert!",targets:["first","home","behind-first","hold"]},
+    {fielder:"2b",role:"rf",runners:['second'],text:"You are the <strong>RIGHT FIELDER</strong>. Ground ball to 2B. The runner on 2nd holds, and the 2B throws to first. Where do you go?",correct:["behind-first"],acceptable:["back-fielder"],hint:"Backup duties.",why:"On a grounder to the right side, the RF runs in behind the 2B, then keeps going to back up first base on the throw. Stay alert!",targets:["first","home","behind-first","back-fielder","hold"]},
     {fielder:"ss",runners:['second','third'],text:"<strong>RUNNERS ON 2ND AND 3RD, 0 OUTS, INFIELD IN.</strong> Hard grounder to SS. Runner from 3rd breaks home. Where's the throw?",correct:["home"],hint:"Infield in = stop the run!",why:"Infield in = no run scores. Throw home to cut down the runner. The other runners will advance, but you can't give up a free run."},
     {fielder:"p",runners:[],text:"<strong>NOBODY ON.</strong> Slow chopper to the pitcher. He fields it. Where's the throw?",correct:["first"],hint:"Easy out at first.",why:"Get the batter at first. Pitchers handle their own grounders all the time."},
-    {fielder:"3b",runners:['first','third'],text:"<strong>RUNNERS ON 1ST AND 3RD, 1 OUT.</strong> Hard grounder to 3B. Runner on 3rd holds. What's the best play?",correct:["second"],acceptable:["home","first"],hint:"Get the inning-ending double play.",why:"Throw to 2nd to start the double play! Runner on 3rd usually won't try to score against a clean DP. If they break, the relay can go home."},
+    {fielder:"3b",runners:['first','third'],text:"<strong>RUNNERS ON 1ST AND 3RD, 1 OUT.</strong> Hard grounder to 3B. Runner on 3rd holds. What's the best play?",correct:["second"],acceptable:["first"],hint:"Get the inning-ending double play.",why:"Throw to 2nd to start the double play! A double play ends the inning before the run can count. If you can't turn two, take the sure out at first."},
     {fielder:"lf",runners:['first','second'],text:"<strong>RUNNERS ON 1ST AND 2ND.</strong> Single to left field. Runner from 2nd is rounding 3rd. Where's the throw?",correct:["home"],acceptable:["cutoff","third"],hint:"Stop the run!",why:"Throw home to stop the run from scoring. (Cutoff is fine if it's a long throw — let him decide whether to relay or to throw out the runner advancing.)"},
-    {fielder:"rf",role:"ss",runners:['second'],text:"You are the <strong>SHORTSTOP</strong>. Single to right field. Runner from 2nd is heading home. Where do you go?",correct:["cutoff"],acceptable:["second"],hint:"You can be the cutoff.",why:"On a throw home from RF, the SS often takes the cutoff position. (The 1B usually has the actual cutoff role though — if so, you cover 2nd instead.)",targets:["second","home","cutoff","hold"]},
+    {fielder:"rf",role:"ss",runners:['second'],text:"You are the <strong>SHORTSTOP</strong>. Single to right field. Runner from 2nd is heading home. Where do you go?",correct:["second"],hint:"The first baseman is the cutoff on this play.",why:"On a throw home from right field, the 1B is the cutoff man, so the SS covers SECOND base. If the cutoff man catches the throw, he may fire to you to get the batter trying for 2nd.",targets:["second","home","cutoff","hold"]},
     {fielder:"2b",runners:['third'],text:"<strong>RUNNER ON 3RD, 1 OUT, INFIELD IN.</strong> Hard grounder to 2B. Runner is going home! Where's the throw?",correct:["home"],hint:"Infield in = stop the run.",why:"Throw home to cut down the runner. Infield in means we're sacrificing the easy out at first to stop the run from scoring."},
     {fielder:"ss",role:"cf",runners:['first'],text:"You are the <strong>CENTER FIELDER</strong>. Hard grounder to SS — looks like a possible double play. Where do you go?",correct:["behind-second"],hint:"Back up the play at 2nd!",why:"On a possible double play at second base, the CF sprints to back up the bag. If the throw to 2nd is wild, you save the play.",targets:["second","behind-second","hold"]},
-    {fielder:"3b",role:"p",runners:['first','second'],text:"You are the <strong>PITCHER</strong>. Bunt to the 3B. Throw is going to 1st. Where do you go?",correct:["behind-first"],hint:"Backup duty after a bunt.",why:"After a bunt to 3B, the pitcher backs up FIRST in case the throw is wild. Hustle!",targets:["first","second","behind-first","hold"]},
+    {fielder:"lf",role:"p",runners:['first'],text:"You are the <strong>PITCHER</strong>. Single to LEFT field. The runner from 1st is trying for 3rd, and the LF is throwing to third. Where do you go?",correct:["behind-third"],hint:"Pitchers back up bases on throws from the outfield.",why:"On a throw from the outfield to 3rd or home, the pitcher runs to back up that base. Get behind third — if the throw gets away, you stop the runner from scoring!",targets:["third","home","behind-third","behind-home","hold"]},
     {fielder:"cf",runners:['first'],text:"<strong>RUNNER ON 1ST, 0 OUTS.</strong> Deep fly to CF — caught! Runner tags up and goes for 2nd. Where's the throw?",correct:["second"],acceptable:["cutoff"],hint:"Throw him out at 2nd!",why:"Runner tagged up and is heading to 2nd. Throw to 2nd to gun him down! (Cutoff is also fine on a long throw.)"},
-    {fielder:"lf",runners:['second','third'],text:"<strong>RUNNERS ON 2ND AND 3RD, 1 OUT.</strong> Single to LEFT field. Both runners score. The batter rounds 1st aggressively. Where's the throw?",correct:["cutoff"],acceptable:["second","first"],hint:"Don't let the batter take 2nd.",why:"The runs are already in. Hit the cutoff to set up a play on the batter — don't let him reach 2nd. Cutoff decides where the throw goes."},
-    {fielder:"rf",role:"lf",runners:['first'],text:"You are the <strong>LEFT FIELDER</strong>. Single to RIGHT field. Where do you go?",correct:["behind-second"],acceptable:["hold"],hint:"Back up across the field.",why:"On a ball to the opposite-side outfielder, you drift toward 2nd base or 3rd to back up any throws coming back to the infield.",targets:["second","third","behind-second","behind-third","hold"]}
+    {fielder:"lf",runners:['second','third'],text:"<strong>RUNNERS ON 2ND AND 3RD, 1 OUT.</strong> Single to LEFT field. Both runners score. The batter rounds 1st aggressively. Where's the throw?",correct:["second","cutoff"],hint:"Don't let the batter take 2nd.",why:"The runs are already in — no play at home. Throw to second (or to the cutoff man) so the batter can't take an extra base and get into scoring position."},
+    {fielder:"rf",role:"lf",runners:['first'],text:"You are the <strong>LEFT FIELDER</strong>. Single to RIGHT field. The runner from 1st is trying to go to 3rd. Where do you go?",correct:["behind-third"],acceptable:["hold"],hint:"Where is the throw going?",why:"The RF's throw is coming to 3rd base — and on throws to third, the left fielder backs it up. Hustle in behind the bag!",targets:["second","third","behind-second","behind-third","hold"]},
   ]
 };
 
@@ -1290,7 +1641,7 @@ function setVisibleTargets(targets){
     }
   });
   // optional ones
-  ['cutoff','behind-first','behind-third','behind-second','behind-home','hold'].forEach(k=>{
+  ['cutoff','behind-first','behind-third','behind-second','behind-home','hold','back-fielder'].forEach(k=>{
     const el = field.querySelector(`[data-base="${k}"]`);
     if(!el) return;
     el.style.display = showSet.has(k) ? '' : 'none';
@@ -1327,6 +1678,10 @@ function loadScenario(){
   $('feedback').style.display='none';
   $('hint').style.display='none';
   $('next-btn').style.display='none';
+  $('next-btn').classList.remove('ready');
+  hintUsed = false;
+  resetPitchClockBar();
+  field.querySelectorAll('.base.reveal').forEach(b=>b.classList.remove('reveal'));
 
   runnersGrp.innerHTML='';
   ballGrp.innerHTML='';
@@ -1359,8 +1714,8 @@ function loadScenario(){
       if(['lf','cf','rf'].includes(next.role)) dy = 30;
       else if(['1b','3b','ss','2b'].includes(next.role)) dy = -25;
       else if(next.role==='c') dy = -25;
-      const hx = rolePos.x;
-      const hy = rolePos.y + dy;
+      const hx = rolePos.x + (next.role==='cf' ? 40 : 0);
+      const hy = next.role==='cf' ? rolePos.y + 5 : rolePos.y + dy;
       holdMarker.setAttribute('cx',hx);
       holdMarker.setAttribute('cy',hy);
       const txt = field.querySelector('[data-base="hold"] text');
@@ -1371,13 +1726,34 @@ function loadScenario(){
     hideUserMarker();
     const fp = fielderPos[next.fielder] || {x:200,y:200};
     const dy = ['lf','cf','rf'].includes(next.fielder) ? 30 : -25;
-    const hx = fp.x;
-    const hy = fp.y + dy;
+    const hx = fp.x + (next.fielder==='cf' ? 40 : 0);
+    const hy = next.fielder==='cf' ? fp.y + 5 : fp.y + dy;
     holdMarker.setAttribute('cx',hx);
     holdMarker.setAttribute('cy',hy);
     const txt = field.querySelector('[data-base="hold"] text');
     if(txt){ txt.setAttribute('x',hx); txt.setAttribute('y',hy+3); }
     basePos.hold = {x:hx, y:hy};
+  }
+
+  // Position the "back up the fielder" zone just behind the fielder with the ball,
+  // shaded toward the side the user is coming from.
+  {
+    const fp = fielderPos[next.fielder] || fielderPos.ss;
+    const rp = fielderPos[next.role] || fp;
+    const side = rp.x < fp.x ? -1 : 1;
+    let bx, by;
+    if(['lf','cf','rf'].includes(next.fielder)){
+      bx = fp.x + side*34; by = fp.y;
+    } else {
+      const dx = fp.x - fielderPos.c.x, dy2 = fp.y - fielderPos.c.y;
+      const len = Math.hypot(dx,dy2) || 1;
+      bx = fp.x + dx/len*34 + side*14; by = fp.y + dy2/len*34;
+    }
+    const bm = $('backf-marker');
+    bm.setAttribute('cx',bx); bm.setAttribute('cy',by);
+    const bt = field.querySelector('[data-base="back-fielder"] text');
+    if(bt){ bt.setAttribute('x',bx); bt.setAttribute('y',by+3); }
+    basePos['back-fielder'] = {x:bx, y:by};
   }
 
   // Place runners on bases
@@ -1403,11 +1779,14 @@ function loadScenario(){
     const fPos = fielderPos[next.fielder] || fielderPos.ss;
     makeTrail(hPos.x,hPos.y,fPos.x,fPos.y);
     moveBall(fPos.x,fPos.y,HIT_MS);
+    sfx.crack();
   }, PITCH_MS+100);
 
   // ENABLE answer when ball arrives
   later(()=>{
     highlightFielder(next.fielder);
+    sfx.pop();
+    startPitchClock();
     if(activeBall) activeBall.classList.remove('ball-spin');
     field.querySelectorAll('.base').forEach(b=>{
       if(b.style.display!=='none'){
@@ -1452,6 +1831,8 @@ function handleAnswer(choice){
   answered = true;
   total++;
   clearTimers();
+  stopPitchClock();
+  sfx.whoosh();
   const sc = currentScenario;
 
   // Determine correctness — multi-correct support
@@ -1471,7 +1852,7 @@ function handleAnswer(choice){
   // For "off-ball" scenarios where the user is moving themselves (not throwing the ball),
   // animate the YOU marker to the target instead of the ball.
   const isOffBall = sc.role && sc.role !== sc.fielder &&
-    ['behind-first','behind-third','behind-second','behind-home','hold','cutoff','first','second','third','home'].includes(choice);
+    ['behind-first','behind-third','behind-second','behind-home','back-fielder','hold','cutoff','first','second','third','home'].includes(choice);
 
   if(isOffBall){
     // animate user marker toward target
@@ -1533,8 +1914,9 @@ function handleAnswer(choice){
       streak = 0;
       fb.className='feedback wrong';
       const correctList = (sc.correct||[]).map(nameForBase).join(' or ');
-      fb.innerHTML = `<strong>NOT QUITE.</strong> The best play is <strong>${correctList}</strong>. ${sc.why}`;
+      fb.innerHTML = `<strong>NOT QUITE.</strong> The best play is <strong>${correctList}</strong> (glowing on the field). ${sc.why}`;
     }
+    playResultFx(sc, choice, isRight, isFullyCorrect, targetPos, isOffBall);
     updateScoreboard();
     $('next-btn').style.display='inline-block';
   }, THROW_MS+100);
@@ -1548,6 +1930,7 @@ function nameForBase(b){
     'behind-third':'behind 3RD (backup)',
     'behind-second':'behind 2ND (backup)',
     'behind-home':'behind HOME (backup)',
+    'back-fielder':'behind the fielder with the ball (backup)',
     hold:'HOLD / stay put'
   }[b] || b;
 }
@@ -1564,6 +1947,7 @@ function updateScoreboard(){
   $('streak-target').textContent = target;
   const pct = Math.min(100, (streak/target)*100);
   $('progress-fill').style.width = pct+'%';
+  renderFire();
 }
 
 // Track which levels have already shown a "you mastered this!" banner this session
@@ -1602,6 +1986,7 @@ function checkPromotion(){
     };
   }
   banner.classList.add('show');
+  sfx.charge(); setTimeout(()=>sfx.cheer(1.6),700); confetti.shower(); setTimeout(()=>confetti.shower(),700);
 }
 
 /* ===========================================================
@@ -1615,6 +2000,7 @@ document.querySelectorAll('.diff-btn').forEach(btn=>{
     currentLevel = btn.dataset.level;
     streak = 0;
     mastered.delete(currentLevel); // re-arm celebration if they come back
+    renderFire();
     updateScoreboard();
     loadScenario();
   });
@@ -1628,14 +2014,17 @@ $('hint-btn').addEventListener('click',()=>{
   const h = $('hint');
   h.style.display = h.style.display==='none' ? 'block' : 'none';
   h.innerHTML = '<strong>HINT:</strong> '+currentScenario.hint;
+  if(!answered && h.style.display==='block') hintUsed = true;
 });
 $('reset-btn').addEventListener('click',()=>{
   streak=0; correct=0; total=0;
+  points=0; displayedPoints=0; $('points').textContent='0'; bestAnnounced=false; renderFire();
   updateScoreboard();
   loadScenario();
 });
 
 // Initial render
+wireGameFx();
 updateScoreboard();
 loadScenario();
 
