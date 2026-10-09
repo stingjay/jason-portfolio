@@ -6,10 +6,13 @@
    ========================================================= */
 var COURSE = {
   term: 'Spring 2027',
-  campus: 'Highland',
+  campus: 'South Austin',
+  location: 'South Austin Campus, 1820 W. Stassney Ln.',
+  room: null,             // e.g. 'SAC 1.234'
+  meets: 'Tue & Thu, 3:00 pm',
   start: null,            // Monday of Week 1, e.g. '2027-01-18'. While null, no dates are shown.
   email: null,            // e.g. 'jconover@austincc.edu'
-  officeHours: null,      // e.g. 'Tue/Thu 4:00–5:00 pm, HLC 3.214'
+  officeHours: null,      // e.g. 'Thu 4:30–5:30 pm, SAC 1.234'. One hour weekly, plus by appointment.
   syllabusUrl: null,      // e.g. 'files/syllabus.pdf'
 
   units: [
@@ -29,15 +32,15 @@ var COURSE = {
     5:  { title: 'Turbine technology I', slides: null, notes: null, readings: [['Turbine anatomy', null]] },
     6:  { title: 'Turbine technology II', slides: null, notes: null, readings: [['Power curve sheets', null]] },
     7:  { title: 'Energy production', slides: null, notes: null, readings: [['Loss stack example', null]] },
-    8:  { title: 'Midterm · Siting fundamentals', slides: null, notes: null, readings: [['Midterm study guide', null]] },
-    9:  { title: 'GIS lab (QGIS)', slides: null, notes: null, readings: [['QGIS install guide', null]] },
+    8:  { title: 'Midterm exam · Siting fundamentals', slides: null, notes: null, readings: [['Midterm study guide', null]] },
+    9:  { title: 'Reading a site plan', slides: null, notes: null, readings: [] },
     10: { title: 'Layout & wake effects', slides: null, notes: null, readings: [['Wake Effect Sandbox', '../wake-simulator.html']] },
     11: { title: 'Permitting', slides: null, notes: null, readings: [['FAA OE/AAA walkthrough', null]] },
-    12: { title: 'Land, leases & community', slides: null, notes: null, readings: [['Case 1 packet', null]] },
+    12: { title: 'Land, leases & community', slides: null, notes: null, readings: [] },
     13: { title: 'Interconnection & the market', slides: null, notes: null, readings: [['Grid Mix Dashboard', '../eia-dashboard.html']] },
-    14: { title: 'Project economics · Debate', slides: null, notes: null, readings: [['Debate brief template', null]] },
-    15: { title: 'Construction, O&M & careers', slides: null, notes: null, readings: [['Case 2 packet', null]] },
-    16: { title: 'Presentations · Final exam', slides: null, notes: null, readings: [['Final study guide', null]] }
+    14: { title: 'Project economics', slides: null, notes: null, readings: [] },
+    15: { title: 'Construction, O&M & careers', slides: null, notes: null, readings: [] },
+    16: { title: 'Final presentations · Final exam', slides: null, notes: null, readings: [['Final study guide', null]] }
   },
 
   glossary: [
@@ -119,7 +122,8 @@ var COURSE = {
         'See the <a href="schedule.html">full schedule</a>' + (before ? ' or <a href="?week=1">preview Week 1</a>.' : '.') + '</p></div>';
     }
     $('cEmail').innerHTML = C.email ? '<a href="mailto:' + esc(C.email) + '">' + esc(C.email) + '</a>' : '<span class="pending">ACC email</span>';
-    $('cHours').innerHTML = C.officeHours ? esc(C.officeHours) : '<span class="pending">TBD</span>';
+    $('cHours').innerHTML = C.officeHours ? esc(C.officeHours) + ', or by appointment' : 'One hour weekly (time TBD), or by appointment';
+    $('cClass').innerHTML = esc(C.meets) + ' · ' + esc(C.location) + (C.room ? ', ' + esc(C.room) : ', room TBA');
     $('cSyllabus').innerHTML = link('Syllabus', C.syllabusUrl);
   }
 
