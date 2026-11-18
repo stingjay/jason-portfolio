@@ -354,3 +354,31 @@ a.tool:hover { border-color: var(--border-strong); }
   .course-head { background: none; color: #000; }
   .course-head h1 { color: #000; }
 }
+
+/* =========================================================
+   AI Lab + external-app cards
+   ========================================================= */
+.badge-ai { background: var(--gold-soft); color: var(--gold); }
+.badge-ext { background: var(--surface-2); color: var(--text-2); margin-left: 4px; }
+.back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: var(--muted); text-decoration: none; margin-bottom: 14px; }
+.back-link:hover { color: var(--accent); }
+
+/* Large feature card used on the AI Lab page and the home page */
+.feature-card {
+  display: grid; gap: 28px; align-items: center; background: var(--surface);
+  border: 1px solid color-mix(in srgb, var(--gold) 40%, var(--border)); border-radius: 18px; padding: 28px;
+  background-image: linear-gradient(160deg, color-mix(in srgb, var(--gold) 7%, transparent), transparent 55%);
+}
+@media (min-width: 860px) { .feature-card { grid-template-columns: 1.25fr 1fr; padding: 36px; } }
+.feature-card h2, .feature-card h3 { font-weight: 600; font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem); margin-bottom: 8px; }
+.feature-card p { color: var(--text-2); }
+.feature-card .actions { margin-top: 22px; }
+.feature-card .fine { font-size: 13px; color: var(--muted); margin-top: 12px; }
+.cover-art {
+  margin: 0; border-radius: 14px; overflow: hidden; border: 1px solid var(--border);
+  box-shadow: var(--shadow); aspect-ratio: 1/1; max-width: 360px; width: 100%; justify-self: center; background: var(--bg-2);
+}
+.cover-art img { width: 100%; height: 100%; display: block; object-fit: cover; }
+.points { list-style: none; display: grid; gap: 8px; margin-top: 14px; }
+.points li { display: flex; gap: 10px; color: var(--text-2); font-size: 15px; }
+.points li::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--gold); transform: translateY(10px); }
